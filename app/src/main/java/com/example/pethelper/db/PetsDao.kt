@@ -1,9 +1,6 @@
 package com.example.pethelper.db
 
 import androidx.room.Dao
-import androidx.room.Entity
-import androidx.room.Insert
-import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
@@ -18,4 +15,7 @@ interface PetsDao{
 
     @Query("UPDATE pets SET photo = :photo WHERE id=:petId")
     suspend fun updatePhoto(photo: String, petId: Int)
+
+    @Query("SELECT * FROM pets WHERE id=:petId")
+    suspend fun getPetById(petId: Int): Pet?
 }

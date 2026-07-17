@@ -13,6 +13,7 @@ val backgroundColor = Color(0xFFFFF8F2)
 val backgroundScreenColor  = Color(0xFFFFF9F2)
 val smallTextColor = Color(0xFFB0A8A3)
 val selectedColor = Color(0xFFFDF1ED)
+val cardColor = Color(0xFFFFFCF9)
 @Composable
 fun TextMaker(text: String, fontSize: TextUnit,
               color: Color = Color.Black,
