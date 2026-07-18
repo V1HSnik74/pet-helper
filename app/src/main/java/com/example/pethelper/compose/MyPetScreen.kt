@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -33,12 +35,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.pethelper.R
-import com.example.pethelper.db.Pet
 import com.example.pethelper.db.PetsViewModel
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun MyPetScreen(petsViewModel: PetsViewModel, id: Int){
@@ -48,7 +47,7 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int){
     val pet by petsViewModel.selectedPet.collectAsState()
     Box(Modifier.fillMaxSize()
         .background(backgroundScreenColor)
-        .padding(start = 25.dp, top = 76.dp, end = 25.dp)){
+        .padding(start = 25.dp, top = 76.dp, end = 25.dp, bottom = 56.dp)){
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -57,10 +56,26 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int){
                 Image(painter = painterResource(R.drawable.paw),
                     contentDescription = "paw icon")
             }
-            Spacer(Modifier.height(32.dp))
-            pet?.let { pet ->
-                PetInfoCard(pet.photo, pet.name, pet.sex, pet.breed,
-                    pet.age, pet.weight, pet.height)
+            LazyColumn(Modifier.fillMaxWidth().weight(1f)) {
+                item{Spacer(Modifier.height(32.dp))}
+                item{pet?.let { pet ->
+                    PetInfoCard(pet.photo, pet.name, pet.sex, pet.breed,
+                        pet.age, pet.weight, pet.height)
+                }}
+                item{Spacer(Modifier.height(20.dp))}
+                item{Row(Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)){
+                    SectionButton(painterResource(R.drawable.heart_icon), "Health", 14.sp, Modifier.weight(1f))
+                    SectionButton(painterResource(R.drawable.bone_icon), "Nutrition", 14.sp, Modifier.weight(1f))
+                    SectionButton(painterResource(R.drawable.bell_icon), "Reminders", 12.sp, Modifier.weight(1f))
+                    SectionButton(painterResource(R.drawable.notes_icon), "Notes", 14.sp,  Modifier.weight(1f))
+                }}
+                item{ Spacer(Modifier.height(20.dp))}
+                item{Upcoming()}
+                item{Spacer(Modifier.height(20.dp))}
+                item{pet?.let {
+                        pet -> AboutSection(pet.name, pet.about)
+                }}
             }
         }
     }
@@ -70,16 +85,15 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int){
 fun PetInfoCard(photo: String?, name: String, gender: String,
                 breed: String, age: Int?, weight: Float?, height: Float?){
     Card(Modifier.fillMaxWidth()
-        .height(200.dp),
+        .wrapContentHeight(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
     ){
         Row(Modifier.fillMaxWidth()
-            .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center){
-            AsyncImage(modifier = Modifier.size(160.dp)
+            .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically){
+            AsyncImage(modifier = Modifier.size(120.dp)
                 .clip(CircleShape),
                 contentDescription = "Pet photo",
                 model = photo,
@@ -89,33 +103,33 @@ fun PetInfoCard(photo: String?, name: String, gender: String,
             )
             Spacer(Modifier.width(5.dp))
             Column(Modifier.fillMaxHeight()
-                .padding(horizontal = 14.dp)
             ){
-                Row(Modifier.fillMaxWidth()){
-                    TextMaker(name, 24.sp)
+                Row(Modifier.padding(start = 8.dp), verticalAlignment = Alignment.CenterVertically){
+                    TextMaker(name, 24.sp, modifier = Modifier.weight(1f, fill = false))
                     Spacer(Modifier.width(4.dp))
                     Image(painter = if (gender == "Male") painterResource(R.drawable.male)
                     else painterResource(R.drawable.female),
                         contentDescription = "Gender")
                 }
                 Spacer(Modifier.height(8.dp))
-                TextMaker(breed, 16.sp, fontWeight = FontWeight.Normal)
+                TextMaker(breed, 16.sp, fontWeight = FontWeight.Normal, modifier = Modifier.padding(start = 8.dp))
                 Spacer(Modifier.height(8.dp))
                 AgeCard(age)
                 Spacer(Modifier.height(8.dp))
-                Row(Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically){
-                    Row(verticalAlignment = Alignment.CenterVertically){
+                Row(verticalAlignment = Alignment.CenterVertically){
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)){
                         Image(painter = painterResource(R.drawable.weight_icon),
                             contentDescription = "Weight icon")
-                        TextMaker(if (weight == null) "No info" else "$weight kg",
+                        Spacer(Modifier.width(4.dp))
+                        TextMaker(if (weight == null) "N/A" else "$weight kg",
                             14.sp, fontWeight = FontWeight.SemiBold)
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)) {
                         Image(painter = painterResource(R.drawable.height_icon),
                             contentDescription = "Height icon")
-                        TextMaker(if (height == null) "No info" else "$height cm",
+                        TextMaker(if (height == null) "N/A" else "$height cm",
                             14.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
@@ -126,26 +140,66 @@ fun PetInfoCard(photo: String?, name: String, gender: String,
 
 @Composable
 fun AgeCard(age: Int?){
-    Card(Modifier.wrapContentSize().padding(horizontal = 22.dp, vertical = 8.dp),
+    Card(Modifier.wrapContentSize().padding(start = 8.dp),
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(Color(0xFFFFE2D0)))
     {
-        TextMaker(if (age == null) "No info" else "$age year(s) old",
+        TextMaker(if (age == null) "N/A" else "$age year(s) old",
             14.sp, Color(0xFF381B0A), FontWeight.SemiBold,
-            Modifier.align(Alignment.CenterHorizontally))
+            Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 22.dp, vertical = 4.dp))
     }
 }
 
 @Composable
-fun SectionButton(painter: Painter, text: String, fontSize: TextUnit){
-    Card(Modifier.height(92.dp).width(80.dp),
+fun SectionButton(painter: Painter, text: String, fontSize: TextUnit, modifier: Modifier){
+    Card(modifier.height(92.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(cardColor),
+        colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(verticalArrangement = Arrangement.Center) {
+        Column(Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
             Image(painter = painter, contentDescription = "Button icon")
             Spacer(Modifier.height(8.dp))
             TextMaker(text, fontSize, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+@Composable
+fun AboutSection(name: String, about: String?){
+    Card(Modifier.fillMaxSize(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)) {
+        Row(Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween){
+            Column(Modifier.fillMaxHeight().weight(1f, fill = false)) {
+                TextMaker("About $name", 16.sp)
+                Spacer(Modifier.height(8.dp))
+                TextMaker(about ?: "No description added yet",
+                    14.sp, fontWeight = FontWeight.Normal)
+            }
+            Image(painter = painterResource(R.drawable.paw_notes_icon),
+                contentDescription = "paw about icon")
+        }
+    }
+}
+
+@Composable
+fun Upcoming(){
+    Card(Modifier.fillMaxWidth().height(209.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)) {
+        Column(Modifier.fillMaxHeight().padding(16.dp)){
+            Row(Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween){
+                TextMaker("Upcoming", 14.sp)
+                TextMaker("View all", 14.sp, Color(0xFF7B3A15))
+            }
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) { }
         }
     }
 }

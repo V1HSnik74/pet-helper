@@ -1,7 +1,6 @@
 package com.example.pethelper.compose
 
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,10 +45,10 @@ import com.example.pethelper.db.PetsViewModel
 
 @Composable
 fun PetSelectionScreen(
-    viewModel: PetsViewModel = viewModel()
+    viewModel: PetsViewModel = viewModel(),
+    onPetClick: (Int) -> Unit
 ){
     val petList by viewModel.allPets.collectAsState(initial = emptyList())
-    var selectedPetId by remember { mutableStateOf<Int?>(null) }
     var showDialog by remember {mutableStateOf(false)}
 
     Box(modifier = Modifier.fillMaxSize().background(backgroundScreenColor)
@@ -75,8 +74,8 @@ fun PetSelectionScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ){
                     items(petList) {
-                        pet -> PetCard(selectedPetId == pet.id,
-                        {selectedPetId = pet.id}, pet.name, pet.breed, pet.photo)
+                        pet -> PetCard(
+                        {onPetClick(pet.id)}, pet.name, pet.breed, pet.photo)
                     }
                 }
             }
@@ -103,17 +102,14 @@ fun PetSelectionScreen(
 }
 
 @Composable
-private fun PetCard(isSelected: Boolean,onClick: () -> Unit, name: String, breed: String, photo: String?){
+private fun PetCard(onClick: () -> Unit, name: String, breed: String, photo: String?){
     val interactionSource = remember { MutableInteractionSource() }
     Card(modifier = Modifier.fillMaxWidth()
         .height(108.dp)
         .clickable(interactionSource = interactionSource,
             indication = null) {onClick()},
         shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(width = 1.dp,
-            color = if (isSelected) buttonColor else Color.Transparent
-        ),
-        colors = CardDefaults.cardColors(containerColor = if (isSelected) selectedColor else Color.White),
+        colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ){
         Row(
@@ -137,11 +133,6 @@ private fun PetCard(isSelected: Boolean,onClick: () -> Unit, name: String, breed
                 TextMaker(name, 18.sp)
                 Spacer(Modifier.height(8.dp))
                 TextMaker(breed, 14.sp, smallTextColor)
-            }
-            if (isSelected){
-                Image(contentDescription = "Selected pet",
-                    painter = painterResource(R.drawable.selected),
-                    alignment = Alignment.TopEnd)
             }
         }
     }

@@ -12,6 +12,7 @@ data class Pet(
     val age: Int? = null,
     val weight: Float? = null,
     val height: Float? = null,
+    val about: String? = null,
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0
 )
