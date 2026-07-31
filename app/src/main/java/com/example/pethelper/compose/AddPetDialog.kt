@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,10 +45,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import coil.compose.AsyncImage
 import com.example.pethelper.R
-import com.example.pethelper.db.PetsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -67,11 +64,13 @@ fun AddPetDialog(onDismiss: () -> Unit,
     var photo by remember {mutableStateOf<String?>(null)}
     var uriPreview by remember{mutableStateOf<Uri?>(null)}
 
+    var isPhotoLoading by remember {mutableStateOf(false)}
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
             uri -> uri?.let{
         uriPreview = uri
+        isPhotoLoading = true
         coroutineScope.launch {
             val path = withContext(Dispatchers.IO){
                 val source = ImageDecoder.createSource(context.contentResolver, uri)
@@ -83,8 +82,10 @@ fun AddPetDialog(onDismiss: () -> Unit,
                 }
                 file.absolutePath
             }
-            if (path != null) photo = path
+            photo = path
+            isPhotoLoading = false
         }
+
     }
     }
     Dialog(
@@ -153,7 +154,8 @@ fun AddPetDialog(onDismiss: () -> Unit,
                 Button(onClick = { onSavePet(name, breed, gender, photo) },
                     modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
-                    shape = RoundedCornerShape(25.dp))
+                    shape = RoundedCornerShape(25.dp),
+                    enabled = !isPhotoLoading)
                 {
                     TextMaker("Save Pet", 14.sp, Color.White)
                 }
@@ -165,10 +167,9 @@ fun AddPetDialog(onDismiss: () -> Unit,
 @Composable
 private fun GenderButton(selectedGender: String, icon: Int, isSelected: Boolean, onClick: () -> Unit,
                  modifier: Modifier = Modifier){
-        val interactionSource = remember { MutableInteractionSource() }
         Card(
             modifier = modifier.height(40.dp)
-                .clickable(interactionSource = interactionSource,
+                .clickable(interactionSource = null,
                     indication = null){onClick()},
             shape = RoundedCornerShape(10.dp),
             border = BorderStroke(

@@ -17,5 +17,8 @@ interface PetsDao{
     suspend fun updatePhoto(photo: String, petId: Int)
 
     @Query("SELECT * FROM pets WHERE id=:petId")
-    suspend fun getPetById(petId: Int): Pet?
+    fun getPetById(petId: Int): Flow<Pet?>
+
+    @Query("UPDATE pets SET sex = :gender WHERE  id=:petId")
+    suspend fun updateGender(gender: String, petId: Int)
 }

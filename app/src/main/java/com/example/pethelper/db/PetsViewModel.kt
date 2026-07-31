@@ -4,16 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class PetsViewModel(application: Application): AndroidViewModel(application) {
     val petsDao = AppDatabase.getInstance(application).petsDao()
     val allPets: Flow<List<Pet>> = petsDao.getAllPets()
-    private val selectedPetPrivate = MutableStateFlow<Pet?>(null)
-    val selectedPet: StateFlow<Pet?> = selectedPetPrivate.asStateFlow()
 
     fun addPet(name: String, breed: String, sex: String, photo: String?){
         viewModelScope.launch {
@@ -27,13 +22,11 @@ class PetsViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
-    fun getPetById(petId: Int){
+    fun updateGender(petId: Int, gender: String){
         viewModelScope.launch {
-            selectedPetPrivate.value =  petsDao.getPetById(petId)
+            petsDao.updateGender(gender, petId)
         }
     }
 
-    fun cleanSelectedPet() {
-        selectedPetPrivate.value = null
-    }
+    fun getPetById(petId: Int): Flow<Pet?> = petsDao.getPetById(petId)
 }

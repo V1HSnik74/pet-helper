@@ -2,6 +2,7 @@ package com.example.pethelper.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,11 +40,8 @@ import com.example.pethelper.R
 import com.example.pethelper.db.PetsViewModel
 
 @Composable
-fun MyPetScreen(petsViewModel: PetsViewModel, id: Int){
-    LaunchedEffect(id) {
-        petsViewModel.getPetById(id)
-    }
-    val pet by petsViewModel.selectedPet.collectAsState()
+fun MyPetScreen(petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Unit){
+    val pet by petsViewModel.getPetById(id).collectAsState(initial = null)
     Box(Modifier.fillMaxSize()
         .background(backgroundScreenColor)
         .padding(start = 25.dp, top = 76.dp, end = 25.dp, bottom = 56.dp)){
@@ -60,7 +57,9 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int){
                 item{Spacer(Modifier.height(32.dp))}
                 item{pet?.let { pet ->
                     PetInfoCard(pet.photo, pet.name, pet.sex, pet.breed,
-                        pet.age, pet.weight, pet.height)
+                        pet.age, pet.weight, pet.height,
+                        onCardClick = {onCardClick(pet.id)}
+                    )
                 }}
                 item{Spacer(Modifier.height(20.dp))}
                 item{Row(Modifier.fillMaxWidth(),
@@ -74,7 +73,8 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int){
                 item{Upcoming()}
                 item{Spacer(Modifier.height(20.dp))}
                 item{pet?.let {
-                        pet -> AboutSection(pet.name, pet.about)
+                        pet -> AboutSection(pet.name, pet.about,
+                    painterResource(R.drawable.paw_notes_icon))
                 }}
             }
         }
@@ -83,9 +83,10 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int){
 
 @Composable
 fun PetInfoCard(photo: String?, name: String, gender: String,
-                breed: String, age: Int?, weight: Float?, height: Float?){
+                breed: String, age: Int?, weight: Float?, height: Float?, onCardClick: () -> Unit){
     Card(Modifier.fillMaxWidth()
-        .wrapContentHeight(),
+        .wrapContentHeight()
+        .clickable{onCardClick()},
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -167,13 +168,13 @@ fun SectionButton(painter: Painter, text: String, fontSize: TextUnit, modifier: 
 }
 
 @Composable
-fun AboutSection(name: String, about: String?){
+fun AboutSection(name: String, about: String?, painter: Painter? = null, hasAbout: Boolean = false){
     Card(Modifier.fillMaxSize(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(Color.White),
+        colors = CardDefaults.cardColors(cardColor),
         elevation = CardDefaults.cardElevation(2.dp)) {
         Row(Modifier.fillMaxWidth().padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.SpaceBetween){
             Column(Modifier.fillMaxHeight().weight(1f, fill = false)) {
                 TextMaker("About $name", 16.sp)
@@ -181,17 +182,23 @@ fun AboutSection(name: String, about: String?){
                 TextMaker(about ?: "No description added yet",
                     14.sp, fontWeight = FontWeight.Normal)
             }
-            Image(painter = painterResource(R.drawable.paw_notes_icon),
-                contentDescription = "paw about icon")
+            if (painter != null) {
+                Image(painter = painter,
+                    contentDescription = "paw about icon")
+            }
+            if (hasAbout)
+                EditAbout(modifier = Modifier)
         }
     }
 }
+
+
 
 @Composable
 fun Upcoming(){
     Card(Modifier.fillMaxWidth().height(209.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(Color.White),
+        colors = CardDefaults.cardColors(cardColor),
         elevation = CardDefaults.cardElevation(2.dp)) {
         Column(Modifier.fillMaxHeight().padding(16.dp)){
             Row(Modifier.fillMaxWidth(),

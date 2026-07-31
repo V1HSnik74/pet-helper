@@ -13,6 +13,10 @@ data class Pet(
     val weight: Float? = null,
     val height: Float? = null,
     val about: String? = null,
+    val birthday: String? = null,
+    val color: String? = null,
+    val neutered: String? = null,
+    val microchipId: String? = null,
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0
 )
