@@ -2,6 +2,8 @@ package com.example.pethelper.compose
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -13,8 +15,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,9 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -80,7 +87,9 @@ fun UpdateGenderDialog(onDismiss: () -> Unit,
                     )
                 }
                 IconButton(onDismiss,
-                     modifier = Modifier.align(Alignment.TopEnd).padding(end = 8.dp, top = 8.dp)) {
+                     modifier = Modifier
+                         .align(Alignment.TopEnd)
+                         .padding(end = 8.dp, top = 8.dp)) {
                     Image(
                         painterResource(R.drawable.cancel),
                         contentDescription = "cancel"
@@ -110,7 +119,8 @@ fun UpdateSmallDialog(onDismiss: () -> Unit, onUpdateInfo: (value: String) -> Un
     {
         Card(
             Modifier
-                .wrapContentHeight().fillMaxWidth(0.9f),
+                .wrapContentHeight()
+                .fillMaxWidth(0.9f),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(backgroundColor)
         )
@@ -166,7 +176,91 @@ fun UpdateSmallDialog(onDismiss: () -> Unit, onUpdateInfo: (value: String) -> Un
                         onUpdateInfo(finalValue)}, enabled = isValid)
                     Spacer(Modifier.height(28.dp))
                 }
-                IconButton(onDismiss, modifier = Modifier.align(Alignment.TopEnd).padding(end = 8.dp, top = 8.dp)) {
+                IconButton(onDismiss, modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 8.dp, top = 8.dp)) {
+                    Image(
+                        painterResource(R.drawable.cancel),
+                        contentDescription = "cancel"
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun UpdateColorDialog(color: String, onDismiss: () -> Unit, onUpdateColor: (String) -> Unit){
+    var selectedColor by remember {mutableStateOf(color)}
+    Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)){
+        Card(colors = CardDefaults.cardColors(backgroundColor),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .wrapContentSize()
+                .fillMaxWidth(0.9f))
+        {
+            Box(Modifier.fillMaxWidth()){
+                Column(Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 28.dp, horizontal = 42.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally){
+                    Image(
+                        alignment = Alignment.TopCenter,
+                        painter = painterResource(R.drawable.color_icon),
+                        contentDescription = "color icon"
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    TextMaker("Edit Color", 20.sp)
+                    Spacer(Modifier.height(24.dp))
+                    OutlinedTextField(value = selectedColor, { selectedColor = it },
+                        placeholder = {TextMaker("e.g. Black", 14.sp,
+                            fontWeight = FontWeight.Normal)},
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = textFieldContainerColor,
+                            unfocusedContainerColor = textFieldContainerColor,
+                            focusedBorderColor = textFieldCursorColor,
+                            unfocusedBorderColor = textFieldCursorColor,
+                            cursorColor = textFieldCursorColor))
+                    Spacer(Modifier.height(20.dp))
+                    TextMaker("Popular colors", 12.sp, Color(0xFF393939), FontWeight.SemiBold)
+                    Spacer(Modifier.height(16.dp))
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween){
+                        ColorCircle(Colors.CREME.values,
+                            selectedColor.equals(Colors.CREME.values, ignoreCase = true),
+                            { selectedColor = Colors.CREME.values},
+                            Colors.CREME.color)
+                        ColorCircle(Colors.GOLDEN.values,
+                            selectedColor.equals(Colors.GOLDEN.values, ignoreCase = true),
+                            {selectedColor = Colors.GOLDEN.values},
+                            Colors.GOLDEN.color)
+                        ColorCircle(Colors.BROWN.values,
+                            selectedColor.equals(Colors.BROWN.values, ignoreCase = true),
+                            {selectedColor = Colors.BROWN.values},
+                            Colors.BROWN.color)
+                        ColorCircle(Colors.BLACK.values,
+                            selectedColor.equals(Colors.BLACK.values, ignoreCase = true),
+                            {selectedColor = Colors.BLACK.values},
+                            Colors.BLACK.color)
+                        ColorCircle(Colors.WHITE.values,
+                            selectedColor.equals(Colors.WHITE.values, ignoreCase = true),
+                            {selectedColor = Colors.WHITE.values},
+                            Colors.WHITE.color)
+                        ColorCircle(Colors.GRAY.values,
+                            selectedColor.equals(Colors.GRAY.values, ignoreCase = true),
+                            {selectedColor = Colors.GRAY.values},
+                            Colors.GRAY.color)
+                    }
+                    Spacer(Modifier.height(32.dp))
+                    ButtonMaker("Save Color", onClick = {onUpdateColor(selectedColor)},
+                        enabled = selectedColor.isNotEmpty())
+                }
+                IconButton(onDismiss, modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 8.dp, top = 8.dp)) {
                     Image(
                         painterResource(R.drawable.cancel),
                         contentDescription = "cancel"
@@ -210,4 +304,30 @@ fun GenderCard(cardGender: String, selectedGender: String, onClick: () -> Unit,
             14.sp)
         }
     }
+}
+
+@Composable
+fun ColorCircle(value: String, isSelected: Boolean, onClick: () -> Unit, color: Color){
+    Box(Modifier
+        .size(40.dp)
+        .clip(CircleShape)
+        .background(color)
+        .border(
+            color = if (isSelected) buttonColor else {
+                if (value == "White") Color.Black else Color.Transparent
+            },
+            width = if (isSelected) 2.dp else 0.5.dp,
+            shape = CircleShape
+        )
+        .clickable(onClick = onClick)
+    )
+}
+
+enum class Colors(val color: Color, val values: String){
+    BLACK(Color.Black, "Black"),
+    CREME(Color(0xFFFFEAC0),"Creme"),
+    GOLDEN(Color(0xFFEFB644),"Golden"),
+    BROWN(Color(0xFFA14E00), "Brown"),
+    WHITE(Color.White, "White"),
+    GRAY(Color.Gray, "Gray")
 }

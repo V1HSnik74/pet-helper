@@ -46,5 +46,11 @@ class PetsViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
+    fun updateColor(color: String, petId: Int){
+        viewModelScope.launch {
+            petsDao.updateColor(color, petId)
+        }
+    }
+
     fun getPetById(petId: Int): Flow<Pet?> = petsDao.getPetById(petId)
 }

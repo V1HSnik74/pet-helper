@@ -66,7 +66,7 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
         var name by remember(pet.id) {mutableStateOf(pet.name)}
         var breed by remember(pet.id) {mutableStateOf(pet.breed)}
         var microchip by remember(pet.id) {mutableStateOf(pet.microchipId?: "")}
-
+        var color by remember(pet.id) {mutableStateOf(pet.color?: "")}
         Column(
             Modifier.fillMaxSize()
                 .background(backgroundScreenColor).padding(bottom = 52.dp)
@@ -141,7 +141,10 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
                             )
                             is PetProfileDialog.Weight -> {}
                             is PetProfileDialog.Height -> {}
-                            is PetProfileDialog.Color -> {}
+                            is PetProfileDialog.Color -> UpdateColorDialog(
+                                color, {activeDialog = null},
+                                {petsViewModel.updateColor(it, pet.id)
+                                activeDialog = null})
                             is PetProfileDialog.IsNeutered -> {}
                             is PetProfileDialog.Name -> UpdateSmallDialog(
                                 onDismiss = {activeDialog = null},

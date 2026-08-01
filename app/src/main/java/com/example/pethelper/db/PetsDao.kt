@@ -30,4 +30,7 @@ interface PetsDao{
 
     @Query("UPDATE pets SET microchipId = :chip WHERE id=:petId")
     suspend fun updateChip(chip: String, petId: Int)
+
+    @Query("UPDATE pets SET color = :color WHERE id=:petId")
+    suspend fun updateColor(color: String, petId: Int)
 }
