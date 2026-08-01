@@ -28,5 +28,23 @@ class PetsViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
+    fun updateName(name: String, petId: Int){
+        viewModelScope.launch {
+            petsDao.updateName(name, petId)
+        }
+    }
+
+    fun updateBreed(breed: String, petId: Int){
+        viewModelScope.launch {
+            petsDao.updateBreed(breed, petId)
+        }
+    }
+
+    fun updateChip(chip: String, petId: Int){
+        viewModelScope.launch {
+            petsDao.updateChip(chip, petId)
+        }
+    }
+
     fun getPetById(petId: Int): Flow<Pet?> = petsDao.getPetById(petId)
 }

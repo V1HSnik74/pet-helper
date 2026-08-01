@@ -54,6 +54,8 @@ sealed interface PetProfileDialog {
     data object Color: PetProfileDialog
     data object IsNeutered: PetProfileDialog
     data object Microchip: PetProfileDialog
+    data object Name: PetProfileDialog
+    data object Breed: PetProfileDialog
 }
 @Composable
 fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
@@ -61,6 +63,10 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
     var activeDialog by remember { mutableStateOf<PetProfileDialog?>(null)}
     pet?.let {
         pet ->
+        var name by remember(pet.id) {mutableStateOf(pet.name)}
+        var breed by remember(pet.id) {mutableStateOf(pet.breed)}
+        var microchip by remember(pet.id) {mutableStateOf(pet.microchipId?: "")}
+
         Column(
             Modifier.fillMaxSize()
                 .background(backgroundScreenColor).padding(bottom = 52.dp)
@@ -99,15 +105,18 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
                     }
                     Spacer(Modifier.height(20.dp))
                     Row{
-                        TextMaker(pet.name, 24.sp)
+                        TextMaker(name, 24.sp)
                         Spacer(Modifier.width(4.dp))
                         Image(painterResource(R.drawable.pencil),
-                            contentDescription = "change name")
+                            contentDescription = "change name",
+                            modifier = Modifier.clickable(
+                                onClick = {activeDialog = PetProfileDialog.Name}))
                     }
                     Spacer(Modifier.height(4.dp))
-                    TextMaker(pet.breed, 16.sp,
+                    TextMaker(breed, 16.sp,
                         fontWeight = FontWeight.Normal,
-                        textDecoration = TextDecoration.Underline)
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable(onClick = {activeDialog = PetProfileDialog.Breed}))
                     Spacer(Modifier.height(20.dp))
                     InfoCard(pet,
                         {activeDialog = PetProfileDialog.Birthday},
@@ -118,7 +127,7 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
                         {activeDialog = PetProfileDialog.IsNeutered},
                         {activeDialog = PetProfileDialog.Microchip})
                     Spacer(Modifier.height(20.dp))
-                    AboutSection(pet.name, pet.about, hasAbout = true)
+                    AboutSection(name, pet.about, hasAbout = true)
                     Spacer(Modifier.height(52.dp))
 
                     activeDialog?.let { dialog ->
@@ -134,7 +143,32 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
                             is PetProfileDialog.Height -> {}
                             is PetProfileDialog.Color -> {}
                             is PetProfileDialog.IsNeutered -> {}
-                            is PetProfileDialog.Microchip -> {}
+                            is PetProfileDialog.Name -> UpdateSmallDialog(
+                                onDismiss = {activeDialog = null},
+                                onUpdateInfo = {
+                                    petsViewModel.updateName(it, pet.id)
+                                activeDialog = null},
+                                painterResource(R.drawable.name_icon),
+                                "Name", "e.g. Buddy", {name = it},
+                                name
+                            )
+                            is PetProfileDialog.Breed -> UpdateSmallDialog(
+                                onDismiss = {activeDialog = null},
+                                onUpdateInfo = {
+                                    petsViewModel.updateBreed(it, pet.id)
+                                               activeDialog = null},
+                                painterResource(R.drawable.breed_icon),
+                                "Breed", "e.g. Poodle", {breed = it}, breed
+                            )
+                            is PetProfileDialog.Microchip -> UpdateSmallDialog(
+                                onDismiss = {activeDialog = null},
+                                onUpdateInfo = {
+                                    petsViewModel.updateChip(it, pet.id)
+                                    activeDialog = null},
+                                painterResource(R.drawable.chip_icon),
+                                "Microchip ID", "000 000 000 000 000", {microchip = it}, microchip,
+                                "Enter 15 digits", true
+                            )
                         }
                     }
                 }

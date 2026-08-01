@@ -21,4 +21,13 @@ interface PetsDao{
 
     @Query("UPDATE pets SET sex = :gender WHERE  id=:petId")
     suspend fun updateGender(gender: String, petId: Int)
+
+    @Query("UPDATE pets SET name = :name WHERE id=:petId")
+    suspend fun updateName(name: String, petId: Int)
+
+    @Query("UPDATE pets SET breed = :breed WHERE id=:petId")
+    suspend fun updateBreed(breed: String, petId: Int)
+
+    @Query("UPDATE pets SET microchipId = :chip WHERE id=:petId")
+    suspend fun updateChip(chip: String, petId: Int)
 }
