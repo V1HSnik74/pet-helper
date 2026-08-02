@@ -52,5 +52,11 @@ class PetsViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
+    fun updateIsNeutered(isNeutered: String, petId: Int){
+        viewModelScope.launch {
+            petsDao.updateIsNeutered(isNeutered, petId)
+        }
+    }
+
     fun getPetById(petId: Int): Flow<Pet?> = petsDao.getPetById(petId)
 }

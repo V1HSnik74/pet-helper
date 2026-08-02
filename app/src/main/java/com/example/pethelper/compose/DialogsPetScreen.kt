@@ -272,6 +272,85 @@ fun UpdateColorDialog(color: String, onDismiss: () -> Unit, onUpdateColor: (Stri
 }
 
 @Composable
+fun UpdateNeutered(onDismiss: () -> Unit, onUpdateNeutered: (String) -> Unit, gender: String, isNeutered: String){
+    var selectedIsNeutered by remember { mutableStateOf(isNeutered) }
+    Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)) {
+        Card(
+            colors = CardDefaults.cardColors(backgroundColor),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .wrapContentSize()
+                .fillMaxWidth(0.9f)
+        ) {
+            Box(Modifier.fillMaxWidth()) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 36.dp, vertical = 28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        alignment = Alignment.TopCenter,
+                        painter = painterResource(R.drawable.neutured_icon),
+                        contentDescription = "neutered icon"
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    TextMaker(if (gender == "Male") "Edit Neutered" else "Edit Spayed", 20.sp)
+                    Spacer(Modifier.height(24.dp))
+                    NeuteredCard(
+                        selectedIsNeutered == "Yes",
+                        onClick = { selectedIsNeutered = "Yes" },
+                        "Yes")
+                    Spacer(Modifier.height(8.dp))
+                    NeuteredCard(
+                        selectedIsNeutered == "No",
+                        onClick = { selectedIsNeutered = "No" },
+                        "No")
+                    Spacer(Modifier.height(8.dp))
+                    NeuteredCard(
+                        selectedIsNeutered == "Not sure",
+                        onClick = { selectedIsNeutered = "Not sure" },
+                        "Not sure")
+                    Spacer(Modifier.height(24.dp))
+                    ButtonMaker("Save", {onUpdateNeutered(selectedIsNeutered)},
+                        enabled = selectedIsNeutered.isNotEmpty())
+                }
+                IconButton(onDismiss, modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 8.dp, top = 8.dp)) {
+                    Image(
+                        painterResource(R.drawable.cancel),
+                        contentDescription = "cancel"
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NeuteredCard(isSelected: Boolean, onClick: () -> Unit, text: String){
+    Card(Modifier.fillMaxWidth().clickable(interactionSource = null,
+        indication = null){onClick()},
+        colors = CardDefaults.cardColors(if (isSelected) selectedColor else cardColor),
+        shape = RoundedCornerShape(10.dp),
+        border = BorderStroke(
+            color = if (isSelected) buttonColor else Color(0xFFAF8268),
+            width = 1.dp
+        )){
+        Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Image(if (isSelected) painterResource(R.drawable.neutered_selected)
+            else painterResource(R.drawable.neutered_not_selected),
+                contentDescription = if (isSelected) "Selected" else "Not selected"
+            )
+            Spacer(Modifier.width(10.dp))
+            TextMaker(text, 14.sp, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+@Composable
 fun GenderCard(cardGender: String, selectedGender: String, onClick: () -> Unit,
                modifier: Modifier){
     val isSelected = cardGender == selectedGender

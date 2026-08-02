@@ -33,4 +33,7 @@ interface PetsDao{
 
     @Query("UPDATE pets SET color = :color WHERE id=:petId")
     suspend fun updateColor(color: String, petId: Int)
+
+    @Query("UPDATE pets SET neutered = :isNeutered WHERE id=:petId")
+    suspend fun updateIsNeutered(isNeutered: String, petId: Int)
 }

@@ -67,6 +67,8 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
         var breed by remember(pet.id) {mutableStateOf(pet.breed)}
         var microchip by remember(pet.id) {mutableStateOf(pet.microchipId?: "")}
         var color by remember(pet.id) {mutableStateOf(pet.color?: "")}
+        var isNeutered by remember(pet.id) {mutableStateOf(pet.neutered?: "")}
+        var gender by remember(pet.id) { mutableStateOf(pet.sex) }
         Column(
             Modifier.fillMaxSize()
                 .background(backgroundScreenColor).padding(bottom = 52.dp)
@@ -136,8 +138,7 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
                             is PetProfileDialog.Gender -> UpdateGenderDialog(
                                 onDismiss = {activeDialog = null},
                                 onUpdateGender = {petsViewModel.updateGender(pet.id, it)
-                                                 activeDialog = null},
-                                pet.sex
+                                                 activeDialog = null}, gender
                             )
                             is PetProfileDialog.Weight -> {}
                             is PetProfileDialog.Height -> {}
@@ -145,7 +146,11 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int){
                                 color, {activeDialog = null},
                                 {petsViewModel.updateColor(it, pet.id)
                                 activeDialog = null})
-                            is PetProfileDialog.IsNeutered -> {}
+                            is PetProfileDialog.IsNeutered -> UpdateNeutered(
+                                {activeDialog = null},
+                                { petsViewModel.updateIsNeutered(it, pet.id)
+                                    activeDialog = null },
+                                gender, isNeutered)
                             is PetProfileDialog.Name -> UpdateSmallDialog(
                                 onDismiss = {activeDialog = null},
                                 onUpdateInfo = {
