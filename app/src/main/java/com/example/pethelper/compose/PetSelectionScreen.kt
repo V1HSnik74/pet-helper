@@ -47,54 +47,76 @@ import com.example.pethelper.db.PetsViewModel
 fun PetSelectionScreen(
     viewModel: PetsViewModel = viewModel(),
     onPetClick: (Int) -> Unit
-){
+) {
     val petList by viewModel.allPets.collectAsState(initial = emptyList())
-    var showDialog by remember {mutableStateOf(false)}
+    var showDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize().background(backgroundScreenColor)
-        .padding(top = 76.dp, start = 26.dp, end = 26.dp, bottom = 160.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundScreenColor)
+            .padding(top = 76.dp, start = 26.dp, end = 26.dp, bottom = 160.dp)
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(modifier = Modifier.fillMaxWidth(),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically) {
-                TextMaker("Select Your Pet",24.sp, fontWeight = FontWeight.SemiBold)
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextMaker("Select Your Pet", 24.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.width(16.dp))
-                Image(painter = painterResource(R.drawable.paw),
+                Image(
+                    painter = painterResource(R.drawable.paw),
                     contentDescription = "paw icon",
-                    modifier = Modifier.size(32.dp))
+                    modifier = Modifier.size(32.dp)
+                )
             }
             Spacer(Modifier.height(24.dp))
-            TextMaker("Choose a pet to view their information",14.sp,
+            TextMaker(
+                "Choose a pet to view their information", 14.sp,
                 Color(0xFFB0A8A3), modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Spacer(Modifier.height(24.dp))
             if (petList.isNotEmpty()) {
                 LazyColumn(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
-                ){
-                    items(petList) {
-                        pet -> PetCard(
-                        {onPetClick(pet.id)}, pet.name, pet.breed, pet.photo)
+                ) {
+                    items(petList) { pet ->
+                        PetCard(
+                            { onPetClick(pet.id) }, pet.name, pet.breed, pet.photo
+                        )
                     }
                 }
-            }
-            else {
-                TextMaker("No pets added yet", 24.sp,
-                    modifier = Modifier.weight(1f).align(Alignment.CenterHorizontally))
+            } else {
+                TextMaker(
+                    "No pets added yet", 24.sp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .align(Alignment.CenterHorizontally)
+                )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = {showDialog = true},
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+            Button(
+                onClick = { showDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
                 shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = buttonColor))
+                colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+            )
             {
                 TextMaker("+ Add New Pet", 16.sp, Color.White)
             }
             if (showDialog) {
-                AddPetDialog({showDialog = false},
-                    {name, breed, gender, photo -> viewModel.addPet(name, breed, gender, photo)
-                    showDialog = false})
+                AddPetDialog(
+                    { showDialog = false },
+                    { name, breed, gender, photo ->
+                        viewModel.addPet(name, breed, gender, photo)
+                        showDialog = false
+                    })
             }
         }
 
@@ -102,34 +124,41 @@ fun PetSelectionScreen(
 }
 
 @Composable
-private fun PetCard(onClick: () -> Unit, name: String, breed: String, photo: String?){
+private fun PetCard(onClick: () -> Unit, name: String, breed: String, photo: String?) {
     val interactionSource = remember { MutableInteractionSource() }
-    Card(modifier = Modifier.fillMaxWidth()
-        .height(108.dp)
-        .clickable(interactionSource = interactionSource,
-            indication = null) {onClick()},
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(108.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ){
+    ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
-        ){
+        ) {
             AsyncImage(
-                modifier = Modifier.size(76.dp).clip(CircleShape),
+                modifier = Modifier
+                    .size(76.dp)
+                    .clip(CircleShape),
                 model = photo ?: R.drawable.no_pet_photo,
                 contentDescription = "Pet photo",
                 contentScale = if (photo == null) {
                     androidx.compose.ui.layout.ContentScale.Fit
-                }
-                else {
+                } else {
                     androidx.compose.ui.layout.ContentScale.Crop
                 }
             )
             Spacer(Modifier.width(24.dp))
-            Column(Modifier.weight(1f)){
+            Column(Modifier.weight(1f)) {
                 TextMaker(name, 18.sp)
                 Spacer(Modifier.height(8.dp))
                 TextMaker(breed, 14.sp, smallTextColor)

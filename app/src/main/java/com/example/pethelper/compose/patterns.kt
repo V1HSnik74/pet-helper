@@ -17,17 +17,19 @@ import com.example.pethelper.ui.theme.InterFamily
 
 val buttonColor = Color(0xFFE27380)
 val backgroundColor = Color(0xFFFFF8F2)
-val backgroundScreenColor  = Color(0xFFFFF9F2)
+val backgroundScreenColor = Color(0xFFFFF9F2)
 val smallTextColor = Color(0xFFB0A8A3)
 val selectedColor = Color(0xFFFDF1ED)
 val cardColor = Color(0xFFFFFCF9)
 val brownColor = Color(0xFFAF8268)
+
 @Composable
-fun TextMaker(text: String, fontSize: TextUnit,
-              color: Color = Color.Black,
-              fontWeight: FontWeight = FontWeight.Bold, modifier: Modifier = Modifier,
-              textDecoration: TextDecoration = TextDecoration.None
-){
+fun TextMaker(
+    text: String, fontSize: TextUnit,
+    color: Color = Color.Black,
+    fontWeight: FontWeight = FontWeight.Bold, modifier: Modifier = Modifier,
+    textDecoration: TextDecoration = TextDecoration.None
+) {
     Text(
         text = text,
         fontSize = fontSize,
@@ -40,12 +42,14 @@ fun TextMaker(text: String, fontSize: TextUnit,
 }
 
 @Composable
-fun ButtonMaker(text: String, onClick: () -> Unit, enabled: Boolean = true){
-    Button(onClick = onClick,
+fun ButtonMaker(text: String, onClick: () -> Unit, enabled: Boolean = true) {
+    Button(
+        onClick = onClick,
         enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
-        shape = RoundedCornerShape(25.dp))
+        shape = RoundedCornerShape(25.dp)
+    )
     {
         TextMaker(text, 14.sp, Color.White)
     }

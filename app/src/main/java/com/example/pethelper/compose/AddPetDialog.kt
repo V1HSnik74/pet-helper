@@ -55,60 +55,72 @@ import java.io.File
 val genderTextColor = Color(0xFF5C5C5C)
 val textFieldContainerColor = Color(0xFFFFFCF9)
 val textFieldCursorColor = Color(0xFFD9BDAD)
-@Composable
-fun AddPetDialog(onDismiss: () -> Unit,
-                 onSavePet: (name: String, breed: String, gender: String, photo: String?) -> Unit){
-    var name by remember { mutableStateOf("") }
-    var breed by remember {mutableStateOf("")}
-    var gender by remember {mutableStateOf("Male")}
-    var photo by remember {mutableStateOf<String?>(null)}
-    var uriPreview by remember{mutableStateOf<Uri?>(null)}
 
-    var isPhotoLoading by remember {mutableStateOf(false)}
+@Composable
+fun AddPetDialog(
+    onDismiss: () -> Unit,
+    onSavePet: (name: String, breed: String, gender: String, photo: String?) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var breed by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("Male") }
+    var photo by remember { mutableStateOf<String?>(null) }
+    var uriPreview by remember { mutableStateOf<Uri?>(null) }
+
+    var isPhotoLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-            uri -> uri?.let{
-        uriPreview = uri
-        isPhotoLoading = true
-        coroutineScope.launch {
-            val path = withContext(Dispatchers.IO){
-                val source = ImageDecoder.createSource(context.contentResolver, uri)
-                val bitmap = ImageDecoder.decodeBitmap(source)
-                val directory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-                val file = File(directory, "pet_${System.currentTimeMillis()}.jpg")
-                file.outputStream().use { outputStream ->
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            uriPreview = uri
+            isPhotoLoading = true
+            coroutineScope.launch {
+                val path = withContext(Dispatchers.IO) {
+                    val source = ImageDecoder.createSource(context.contentResolver, uri)
+                    val bitmap = ImageDecoder.decodeBitmap(source)
+                    val directory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+                    val file = File(directory, "pet_${System.currentTimeMillis()}.jpg")
+                    file.outputStream().use { outputStream ->
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                    }
+                    file.absolutePath
                 }
-                file.absolutePath
+                photo = path
+                isPhotoLoading = false
             }
-            photo = path
-            isPhotoLoading = false
-        }
 
-    }
+        }
     }
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
-    ){
+    ) {
         Card(
-            modifier = Modifier.wrapContentHeight().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .wrapContentHeight()
+                .padding(horizontal = 16.dp),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = backgroundColor)
         ) {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                IconButton(onClick = onDismiss){
-                    Image(painter = painterResource(R.drawable.cancel), contentDescription = "Cancel",
-                        modifier = Modifier.size(28.dp))
+                IconButton(onClick = onDismiss) {
+                    Image(
+                        painter = painterResource(R.drawable.cancel), contentDescription = "Cancel",
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
             }
-            Column(Modifier.fillMaxWidth()
-                .padding(horizontal = 42.dp),
-                horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 42.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-                    Image(painter = painterResource(R.drawable.paw_upper),
-                        contentDescription = "Upper paw", Modifier.size(48.dp))
+                    Image(
+                        painter = painterResource(R.drawable.paw_upper),
+                        contentDescription = "Upper paw", Modifier.size(48.dp)
+                    )
                 }
                 Spacer(Modifier.height(16.dp))
                 TextMaker("Add New Pet", 20.sp)
@@ -116,46 +128,64 @@ fun AddPetDialog(onDismiss: () -> Unit,
                 TextMaker("Tell us about your pet", 12.sp, smallTextColor)
                 Spacer(Modifier.height(16.dp))
                 TextMaker("Photo", 12.sp, modifier = Modifier.align(Alignment.Start))
-                AsyncImage(modifier = Modifier.align(Alignment.CenterHorizontally)
-                    .size(100.dp).clip(CircleShape).clickable{launcher.launch("image/*")},
-                        model = if (uriPreview == null) R.drawable.choose_photo_icon else uriPreview,
-                        contentDescription = "Choose photo",
-                        contentScale = if (uriPreview == null) {
-                            androidx.compose.ui.layout.ContentScale.Fit
-                        }
-                else {
-                    androidx.compose.ui.layout.ContentScale.Crop
-                })
+                AsyncImage(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .clickable { launcher.launch("image/*") },
+                    model = if (uriPreview == null) R.drawable.choose_photo_icon else uriPreview,
+                    contentDescription = "Choose photo",
+                    contentScale = if (uriPreview == null) {
+                        androidx.compose.ui.layout.ContentScale.Fit
+                    } else {
+                        androidx.compose.ui.layout.ContentScale.Crop
+                    }
+                )
                 Spacer(Modifier.height(8.dp))
                 TextMaker("JPG, PNG", fontSize = 12.sp, color = smallTextColor)
                 Spacer(Modifier.height(16.dp))
                 TextMaker("Name", 12.sp, modifier = Modifier.align(Alignment.Start))
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextFieldsMaker(name, {name = it},
-                    "e.g. Buddy", R.drawable.tag_icon)
+                OutlinedTextFieldsMaker(
+                    name, { name = it },
+                    "e.g. Buddy", R.drawable.tag_icon
+                )
                 Spacer(Modifier.height(16.dp))
                 TextMaker("Breed", 12.sp, modifier = Modifier.align(Alignment.Start))
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextFieldsMaker(breed, {breed = it},
-                    "e.g. Poodle", R.drawable.little_paw)
+                OutlinedTextFieldsMaker(
+                    breed, { breed = it },
+                    "e.g. Poodle", R.drawable.little_paw
+                )
                 Spacer(Modifier.height(16.dp))
                 TextMaker("Gender", 12.sp, modifier = Modifier.align(Alignment.Start))
                 Spacer(Modifier.height(8.dp))
-                Row(Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)){
-                        GenderButton("Male", R.drawable.male_icon,
-                            (gender == "Male"), {gender = "Male"},
-                            modifier = Modifier.weight(1f))
-                        GenderButton("Female", R.drawable.female_icon,
-                            (gender == "Female"), {gender = "Female"},
-                            modifier = Modifier.weight(1f))
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    GenderButton(
+                        "Male", R.drawable.male_icon,
+                        (gender == "Male"), { gender = "Male" },
+                        modifier = Modifier.weight(1f)
+                    )
+                    GenderButton(
+                        "Female", R.drawable.female_icon,
+                        (gender == "Female"), { gender = "Female" },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = { onSavePet(name, breed, gender, photo) },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                Button(
+                    onClick = { onSavePet(name, breed, gender, photo) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                     shape = RoundedCornerShape(25.dp),
-                    enabled = !isPhotoLoading)
+                    enabled = !isPhotoLoading
+                )
                 {
                     TextMaker("Save Pet", 14.sp, Color.White)
                 }
@@ -165,38 +195,51 @@ fun AddPetDialog(onDismiss: () -> Unit,
 }
 
 @Composable
-private fun GenderButton(selectedGender: String, icon: Int, isSelected: Boolean, onClick: () -> Unit,
-                 modifier: Modifier = Modifier){
-        Card(
-            modifier = modifier.height(40.dp)
-                .clickable(interactionSource = null,
-                    indication = null){onClick()},
-            shape = RoundedCornerShape(10.dp),
-            border = BorderStroke(
-                width = 1.dp,
-                color = if(isSelected) buttonColor else Color(0xFFD9BDAD)),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isSelected) Color(0xFFFDF1ED) else Color(0xFFFFFCF9))
+private fun GenderButton(
+    selectedGender: String, icon: Int, isSelected: Boolean, onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .height(40.dp)
+            .clickable(
+                interactionSource = null,
+                indication = null
+            ) { onClick() },
+        shape = RoundedCornerShape(10.dp),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isSelected) buttonColor else Color(0xFFD9BDAD)
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) Color(0xFFFDF1ED) else Color(0xFFFFFCF9)
+        )
+    ) {
+        Row(
+            Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            Row(
-                Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    painter = painterResource(icon),
-                    modifier = Modifier.size(24.dp),
-                    contentDescription = "$selectedGender icon"
-                )
-                Spacer(Modifier.width(8.dp))
-                TextMaker(selectedGender, 12.sp, genderTextColor)
-            }
+            Image(
+                painter = painterResource(icon),
+                modifier = Modifier.size(24.dp),
+                contentDescription = "$selectedGender icon"
+            )
+            Spacer(Modifier.width(8.dp))
+            TextMaker(selectedGender, 12.sp, genderTextColor)
         }
+    }
 }
 
 @Composable
-private fun OutlinedTextFieldsMaker(value: String, onValueChange: (String) -> Unit, text: String, icon: Int){
-    OutlinedTextField(value = value, onValueChange = onValueChange,
+private fun OutlinedTextFieldsMaker(
+    value: String,
+    onValueChange: (String) -> Unit,
+    text: String,
+    icon: Int
+) {
+    OutlinedTextField(
+        value = value, onValueChange = onValueChange,
         placeholder = {
             TextMaker(text, 12.sp, smallTextColor)
         },

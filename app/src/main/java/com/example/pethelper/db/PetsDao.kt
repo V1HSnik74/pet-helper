@@ -6,7 +6,7 @@ import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface PetsDao{
+interface PetsDao {
     @Query("SELECT * FROM pets")
     fun getAllPets(): Flow<List<Pet>>
 
@@ -36,4 +36,10 @@ interface PetsDao{
 
     @Query("UPDATE pets SET neutered = :isNeutered WHERE id=:petId")
     suspend fun updateIsNeutered(isNeutered: String, petId: Int)
+
+    @Query("UPDATE pets SET weight = :weight WHERE id=:petId")
+    suspend fun updateWeight(weight: Float, petId: Int)
+
+    @Query("UPDATE pets SET height = :height WHERE id=:petId")
+    suspend fun updateHeight(height: Float, petId: Int)
 }

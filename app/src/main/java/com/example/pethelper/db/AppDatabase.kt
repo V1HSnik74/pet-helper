@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase
     entities = [Pet::class],
     version = 1
 )
-abstract class AppDatabase: RoomDatabase(){
+abstract class AppDatabase : RoomDatabase() {
     abstract fun petsDao(): PetsDao
 
     companion object {
@@ -20,7 +20,7 @@ abstract class AppDatabase: RoomDatabase(){
             val tempInstance = INSTANCE
             if (tempInstance != null)
                 return tempInstance
-            return synchronized(this){
+            return synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,

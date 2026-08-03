@@ -40,62 +40,111 @@ import com.example.pethelper.R
 import com.example.pethelper.db.PetsViewModel
 
 @Composable
-fun MyPetScreen(petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Unit){
+fun MyPetScreen(petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Unit) {
     val pet by petsViewModel.getPetById(id).collectAsState(initial = null)
-    Box(Modifier.fillMaxSize()
-        .background(backgroundScreenColor)
-        .padding(start = 25.dp, top = 76.dp, end = 25.dp, bottom = 56.dp)){
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(backgroundScreenColor)
+            .padding(start = 25.dp, top = 76.dp, end = 25.dp, bottom = 56.dp)
+    ) {
         Column(Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxWidth(),
+            Row(
+                Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 TextMaker("My Pet", 24.sp)
-                Image(painter = painterResource(R.drawable.paw),
-                    contentDescription = "paw icon")
+                Image(
+                    painter = painterResource(R.drawable.paw),
+                    contentDescription = "paw icon"
+                )
             }
-            LazyColumn(Modifier.fillMaxWidth().weight(1f)) {
-                item{Spacer(Modifier.height(32.dp))}
-                item{pet?.let { pet ->
-                    PetInfoCard(pet.photo, pet.name, pet.sex, pet.breed,
-                        pet.age, pet.weight, pet.height,
-                        onCardClick = {onCardClick(pet.id)}
-                    )
-                }}
-                item{Spacer(Modifier.height(20.dp))}
-                item{Row(Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)){
-                    SectionButton(painterResource(R.drawable.heart_icon), "Health", 14.sp, Modifier.weight(1f))
-                    SectionButton(painterResource(R.drawable.bone_icon), "Nutrition", 14.sp, Modifier.weight(1f))
-                    SectionButton(painterResource(R.drawable.bell_icon), "Reminders", 12.sp, Modifier.weight(1f))
-                    SectionButton(painterResource(R.drawable.notes_icon), "Notes", 14.sp,  Modifier.weight(1f))
-                }}
-                item{ Spacer(Modifier.height(20.dp))}
-                item{Upcoming()}
-                item{Spacer(Modifier.height(20.dp))}
-                item{pet?.let {
-                        pet -> AboutSection(pet.name, pet.about,
-                    painterResource(R.drawable.paw_notes_icon))
-                }}
+            LazyColumn(Modifier
+                .fillMaxWidth()
+                .weight(1f)) {
+                item { Spacer(Modifier.height(32.dp)) }
+                item {
+                    pet?.let { pet ->
+                        PetInfoCard(
+                            pet.photo, pet.name, pet.sex, pet.breed,
+                            pet.age, pet.weight, pet.height,
+                            onCardClick = { onCardClick(pet.id) }
+                        )
+                    }
+                }
+                item { Spacer(Modifier.height(20.dp)) }
+                item {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SectionButton(
+                            painterResource(R.drawable.heart_icon),
+                            "Health",
+                            14.sp,
+                            Modifier.weight(1f)
+                        )
+                        SectionButton(
+                            painterResource(R.drawable.bone_icon),
+                            "Nutrition",
+                            14.sp,
+                            Modifier.weight(1f)
+                        )
+                        SectionButton(
+                            painterResource(R.drawable.bell_icon),
+                            "Reminders",
+                            12.sp,
+                            Modifier.weight(1f)
+                        )
+                        SectionButton(
+                            painterResource(R.drawable.notes_icon),
+                            "Notes",
+                            14.sp,
+                            Modifier.weight(1f)
+                        )
+                    }
+                }
+                item { Spacer(Modifier.height(20.dp)) }
+                item { Upcoming() }
+                item { Spacer(Modifier.height(20.dp)) }
+                item {
+                    pet?.let { pet ->
+                        AboutSection(
+                            pet.name, pet.about,
+                            painterResource(R.drawable.paw_notes_icon)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun PetInfoCard(photo: String?, name: String, gender: String,
-                breed: String, age: Int?, weight: Float?, height: Float?, onCardClick: () -> Unit){
-    Card(Modifier.fillMaxWidth()
-        .wrapContentHeight()
-        .clickable{onCardClick()},
+fun PetInfoCard(
+    photo: String?, name: String, gender: String,
+    breed: String, age: Int?, weight: Float?, height: Float?, onCardClick: () -> Unit
+) {
+    Card(
+        Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clickable { onCardClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
-    ){
-        Row(Modifier.fillMaxWidth()
-            .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically){
-            AsyncImage(modifier = Modifier.size(120.dp)
-                .clip(CircleShape),
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape),
                 contentDescription = "Pet photo",
                 model = photo,
                 contentScale = if (photo == null)
@@ -103,35 +152,58 @@ fun PetInfoCard(photo: String?, name: String, gender: String,
                 else androidx.compose.ui.layout.ContentScale.Crop
             )
             Spacer(Modifier.width(5.dp))
-            Column(Modifier.fillMaxHeight()
-            ){
-                Row(Modifier.padding(start = 8.dp), verticalAlignment = Alignment.CenterVertically){
+            Column(
+                Modifier.fillMaxHeight()
+            ) {
+                Row(
+                    Modifier.padding(start = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     TextMaker(name, 24.sp, modifier = Modifier.weight(1f, fill = false))
                     Spacer(Modifier.width(4.dp))
-                    Image(painter = if (gender == "Male") painterResource(R.drawable.male)
-                    else painterResource(R.drawable.female),
-                        contentDescription = "Gender")
+                    Image(
+                        painter = if (gender == "Male") painterResource(R.drawable.male)
+                        else painterResource(R.drawable.female),
+                        contentDescription = "Gender"
+                    )
                 }
                 Spacer(Modifier.height(8.dp))
-                TextMaker(breed, 16.sp, fontWeight = FontWeight.Normal, modifier = Modifier.padding(start = 8.dp))
+                TextMaker(
+                    breed,
+                    16.sp,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
                 Spacer(Modifier.height(8.dp))
                 AgeCard(age)
                 Spacer(Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically){
-                    Row(verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)){
-                        Image(painter = painterResource(R.drawable.weight_icon),
-                            contentDescription = "Weight icon")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.weight_icon),
+                            contentDescription = "Weight icon"
+                        )
                         Spacer(Modifier.width(4.dp))
-                        TextMaker(if (weight == null) "N/A" else "$weight kg",
-                            14.sp, fontWeight = FontWeight.SemiBold)
+                        TextMaker(
+                            if (weight == null) "N/A" else "$weight kg",
+                            14.sp, fontWeight = FontWeight.SemiBold
+                        )
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)) {
-                        Image(painter = painterResource(R.drawable.height_icon),
-                            contentDescription = "Height icon")
-                        TextMaker(if (height == null) "N/A" else "$height cm",
-                            14.sp, fontWeight = FontWeight.SemiBold)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.height_icon),
+                            contentDescription = "Height icon"
+                        )
+                        TextMaker(
+                            if (height == null) "N/A" else "$height cm",
+                            14.sp, fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
             }
@@ -140,26 +212,38 @@ fun PetInfoCard(photo: String?, name: String, gender: String,
 }
 
 @Composable
-fun AgeCard(age: Int?){
-    Card(Modifier.wrapContentSize().padding(start = 8.dp),
+fun AgeCard(age: Int?) {
+    Card(
+        Modifier
+            .wrapContentSize()
+            .padding(start = 8.dp),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(Color(0xFFFFE2D0)))
+        colors = CardDefaults.cardColors(Color(0xFFFFE2D0))
+    )
     {
-        TextMaker(if (age == null) "N/A" else "$age year(s) old",
+        TextMaker(
+            if (age == null) "N/A" else "$age year(s) old",
             14.sp, Color(0xFF381B0A), FontWeight.SemiBold,
-            Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 22.dp, vertical = 4.dp))
+            Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(horizontal = 22.dp, vertical = 4.dp)
+        )
     }
 }
 
 @Composable
-fun SectionButton(painter: Painter, text: String, fontSize: TextUnit, modifier: Modifier){
-    Card(modifier.height(92.dp),
+fun SectionButton(painter: Painter, text: String, fontSize: TextUnit, modifier: Modifier) {
+    Card(
+        modifier.height(92.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(Color.White),
-        elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(Modifier.fillMaxSize(),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Image(painter = painter, contentDescription = "Button icon")
             Spacer(Modifier.height(8.dp))
             TextMaker(text, fontSize, fontWeight = FontWeight.SemiBold)
@@ -168,23 +252,40 @@ fun SectionButton(painter: Painter, text: String, fontSize: TextUnit, modifier: 
 }
 
 @Composable
-fun AboutSection(name: String, about: String?, painter: Painter? = null, hasAbout: Boolean = false){
-    Card(Modifier.fillMaxSize(),
+fun AboutSection(
+    name: String,
+    about: String?,
+    painter: Painter? = null,
+    hasAbout: Boolean = false
+) {
+    Card(
+        Modifier.fillMaxSize(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(cardColor),
-        elevation = CardDefaults.cardElevation(2.dp)) {
-        Row(Modifier.fillMaxWidth().padding(16.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.SpaceBetween){
-            Column(Modifier.fillMaxHeight().weight(1f, fill = false)) {
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(Modifier
+                .fillMaxHeight()
+                .weight(1f, fill = false)) {
                 TextMaker("About $name", 16.sp)
                 Spacer(Modifier.height(8.dp))
-                TextMaker(about ?: "No description added yet",
-                    14.sp, fontWeight = FontWeight.Normal)
+                TextMaker(
+                    about ?: "No description added yet",
+                    14.sp, fontWeight = FontWeight.Normal
+                )
             }
             if (painter != null) {
-                Image(painter = painter,
-                    contentDescription = "paw about icon")
+                Image(
+                    painter = painter,
+                    contentDescription = "paw about icon"
+                )
             }
             if (hasAbout)
                 EditAbout(modifier = Modifier)
@@ -193,16 +294,23 @@ fun AboutSection(name: String, about: String?, painter: Painter? = null, hasAbou
 }
 
 
-
 @Composable
-fun Upcoming(){
-    Card(Modifier.fillMaxWidth().height(209.dp),
+fun Upcoming() {
+    Card(
+        Modifier
+            .fillMaxWidth()
+            .height(209.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(cardColor),
-        elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(Modifier.fillMaxHeight().padding(16.dp)){
-            Row(Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween){
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(Modifier
+            .fillMaxHeight()
+            .padding(16.dp)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 TextMaker("Upcoming", 14.sp)
                 TextMaker("View all", 14.sp, Color(0xFF7B3A15))
             }

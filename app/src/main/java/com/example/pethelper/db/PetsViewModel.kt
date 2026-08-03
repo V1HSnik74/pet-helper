@@ -6,55 +6,67 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class PetsViewModel(application: Application): AndroidViewModel(application) {
+class PetsViewModel(application: Application) : AndroidViewModel(application) {
     val petsDao = AppDatabase.getInstance(application).petsDao()
     val allPets: Flow<List<Pet>> = petsDao.getAllPets()
 
-    fun addPet(name: String, breed: String, sex: String, photo: String?){
+    fun addPet(name: String, breed: String, sex: String, photo: String?) {
         viewModelScope.launch {
             petsDao.upsertPet(Pet(name, breed, sex, photo))
         }
     }
 
-    fun updatePetPhoto(petId: Int, photo: String){
+    fun updatePetPhoto(petId: Int, photo: String) {
         viewModelScope.launch {
             petsDao.updatePhoto(photo, petId)
         }
     }
 
-    fun updateGender(petId: Int, gender: String){
+    fun updateGender(petId: Int, gender: String) {
         viewModelScope.launch {
             petsDao.updateGender(gender, petId)
         }
     }
 
-    fun updateName(name: String, petId: Int){
+    fun updateName(name: String, petId: Int) {
         viewModelScope.launch {
             petsDao.updateName(name, petId)
         }
     }
 
-    fun updateBreed(breed: String, petId: Int){
+    fun updateBreed(breed: String, petId: Int) {
         viewModelScope.launch {
             petsDao.updateBreed(breed, petId)
         }
     }
 
-    fun updateChip(chip: String, petId: Int){
+    fun updateChip(chip: String, petId: Int) {
         viewModelScope.launch {
             petsDao.updateChip(chip, petId)
         }
     }
 
-    fun updateColor(color: String, petId: Int){
+    fun updateColor(color: String, petId: Int) {
         viewModelScope.launch {
             petsDao.updateColor(color, petId)
         }
     }
 
-    fun updateIsNeutered(isNeutered: String, petId: Int){
+    fun updateIsNeutered(isNeutered: String, petId: Int) {
         viewModelScope.launch {
             petsDao.updateIsNeutered(isNeutered, petId)
+        }
+    }
+
+    fun updateWeight(weight: Float, petId: Int) {
+        viewModelScope.launch {
+            petsDao.updateWeight(weight, petId)
+        }
+    }
+
+    fun updateHeight(height: Float, petId: Int) {
+        viewModelScope.launch {
+            petsDao.updateHeight(height, petId)
         }
     }
 

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -28,7 +29,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +47,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.pethelper.R
+import com.sd.lib.compose.wheel_picker.FVerticalWheelPicker
+import com.sd.lib.compose.wheel_picker.rememberFWheelPickerState
 
 @Composable
 fun UpdateGenderDialog(onDismiss: () -> Unit,
@@ -325,6 +330,124 @@ fun UpdateNeutered(onDismiss: () -> Unit, onUpdateNeutered: (String) -> Unit, ge
                 }
             }
         }
+    }
+}
+
+@Composable
+fun UpdateWeightHeightDialog(onDismiss: () -> Unit, onUpdateValue: (Float) -> Unit, isWeight: Boolean, valueInt: Int,
+                             valueFloat: Int, count: Int, firstValue: Int, lastValue: Int){
+    var selectedInteger by remember {mutableIntStateOf(valueInt)}
+    var selectedFraction by remember {mutableIntStateOf(valueFloat)}
+    val totalValue = selectedInteger + (selectedFraction / 10f)
+    Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)) {
+        Card(
+            colors = CardDefaults.cardColors(backgroundColor),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .wrapContentSize()
+                .fillMaxWidth(0.9f)
+        ) {
+            Box(Modifier.fillMaxWidth()) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 36.dp, vertical = 28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        alignment = Alignment.TopCenter,
+                        painter = if (isWeight) painterResource(R.drawable.weight_icon_dialog)
+                        else painterResource(R.drawable.height_icon_dialog),
+                        contentDescription = "neutered icon"
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    TextMaker(if (isWeight) "Edit Weight" else "Edit Height", 20.sp)
+                    Spacer(Modifier.height(20.dp))
+                    Row(Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center){
+                        TextMaker("$selectedInteger.$selectedFraction",
+                            32.sp, buttonColor, FontWeight.SemiBold)
+                        Spacer(Modifier.width(4.dp))
+                        TextMaker(if (isWeight) "kg" else "cm", 18.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                    Spacer(Modifier.height(20.dp))
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically){
+                        Column(Modifier.wrapContentWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center) {
+                            TextMaker(if (isWeight) "kg" else "cm",
+                                14.sp, fontWeight = FontWeight.SemiBold)
+                            Spacer(Modifier.height(10.dp))
+                            WheelPickerCard(count, selectedInteger, {selectedInteger = it}, firstValue)
+                            Spacer(Modifier.height(10.dp))
+                            TextMaker("$firstValue-$lastValue", 14.sp, smallTextColor,
+                                FontWeight.SemiBold)
+                        }
+                        Image(painterResource(R.drawable.dot), contentDescription = "number splitter")
+                        Column(Modifier.wrapContentWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center) {
+                            TextMaker(if (isWeight) ".kg" else ".cm",
+                                14.sp, fontWeight = FontWeight.SemiBold)
+                            Spacer(Modifier.height(10.dp))
+                            WheelPickerCard(10, selectedFraction, {selectedFraction = it}, 0)
+                            Spacer(Modifier.height(10.dp))
+                            TextMaker("0-9", 14.sp, smallTextColor,
+                                FontWeight.SemiBold)
+                        }
+                    }
+                    Spacer(Modifier.height(20.dp))
+                    ButtonMaker(if (isWeight) "Save Weight" else "Save Height",
+                        onClick = {onUpdateValue(totalValue)},
+                        enabled = totalValue != 0f)
+                }
+                IconButton(onDismiss, modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 8.dp, top = 8.dp)) {
+                    Image(
+                        painterResource(R.drawable.cancel),
+                        contentDescription = "cancel"
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WheelPickerCard(count: Int, initIndex: Int, onValueChange: (Int) -> Unit, firstValue: Int){
+    val state = rememberFWheelPickerState(initIndex - firstValue)
+    LaunchedEffect(state.currentIndex) {
+        onValueChange(state.currentIndex + firstValue)
+    }
+    Card(shape = RoundedCornerShape(15.dp),
+        border = BorderStroke(
+            width = 1.dp,
+            color = Color(0xFFFFD8C1)),
+        colors = CardDefaults.cardColors(backgroundColor),
+        modifier = Modifier.width(100.dp))
+    {
+        Box(Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center){
+            Box(Modifier.fillMaxWidth().height(40.dp).background(selectedColor, RoundedCornerShape(10.dp)))
+            FVerticalWheelPicker(count = count,
+                unfocusedCount = 1,
+                itemHeight = 40.dp,
+                state = state) { index ->
+                val displayValue = index + firstValue
+                val isSelected = state.currentIndexSnapshot == index
+                Box(Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center){
+                    TextMaker(displayValue.toString(), 24.sp,
+                        if (isSelected) buttonColor else Color.Black,
+                        FontWeight.Medium)
+                }
+            }
+        }
+
     }
 }
 
