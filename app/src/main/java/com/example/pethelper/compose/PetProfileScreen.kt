@@ -59,15 +59,15 @@ import java.io.File
 
 
 sealed interface PetProfileDialog {
-    data object Birthday: PetProfileDialog
-    data object Gender: PetProfileDialog
-    data object Weight: PetProfileDialog
-    data object Height: PetProfileDialog
-    data object Color: PetProfileDialog
-    data object IsNeutered: PetProfileDialog
-    data object Microchip: PetProfileDialog
-    data object Name: PetProfileDialog
-    data object Breed: PetProfileDialog
+    data object Birthday : PetProfileDialog
+    data object Gender : PetProfileDialog
+    data object Weight : PetProfileDialog
+    data object Height : PetProfileDialog
+    data object Color : PetProfileDialog
+    data object IsNeutered : PetProfileDialog
+    data object Microchip : PetProfileDialog
+    data object Name : PetProfileDialog
+    data object Breed : PetProfileDialog
 }
 
 @Composable
@@ -84,6 +84,7 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int) {
         var weight by remember(pet.id) { mutableFloatStateOf(pet.weight ?: 0.0f) }
         var height by remember(pet.id) { mutableFloatStateOf(pet.height ?: 0.0f) }
         var photo by remember(pet.id) { mutableStateOf(pet.photo ?: "") }
+        var birthday by remember(pet.id) { mutableStateOf(pet.birthday ?: "") }
 
         val coroutineScope = rememberCoroutineScope()
         val context = LocalContext.current
@@ -208,7 +209,14 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int) {
 
                     activeDialog?.let { dialog ->
                         when (dialog) {
-                            is PetProfileDialog.Birthday -> {}
+                            is PetProfileDialog.Birthday -> UpdateBirthdayDialog(
+                                onDismiss = { activeDialog = null },
+                                onUpdateBirthday = {
+                                    petsViewModel.updateBirthdayDate(it, pet.id)
+                                    activeDialog = null
+                                }, currentDate = birthday
+                            )
+
                             is PetProfileDialog.Gender -> UpdateGenderDialog(
                                 onDismiss = { activeDialog = null },
                                 onUpdateGender = {

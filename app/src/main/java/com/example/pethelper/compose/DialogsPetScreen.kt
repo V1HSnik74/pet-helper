@@ -49,6 +49,10 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.pethelper.R
 import com.sd.lib.compose.wheel_picker.FVerticalWheelPicker
 import com.sd.lib.compose.wheel_picker.rememberFWheelPickerState
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
 fun UpdateGenderDialog(onDismiss: () -> Unit,
@@ -418,7 +422,75 @@ fun UpdateWeightHeightDialog(onDismiss: () -> Unit, onUpdateValue: (Float) -> Un
 }
 
 @Composable
-fun WheelPickerCard(count: Int, initIndex: Int, onValueChange: (Int) -> Unit, firstValue: Int){
+fun UpdateBirthdayDialog(
+    onDismiss: () -> Unit,
+    currentDate: String,
+    onUpdateBirthday: (String) -> Unit
+) {
+    val dateFormatter = remember { DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH) }
+    var selectedDate by remember(currentDate)
+    {
+        mutableStateOf(
+            if (currentDate.isNotEmpty()) LocalDate.parse(
+                currentDate,
+                dateFormatter
+            ) else LocalDate.now()
+        )
+    }
+    val year = selectedDate.year
+    val month = selectedDate.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)
+    val day = selectedDate.dayOfMonth
+    val stringDate = "$month $day, $year"
+    Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)) {
+        Card(
+            colors = CardDefaults.cardColors(backgroundColor),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .wrapContentSize()
+                .fillMaxWidth(0.9f)
+        ) {
+            Box(Modifier.fillMaxWidth()) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 36.dp, vertical = 28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        alignment = Alignment.TopCenter,
+                        painter = painterResource(R.drawable.birthday_icon),
+                        contentDescription = "birthday icon"
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    TextMaker("Edit Birthday", 20.sp)
+                    Spacer(Modifier.height(20.dp))
+                    BirthdayCalendar(
+                        currentDay = selectedDate,
+                        onValueChanged = { selectedDate = it })
+                    Spacer(Modifier.height(24.dp))
+                    ButtonMaker(
+                        "Save Birthday",
+                        { onUpdateBirthday(stringDate) },
+                        enabled = stringDate.isNotEmpty()
+                    )
+                }
+                IconButton(
+                    onDismiss, modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = 8.dp, top = 8.dp)
+                ) {
+                    Image(
+                        painterResource(R.drawable.cancel),
+                        contentDescription = "cancel"
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WheelPickerCard(count: Int, initIndex: Int, onValueChange: (Int) -> Unit, firstValue: Int){
     val state = rememberFWheelPickerState(initIndex - firstValue)
     LaunchedEffect(state.currentIndex) {
         onValueChange(state.currentIndex + firstValue)
@@ -432,7 +504,10 @@ fun WheelPickerCard(count: Int, initIndex: Int, onValueChange: (Int) -> Unit, fi
     {
         Box(Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center){
-            Box(Modifier.fillMaxWidth().height(40.dp).background(selectedColor, RoundedCornerShape(10.dp)))
+            Box(Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .background(selectedColor, RoundedCornerShape(10.dp)))
             FVerticalWheelPicker(count = count,
                 unfocusedCount = 1,
                 itemHeight = 40.dp,
@@ -452,16 +527,22 @@ fun WheelPickerCard(count: Int, initIndex: Int, onValueChange: (Int) -> Unit, fi
 }
 
 @Composable
-fun NeuteredCard(isSelected: Boolean, onClick: () -> Unit, text: String){
-    Card(Modifier.fillMaxWidth().clickable(interactionSource = null,
-        indication = null){onClick()},
+private fun NeuteredCard(isSelected: Boolean, onClick: () -> Unit, text: String){
+    Card(Modifier
+        .fillMaxWidth()
+        .clickable(
+            interactionSource = null,
+            indication = null
+        ) { onClick() },
         colors = CardDefaults.cardColors(if (isSelected) selectedColor else cardColor),
         shape = RoundedCornerShape(10.dp),
         border = BorderStroke(
             color = if (isSelected) buttonColor else Color(0xFFAF8268),
             width = 1.dp
         )){
-        Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 12.dp),
+        Row(Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically) {
             Image(if (isSelected) painterResource(R.drawable.neutered_selected)
             else painterResource(R.drawable.neutered_not_selected),
@@ -474,7 +555,7 @@ fun NeuteredCard(isSelected: Boolean, onClick: () -> Unit, text: String){
 }
 
 @Composable
-fun GenderCard(cardGender: String, selectedGender: String, onClick: () -> Unit,
+private fun GenderCard(cardGender: String, selectedGender: String, onClick: () -> Unit,
                modifier: Modifier){
     val isSelected = cardGender == selectedGender
     val interactionSource = remember { MutableInteractionSource() }
@@ -509,7 +590,7 @@ fun GenderCard(cardGender: String, selectedGender: String, onClick: () -> Unit,
 }
 
 @Composable
-fun ColorCircle(value: String, isSelected: Boolean, onClick: () -> Unit, color: Color){
+private fun ColorCircle(value: String, isSelected: Boolean, onClick: () -> Unit, color: Color){
     Box(Modifier
         .size(40.dp)
         .clip(CircleShape)
@@ -525,7 +606,7 @@ fun ColorCircle(value: String, isSelected: Boolean, onClick: () -> Unit, color: 
     )
 }
 
-enum class Colors(val color: Color, val values: String){
+private enum class Colors(val color: Color, val values: String){
     BLACK(Color.Black, "Black"),
     CREME(Color(0xFFFFEAC0),"Creme"),
     GOLDEN(Color(0xFFEFB644),"Golden"),

@@ -70,5 +70,11 @@ class PetsViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateBirthdayDate(birthday: String, petId: Int){
+        viewModelScope.launch {
+            petsDao.updateBirthdayDate(birthday, petId)
+        }
+    }
+
     fun getPetById(petId: Int): Flow<Pet?> = petsDao.getPetById(petId)
 }

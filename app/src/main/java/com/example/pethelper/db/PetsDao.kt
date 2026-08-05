@@ -42,4 +42,7 @@ interface PetsDao {
 
     @Query("UPDATE pets SET height = :height WHERE id=:petId")
     suspend fun updateHeight(height: Float, petId: Int)
+
+    @Query("UPDATE pets SET birthday = :birthdayDate WHERE id=:petId")
+    suspend fun updateBirthdayDate(birthdayDate: String, petId: Int)
 }
