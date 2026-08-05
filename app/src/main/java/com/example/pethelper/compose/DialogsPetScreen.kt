@@ -169,9 +169,9 @@ fun UpdateSmallDialog(
                     Spacer(Modifier.height(10.dp))
                     OutlinedTextField(
                         value = value, onValueChange = {
-                        if (isMicrochip) onValueChange(it.filter { it.isDigit() }.take(15))
-                        else onValueChange(it)
-                    },
+                            if (isMicrochip) onValueChange(it.filter { it.isDigit() }.take(15))
+                            else onValueChange(it)
+                        },
                         placeholder = {
                             TextMaker(placeholder, 12.sp, smallTextColor)
                         },
@@ -577,6 +577,68 @@ fun UpdateBirthdayDialog(
                     Image(
                         painterResource(R.drawable.cancel),
                         contentDescription = "cancel"
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun UpdateAboutDialog(
+    onDismiss: () -> Unit,
+    name: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    onUpdateAbout: (String) -> Unit
+) {
+    Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)) {
+        Card(
+            colors = CardDefaults.cardColors(backgroundColor),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .wrapContentSize()
+                .fillMaxWidth(0.9f)
+        ) {
+            Box(Modifier.fillMaxWidth()) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 36.dp, vertical = 28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        alignment = Alignment.TopCenter,
+                        painter = painterResource(R.drawable.about_icon),
+                        contentDescription = "Edit about"
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    TextMaker("Edit About $name", 20.sp)
+                    Spacer(Modifier.height(24.dp))
+                    OutlinedTextField(
+                        value = value, onValueChange = onValueChange,
+                        placeholder = {
+                            TextMaker(
+                                "Add some description of your pet",
+                                12.sp,
+                                smallTextColor
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        singleLine = false,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = textFieldContainerColor,
+                            unfocusedContainerColor = textFieldContainerColor,
+                            focusedBorderColor = textFieldCursorColor,
+                            unfocusedBorderColor = textFieldCursorColor,
+                            cursorColor = textFieldCursorColor
+                        )
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    ButtonMaker(
+                        "Save About $name", onClick = { onUpdateAbout(value) },
+                        enabled = value.isNotEmpty()
                     )
                 }
             }

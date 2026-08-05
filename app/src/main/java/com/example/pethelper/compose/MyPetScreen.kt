@@ -274,7 +274,8 @@ fun AboutSection(
     name: String,
     about: String?,
     painter: Painter? = null,
-    hasAbout: Boolean = false
+    hasAbout: Boolean = false,
+    onOpenDialog: () -> Unit = {}
 ) {
     Card(
         Modifier.fillMaxSize(),
@@ -308,7 +309,7 @@ fun AboutSection(
                 )
             }
             if (hasAbout)
-                EditAbout(modifier = Modifier)
+                EditAbout(modifier = Modifier, onOpenDialog = onOpenDialog)
         }
     }
 }

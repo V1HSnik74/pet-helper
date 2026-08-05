@@ -74,6 +74,7 @@ sealed interface PetProfileDialog {
 fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int) {
     val pet by petsViewModel.getPetById(id).collectAsState(initial = null)
     var activeDialog by remember { mutableStateOf<PetProfileDialog?>(null) }
+    var aboutDialogActive by remember { mutableStateOf(false) }
     pet?.let { pet ->
         var name by remember(pet.id) { mutableStateOf(pet.name) }
         var breed by remember(pet.id) { mutableStateOf(pet.breed) }
@@ -85,6 +86,7 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int) {
         var height by remember(pet.id) { mutableFloatStateOf(pet.height ?: 0.0f) }
         var photo by remember(pet.id) { mutableStateOf(pet.photo ?: "") }
         var birthday by remember(pet.id) { mutableStateOf(pet.birthday ?: "") }
+        var about by remember(pet.id) { mutableStateOf(pet.about ?: "") }
 
         val coroutineScope = rememberCoroutineScope()
         val context = LocalContext.current
@@ -111,6 +113,15 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int) {
                     }
                 }
             }
+        if (aboutDialogActive) {
+            UpdateAboutDialog(
+                { aboutDialogActive = false },
+                name, about, { about = it },
+                {
+                    petsViewModel.updateAbout(it, pet.id)
+                    aboutDialogActive = false
+                })
+        }
         Column(
             Modifier
                 .fillMaxSize()
@@ -204,7 +215,9 @@ fun PetProfileScreen(petsViewModel: PetsViewModel, id: Int) {
                         { activeDialog = PetProfileDialog.IsNeutered },
                         { activeDialog = PetProfileDialog.Microchip })
                     Spacer(Modifier.height(20.dp))
-                    AboutSection(name, pet.about, hasAbout = true)
+                    AboutSection(
+                        name, pet.about, hasAbout = true,
+                        onOpenDialog = { aboutDialogActive = true })
                     Spacer(Modifier.height(52.dp))
 
                     activeDialog?.let { dialog ->
@@ -409,7 +422,7 @@ fun InfoCard(
 }
 
 @Composable
-fun EditAbout(modifier: Modifier) {
+fun EditAbout(modifier: Modifier, onOpenDialog: () -> Unit) {
     Card(
         modifier.wrapContentSize(),
         colors = CardDefaults.cardColors(Color(0xFFFFE2D0)),
@@ -420,6 +433,10 @@ fun EditAbout(modifier: Modifier) {
             modifier = Modifier
                 .padding(horizontal = 14.dp, vertical = 8.dp)
                 .align(Alignment.CenterHorizontally)
+                .clickable(
+                    interactionSource = null, indication = null,
+                    onClick = onOpenDialog
+                )
         )
     }
 }
