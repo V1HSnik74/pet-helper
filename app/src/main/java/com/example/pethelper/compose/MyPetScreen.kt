@@ -25,6 +25,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +39,10 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.pethelper.R
 import com.example.pethelper.db.PetsViewModel
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun MyPetScreen(petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Unit) {
@@ -60,15 +65,28 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Uni
                     contentDescription = "paw icon"
                 )
             }
-            LazyColumn(Modifier
-                .fillMaxWidth()
-                .weight(1f)) {
+            LazyColumn(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
                 item { Spacer(Modifier.height(32.dp)) }
                 item {
                     pet?.let { pet ->
+                        val birthday = pet.birthday ?: ""
+                        val formatter =
+                            remember { DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH) }
+
+                        val age = if (birthday.isNotEmpty()) {
+                            val period = Period.between(
+                                LocalDate.parse(birthday, formatter),
+                                LocalDate.now()
+                            )
+                            period.years.toString()
+                        } else "N/A"
                         PetInfoCard(
                             pet.photo, pet.name, pet.sex, pet.breed,
-                            pet.age, pet.weight, pet.height,
+                            age, pet.weight, pet.height,
                             onCardClick = { onCardClick(pet.id) }
                         )
                     }
@@ -124,7 +142,7 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Uni
 @Composable
 fun PetInfoCard(
     photo: String?, name: String, gender: String,
-    breed: String, age: Int?, weight: Float?, height: Float?, onCardClick: () -> Unit
+    breed: String, age: String, weight: Float?, height: Float?, onCardClick: () -> Unit
 ) {
     Card(
         Modifier
@@ -212,7 +230,7 @@ fun PetInfoCard(
 }
 
 @Composable
-fun AgeCard(age: Int?) {
+fun AgeCard(age: String) {
     Card(
         Modifier
             .wrapContentSize()
@@ -222,7 +240,7 @@ fun AgeCard(age: Int?) {
     )
     {
         TextMaker(
-            if (age == null) "N/A" else "$age year(s) old",
+            if (age == "N/A") "N/A" else "$age year(s) old",
             14.sp, Color(0xFF381B0A), FontWeight.SemiBold,
             Modifier
                 .align(Alignment.CenterHorizontally)
@@ -271,9 +289,11 @@ fun AboutSection(
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(Modifier
-                .fillMaxHeight()
-                .weight(1f, fill = false)) {
+            Column(
+                Modifier
+                    .fillMaxHeight()
+                    .weight(1f, fill = false)
+            ) {
                 TextMaker("About $name", 16.sp)
                 Spacer(Modifier.height(8.dp))
                 TextMaker(
@@ -304,9 +324,11 @@ fun Upcoming() {
         colors = CardDefaults.cardColors(cardColor),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Column(Modifier
-            .fillMaxHeight()
-            .padding(16.dp)) {
+        Column(
+            Modifier
+                .fillMaxHeight()
+                .padding(16.dp)
+        ) {
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween

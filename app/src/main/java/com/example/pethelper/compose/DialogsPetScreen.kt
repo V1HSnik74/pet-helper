@@ -55,14 +55,16 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-fun UpdateGenderDialog(onDismiss: () -> Unit,
-                       onUpdateGender: (gender: String) -> Unit,
-                       currGender: String){
-    var gender by remember(currGender) {mutableStateOf(currGender)}
+fun UpdateGenderDialog(
+    onDismiss: () -> Unit,
+    onUpdateGender: (gender: String) -> Unit,
+    currGender: String
+) {
+    var gender by remember(currGender) { mutableStateOf(currGender) }
     Dialog(
         onDismiss,
         DialogProperties(usePlatformDefaultWidth = false)
-    ){
+    ) {
         Card(
             Modifier
                 .wrapContentHeight()
@@ -70,35 +72,44 @@ fun UpdateGenderDialog(onDismiss: () -> Unit,
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(backgroundColor)
         ) {
-            Box(Modifier.fillMaxWidth()){
+            Box(Modifier.fillMaxWidth()) {
                 Column(
                     Modifier
                         .fillMaxWidth()
                         .padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(alignment = Alignment.TopCenter,
+                    Image(
+                        alignment = Alignment.TopCenter,
                         painter = painterResource(R.drawable.gender_icon),
-                        contentDescription = "gender icon")
+                        contentDescription = "gender icon"
+                    )
                     Spacer(Modifier.height(16.dp))
                     TextMaker("Edit Gender", 20.sp)
                     Spacer(Modifier.height(24.dp))
                     Row(Modifier.fillMaxWidth()) {
-                        GenderCard("Male", gender, {gender = "Male"},
-                            Modifier.weight(1f))
+                        GenderCard(
+                            "Male", gender, { gender = "Male" },
+                            Modifier.weight(1f)
+                        )
                         Spacer(Modifier.width(20.dp))
-                        GenderCard("Female", gender, {gender = "Female"},
-                            Modifier.weight(1f))
+                        GenderCard(
+                            "Female", gender, { gender = "Female" },
+                            Modifier.weight(1f)
+                        )
                     }
                     Spacer(Modifier.height(24.dp))
-                    ButtonMaker("Save Gender",
+                    ButtonMaker(
+                        "Save Gender",
                         onClick = { onUpdateGender(gender) }
                     )
                 }
-                IconButton(onDismiss,
-                     modifier = Modifier
-                         .align(Alignment.TopEnd)
-                         .padding(end = 8.dp, top = 8.dp)) {
+                IconButton(
+                    onDismiss,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = 8.dp, top = 8.dp)
+                ) {
                     Image(
                         painterResource(R.drawable.cancel),
                         contentDescription = "cancel"
@@ -112,14 +123,17 @@ fun UpdateGenderDialog(onDismiss: () -> Unit,
 }
 
 @Composable
-fun UpdateSmallDialog(onDismiss: () -> Unit, onUpdateInfo: (value: String) -> Unit, painter: Painter,
-                      label: String, placeholder: String,
-                      onValueChange: (String) -> Unit,
-                      value: String,
-                      errorMessage: String? = null,
-                      isMicrochip: Boolean = false) {
+fun UpdateSmallDialog(
+    onDismiss: () -> Unit, onUpdateInfo: (value: String) -> Unit, painter: Painter,
+    label: String, placeholder: String,
+    onValueChange: (String) -> Unit,
+    value: String,
+    errorMessage: String? = null,
+    isMicrochip: Boolean = false
+) {
     val digitsOnly = value.filter { it.isDigit() }
-    val isValid = if (isMicrochip) (digitsOnly.length == 15 || value.isEmpty()) else value.isNotBlank()
+    val isValid =
+        if (isMicrochip) (digitsOnly.length == 15 || value.isEmpty()) else value.isNotBlank()
     val showError = (errorMessage != null) && value.isNotBlank() && !isValid
     Dialog(
         onDismiss,
@@ -153,8 +167,9 @@ fun UpdateSmallDialog(onDismiss: () -> Unit, onUpdateInfo: (value: String) -> Un
                     Spacer(Modifier.height(24.dp))
                     TextMaker(label, 14.sp, modifier = Modifier.align(Alignment.Start))
                     Spacer(Modifier.height(10.dp))
-                    OutlinedTextField(value = value, onValueChange = {
-                        if (isMicrochip) onValueChange(it.filter {it.isDigit()}.take(15))
+                    OutlinedTextField(
+                        value = value, onValueChange = {
+                        if (isMicrochip) onValueChange(it.filter { it.isDigit() }.take(15))
                         else onValueChange(it)
                     },
                         placeholder = {
@@ -171,23 +186,26 @@ fun UpdateSmallDialog(onDismiss: () -> Unit, onUpdateInfo: (value: String) -> Un
                             cursorColor = textFieldCursorColor
                         ),
                         isError = showError,
-                        supportingText =  if (showError){
-                            {TextMaker(errorMessage, 12.sp, Color.Red)}
-                            } else null
+                        supportingText = if (showError) {
+                            { TextMaker(errorMessage, 12.sp, Color.Red) }
+                        } else null
 
                     )
                     Spacer(Modifier.height(24.dp))
                     ButtonMaker("Save $label", {
-                        val finalValue = if (isMicrochip){
+                        val finalValue = if (isMicrochip) {
                             if (value.isEmpty()) "No microchip ID"
                             else (value.chunked(3).joinToString(" "))
                         } else value
-                        onUpdateInfo(finalValue)}, enabled = isValid)
+                        onUpdateInfo(finalValue)
+                    }, enabled = isValid)
                     Spacer(Modifier.height(28.dp))
                 }
-                IconButton(onDismiss, modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 8.dp, top = 8.dp)) {
+                IconButton(
+                    onDismiss, modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = 8.dp, top = 8.dp)
+                ) {
                     Image(
                         painterResource(R.drawable.cancel),
                         contentDescription = "cancel"
@@ -199,20 +217,24 @@ fun UpdateSmallDialog(onDismiss: () -> Unit, onUpdateInfo: (value: String) -> Un
 }
 
 @Composable
-fun UpdateColorDialog(color: String, onDismiss: () -> Unit, onUpdateColor: (String) -> Unit){
-    var selectedColor by remember {mutableStateOf(color)}
-    Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)){
-        Card(colors = CardDefaults.cardColors(backgroundColor),
+fun UpdateColorDialog(color: String, onDismiss: () -> Unit, onUpdateColor: (String) -> Unit) {
+    var selectedColor by remember { mutableStateOf(color) }
+    Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)) {
+        Card(
+            colors = CardDefaults.cardColors(backgroundColor),
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .wrapContentSize()
-                .fillMaxWidth(0.9f))
+                .fillMaxWidth(0.9f)
+        )
         {
-            Box(Modifier.fillMaxWidth()){
-                Column(Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 28.dp, horizontal = 42.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally){
+            Box(Modifier.fillMaxWidth()) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 28.dp, horizontal = 42.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Image(
                         alignment = Alignment.TopCenter,
                         painter = painterResource(R.drawable.color_icon),
@@ -221,9 +243,14 @@ fun UpdateColorDialog(color: String, onDismiss: () -> Unit, onUpdateColor: (Stri
                     Spacer(Modifier.height(16.dp))
                     TextMaker("Edit Color", 20.sp)
                     Spacer(Modifier.height(24.dp))
-                    OutlinedTextField(value = selectedColor, { selectedColor = it },
-                        placeholder = {TextMaker("e.g. Black", 14.sp,
-                            fontWeight = FontWeight.Normal)},
+                    OutlinedTextField(
+                        value = selectedColor, { selectedColor = it },
+                        placeholder = {
+                            TextMaker(
+                                "e.g. Black", 14.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
                         singleLine = true,
@@ -232,44 +259,64 @@ fun UpdateColorDialog(color: String, onDismiss: () -> Unit, onUpdateColor: (Stri
                             unfocusedContainerColor = textFieldContainerColor,
                             focusedBorderColor = textFieldCursorColor,
                             unfocusedBorderColor = textFieldCursorColor,
-                            cursorColor = textFieldCursorColor))
+                            cursorColor = textFieldCursorColor
+                        )
+                    )
                     Spacer(Modifier.height(20.dp))
                     TextMaker("Popular colors", 12.sp, Color(0xFF393939), FontWeight.SemiBold)
                     Spacer(Modifier.height(16.dp))
-                    Row(Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween){
-                        ColorCircle(Colors.CREME.values,
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        ColorCircle(
+                            Colors.CREME.values,
                             selectedColor.equals(Colors.CREME.values, ignoreCase = true),
-                            { selectedColor = Colors.CREME.values},
-                            Colors.CREME.color)
-                        ColorCircle(Colors.GOLDEN.values,
+                            { selectedColor = Colors.CREME.values },
+                            Colors.CREME.color
+                        )
+                        ColorCircle(
+                            Colors.GOLDEN.values,
                             selectedColor.equals(Colors.GOLDEN.values, ignoreCase = true),
-                            {selectedColor = Colors.GOLDEN.values},
-                            Colors.GOLDEN.color)
-                        ColorCircle(Colors.BROWN.values,
+                            { selectedColor = Colors.GOLDEN.values },
+                            Colors.GOLDEN.color
+                        )
+                        ColorCircle(
+                            Colors.BROWN.values,
                             selectedColor.equals(Colors.BROWN.values, ignoreCase = true),
-                            {selectedColor = Colors.BROWN.values},
-                            Colors.BROWN.color)
-                        ColorCircle(Colors.BLACK.values,
+                            { selectedColor = Colors.BROWN.values },
+                            Colors.BROWN.color
+                        )
+                        ColorCircle(
+                            Colors.BLACK.values,
                             selectedColor.equals(Colors.BLACK.values, ignoreCase = true),
-                            {selectedColor = Colors.BLACK.values},
-                            Colors.BLACK.color)
-                        ColorCircle(Colors.WHITE.values,
+                            { selectedColor = Colors.BLACK.values },
+                            Colors.BLACK.color
+                        )
+                        ColorCircle(
+                            Colors.WHITE.values,
                             selectedColor.equals(Colors.WHITE.values, ignoreCase = true),
-                            {selectedColor = Colors.WHITE.values},
-                            Colors.WHITE.color)
-                        ColorCircle(Colors.GRAY.values,
+                            { selectedColor = Colors.WHITE.values },
+                            Colors.WHITE.color
+                        )
+                        ColorCircle(
+                            Colors.GRAY.values,
                             selectedColor.equals(Colors.GRAY.values, ignoreCase = true),
-                            {selectedColor = Colors.GRAY.values},
-                            Colors.GRAY.color)
+                            { selectedColor = Colors.GRAY.values },
+                            Colors.GRAY.color
+                        )
                     }
                     Spacer(Modifier.height(32.dp))
-                    ButtonMaker("Save Color", onClick = {onUpdateColor(selectedColor)},
-                        enabled = selectedColor.isNotEmpty())
+                    ButtonMaker(
+                        "Save Color", onClick = { onUpdateColor(selectedColor) },
+                        enabled = selectedColor.isNotEmpty()
+                    )
                 }
-                IconButton(onDismiss, modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 8.dp, top = 8.dp)) {
+                IconButton(
+                    onDismiss, modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = 8.dp, top = 8.dp)
+                ) {
                     Image(
                         painterResource(R.drawable.cancel),
                         contentDescription = "cancel"
@@ -281,7 +328,12 @@ fun UpdateColorDialog(color: String, onDismiss: () -> Unit, onUpdateColor: (Stri
 }
 
 @Composable
-fun UpdateNeutered(onDismiss: () -> Unit, onUpdateNeutered: (String) -> Unit, gender: String, isNeutered: String){
+fun UpdateNeutered(
+    onDismiss: () -> Unit,
+    onUpdateNeutered: (String) -> Unit,
+    gender: String,
+    isNeutered: String
+) {
     var selectedIsNeutered by remember { mutableStateOf(isNeutered) }
     Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)) {
         Card(
@@ -309,24 +361,31 @@ fun UpdateNeutered(onDismiss: () -> Unit, onUpdateNeutered: (String) -> Unit, ge
                     NeuteredCard(
                         selectedIsNeutered == "Yes",
                         onClick = { selectedIsNeutered = "Yes" },
-                        "Yes")
+                        "Yes"
+                    )
                     Spacer(Modifier.height(8.dp))
                     NeuteredCard(
                         selectedIsNeutered == "No",
                         onClick = { selectedIsNeutered = "No" },
-                        "No")
+                        "No"
+                    )
                     Spacer(Modifier.height(8.dp))
                     NeuteredCard(
                         selectedIsNeutered == "Not sure",
                         onClick = { selectedIsNeutered = "Not sure" },
-                        "Not sure")
+                        "Not sure"
+                    )
                     Spacer(Modifier.height(24.dp))
-                    ButtonMaker("Save", {onUpdateNeutered(selectedIsNeutered)},
-                        enabled = selectedIsNeutered.isNotEmpty())
+                    ButtonMaker(
+                        "Save", { onUpdateNeutered(selectedIsNeutered) },
+                        enabled = selectedIsNeutered.isNotEmpty()
+                    )
                 }
-                IconButton(onDismiss, modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 8.dp, top = 8.dp)) {
+                IconButton(
+                    onDismiss, modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = 8.dp, top = 8.dp)
+                ) {
                     Image(
                         painterResource(R.drawable.cancel),
                         contentDescription = "cancel"
@@ -338,10 +397,12 @@ fun UpdateNeutered(onDismiss: () -> Unit, onUpdateNeutered: (String) -> Unit, ge
 }
 
 @Composable
-fun UpdateWeightHeightDialog(onDismiss: () -> Unit, onUpdateValue: (Float) -> Unit, isWeight: Boolean, valueInt: Int,
-                             valueFloat: Int, count: Int, firstValue: Int, lastValue: Int){
-    var selectedInteger by remember {mutableIntStateOf(valueInt)}
-    var selectedFraction by remember {mutableIntStateOf(valueFloat)}
+fun UpdateWeightHeightDialog(
+    onDismiss: () -> Unit, onUpdateValue: (Float) -> Unit, isWeight: Boolean, valueInt: Int,
+    valueFloat: Int, count: Int, firstValue: Int, lastValue: Int
+) {
+    var selectedInteger by remember { mutableIntStateOf(valueInt) }
+    var selectedFraction by remember { mutableIntStateOf(valueFloat) }
     val totalValue = selectedInteger + (selectedFraction / 10f)
     Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)) {
         Card(
@@ -367,50 +428,84 @@ fun UpdateWeightHeightDialog(onDismiss: () -> Unit, onUpdateValue: (Float) -> Un
                     Spacer(Modifier.height(16.dp))
                     TextMaker(if (isWeight) "Edit Weight" else "Edit Height", 20.sp)
                     Spacer(Modifier.height(20.dp))
-                    Row(Modifier.fillMaxWidth(),
+                    Row(
+                        Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center){
-                        TextMaker("$selectedInteger.$selectedFraction",
-                            32.sp, buttonColor, FontWeight.SemiBold)
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        TextMaker(
+                            "$selectedInteger.$selectedFraction",
+                            32.sp, buttonColor, FontWeight.SemiBold
+                        )
                         Spacer(Modifier.width(4.dp))
-                        TextMaker(if (isWeight) "kg" else "cm", 18.sp, fontWeight = FontWeight.SemiBold)
+                        TextMaker(
+                            if (isWeight) "kg" else "cm",
+                            18.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                     Spacer(Modifier.height(20.dp))
-                    Row(Modifier.fillMaxWidth(),
+                    Row(
+                        Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically){
-                        Column(Modifier.wrapContentWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(
+                            Modifier.wrapContentWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center) {
-                            TextMaker(if (isWeight) "kg" else "cm",
-                                14.sp, fontWeight = FontWeight.SemiBold)
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            TextMaker(
+                                if (isWeight) "kg" else "cm",
+                                14.sp, fontWeight = FontWeight.SemiBold
+                            )
                             Spacer(Modifier.height(10.dp))
-                            WheelPickerCard(count, selectedInteger, {selectedInteger = it}, firstValue)
+                            WheelPickerCard(
+                                count,
+                                selectedInteger,
+                                { selectedInteger = it },
+                                firstValue
+                            )
                             Spacer(Modifier.height(10.dp))
-                            TextMaker("$firstValue-$lastValue", 14.sp, smallTextColor,
-                                FontWeight.SemiBold)
+                            TextMaker(
+                                "$firstValue-$lastValue", 14.sp, smallTextColor,
+                                FontWeight.SemiBold
+                            )
                         }
-                        Image(painterResource(R.drawable.dot), contentDescription = "number splitter")
-                        Column(Modifier.wrapContentWidth(),
+                        Image(
+                            painterResource(R.drawable.dot),
+                            contentDescription = "number splitter"
+                        )
+                        Column(
+                            Modifier.wrapContentWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center) {
-                            TextMaker(if (isWeight) ".kg" else ".cm",
-                                14.sp, fontWeight = FontWeight.SemiBold)
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            TextMaker(
+                                if (isWeight) ".kg" else ".cm",
+                                14.sp, fontWeight = FontWeight.SemiBold
+                            )
                             Spacer(Modifier.height(10.dp))
-                            WheelPickerCard(10, selectedFraction, {selectedFraction = it}, 0)
+                            WheelPickerCard(10, selectedFraction, { selectedFraction = it }, 0)
                             Spacer(Modifier.height(10.dp))
-                            TextMaker("0-9", 14.sp, smallTextColor,
-                                FontWeight.SemiBold)
+                            TextMaker(
+                                "0-9", 14.sp, smallTextColor,
+                                FontWeight.SemiBold
+                            )
                         }
                     }
                     Spacer(Modifier.height(20.dp))
-                    ButtonMaker(if (isWeight) "Save Weight" else "Save Height",
-                        onClick = {onUpdateValue(totalValue)},
-                        enabled = totalValue != 0f)
+                    ButtonMaker(
+                        if (isWeight) "Save Weight" else "Save Height",
+                        onClick = { onUpdateValue(totalValue) },
+                        enabled = totalValue != 0f
+                    )
                 }
-                IconButton(onDismiss, modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 8.dp, top = 8.dp)) {
+                IconButton(
+                    onDismiss, modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = 8.dp, top = 8.dp)
+                ) {
                     Image(
                         painterResource(R.drawable.cancel),
                         contentDescription = "cancel"
@@ -490,35 +585,53 @@ fun UpdateBirthdayDialog(
 }
 
 @Composable
-private fun WheelPickerCard(count: Int, initIndex: Int, onValueChange: (Int) -> Unit, firstValue: Int){
+private fun WheelPickerCard(
+    count: Int,
+    initIndex: Int,
+    onValueChange: (Int) -> Unit,
+    firstValue: Int
+) {
     val state = rememberFWheelPickerState(initIndex - firstValue)
     LaunchedEffect(state.currentIndex) {
         onValueChange(state.currentIndex + firstValue)
     }
-    Card(shape = RoundedCornerShape(15.dp),
+    Card(
+        shape = RoundedCornerShape(15.dp),
         border = BorderStroke(
             width = 1.dp,
-            color = Color(0xFFFFD8C1)),
+            color = Color(0xFFFFD8C1)
+        ),
         colors = CardDefaults.cardColors(backgroundColor),
-        modifier = Modifier.width(100.dp))
+        modifier = Modifier.width(100.dp)
+    )
     {
-        Box(Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center){
-            Box(Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .background(selectedColor, RoundedCornerShape(10.dp)))
-            FVerticalWheelPicker(count = count,
+        Box(
+            Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .background(selectedColor, RoundedCornerShape(10.dp))
+            )
+            FVerticalWheelPicker(
+                count = count,
                 unfocusedCount = 1,
                 itemHeight = 40.dp,
-                state = state) { index ->
+                state = state
+            ) { index ->
                 val displayValue = index + firstValue
                 val isSelected = state.currentIndexSnapshot == index
-                Box(Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center){
-                    TextMaker(displayValue.toString(), 24.sp,
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TextMaker(
+                        displayValue.toString(), 24.sp,
                         if (isSelected) buttonColor else Color.Black,
-                        FontWeight.Medium)
+                        FontWeight.Medium
+                    )
                 }
             }
         }
@@ -527,25 +640,30 @@ private fun WheelPickerCard(count: Int, initIndex: Int, onValueChange: (Int) -> 
 }
 
 @Composable
-private fun NeuteredCard(isSelected: Boolean, onClick: () -> Unit, text: String){
-    Card(Modifier
-        .fillMaxWidth()
-        .clickable(
-            interactionSource = null,
-            indication = null
-        ) { onClick() },
+private fun NeuteredCard(isSelected: Boolean, onClick: () -> Unit, text: String) {
+    Card(
+        Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = null,
+                indication = null
+            ) { onClick() },
         colors = CardDefaults.cardColors(if (isSelected) selectedColor else cardColor),
         shape = RoundedCornerShape(10.dp),
         border = BorderStroke(
             color = if (isSelected) buttonColor else Color(0xFFAF8268),
             width = 1.dp
-        )){
-        Row(Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-            Image(if (isSelected) painterResource(R.drawable.neutered_selected)
-            else painterResource(R.drawable.neutered_not_selected),
+        )
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                if (isSelected) painterResource(R.drawable.neutered_selected)
+                else painterResource(R.drawable.neutered_not_selected),
                 contentDescription = if (isSelected) "Selected" else "Not selected"
             )
             Spacer(Modifier.width(10.dp))
@@ -555,61 +673,76 @@ private fun NeuteredCard(isSelected: Boolean, onClick: () -> Unit, text: String)
 }
 
 @Composable
-private fun GenderCard(cardGender: String, selectedGender: String, onClick: () -> Unit,
-               modifier: Modifier){
+private fun GenderCard(
+    cardGender: String, selectedGender: String, onClick: () -> Unit,
+    modifier: Modifier
+) {
     val isSelected = cardGender == selectedGender
     val interactionSource = remember { MutableInteractionSource() }
-    Card(modifier
-        .height(110.dp)
-        .clickable(
-            interactionSource = interactionSource,
-            indication = null
-        ) { onClick() },
+    Card(
+        modifier
+            .height(110.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { onClick() },
         colors = CardDefaults.cardColors(
-         if (isSelected) selectedColor else cardColor),
-        border = BorderStroke(width = 1.dp,
-            color = if (isSelected) buttonColor else Color.Transparent),
+            if (isSelected) selectedColor else cardColor
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isSelected) buttonColor else Color.Transparent
+        ),
         elevation = CardDefaults.cardElevation(2.dp),
         shape = RoundedCornerShape(10.dp)
-    ){
-        Column(Modifier.fillMaxSize(),
+    ) {
+        Column(
+            Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally)
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
         {
-            Icon(painterResource(if (cardGender == "Male")
-                R.drawable.male_not_selected else
-                R.drawable.female_dialog),
+            Icon(
+                painterResource(
+                    if (cardGender == "Male")
+                        R.drawable.male_not_selected else
+                        R.drawable.female_dialog
+                ),
                 tint = if (isSelected) buttonColor else brownColor,
-                contentDescription = "$cardGender icon")
+                contentDescription = "$cardGender icon"
+            )
 
             Spacer(Modifier.height(8.dp))
-            TextMaker(if (cardGender == "Male") "Male" else "Female",
-            14.sp)
+            TextMaker(
+                if (cardGender == "Male") "Male" else "Female",
+                14.sp
+            )
         }
     }
 }
 
 @Composable
-private fun ColorCircle(value: String, isSelected: Boolean, onClick: () -> Unit, color: Color){
-    Box(Modifier
-        .size(40.dp)
-        .clip(CircleShape)
-        .background(color)
-        .border(
-            color = if (isSelected) buttonColor else {
-                if (value == "White") Color.Black else Color.Transparent
-            },
-            width = if (isSelected) 2.dp else 0.5.dp,
-            shape = CircleShape
-        )
-        .clickable(onClick = onClick)
+private fun ColorCircle(value: String, isSelected: Boolean, onClick: () -> Unit, color: Color) {
+    Box(
+        Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(color)
+            .border(
+                color = if (isSelected) buttonColor else {
+                    if (value == "White") Color.Black else Color.Transparent
+                },
+                width = if (isSelected) 2.dp else 0.5.dp,
+                shape = CircleShape
+            )
+            .clickable(onClick = onClick)
     )
 }
 
-private enum class Colors(val color: Color, val values: String){
+private enum class Colors(val color: Color, val values: String) {
     BLACK(Color.Black, "Black"),
-    CREME(Color(0xFFFFEAC0),"Creme"),
-    GOLDEN(Color(0xFFEFB644),"Golden"),
+    CREME(Color(0xFFFFEAC0), "Creme"),
+    GOLDEN(Color(0xFFEFB644), "Golden"),
     BROWN(Color(0xFFA14E00), "Brown"),
     WHITE(Color.White, "White"),
     GRAY(Color.Gray, "Gray")

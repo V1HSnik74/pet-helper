@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -59,21 +60,23 @@ fun BirthdayCalendar(
 ) {
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(adjacentMonths) }
-    val endMonth = remember { currentMonth.plusMonths(adjacentMonths) }
+    val endMonth = remember { currentMonth }
     val daysOfWeek = remember { daysOfWeek() }
     var selectedDay by remember(currentDay) { mutableStateOf(currentDay) }
     var isMenuOpened by remember { mutableStateOf(false) }
     Card(
-        Modifier.fillMaxWidth(),
+        Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
         colors = CardDefaults.cardColors(cardColor),
         shape = RoundedCornerShape(10.dp),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .background(Color.White)
-                .padding(16.dp)
+                .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
         ) {
             val state = rememberCalendarState(
                 startMonth = startMonth,
@@ -100,7 +103,12 @@ fun BirthdayCalendar(
                 }
                 Box {
                     TextMaker(
-                        "${visibleMonth.month} ${visibleMonth.year}",
+                        "${
+                            visibleMonth.month.getDisplayName(
+                                TextStyle.FULL,
+                                Locale.ENGLISH
+                            )
+                        } ${visibleMonth.year}",
                         12.sp, textDecoration = TextDecoration.Underline,
                         modifier = Modifier.clickable(
                             interactionSource = null,
@@ -114,7 +122,7 @@ fun BirthdayCalendar(
                             .background(Color.White)
                     ) {
                         val minYear = startMonth.year
-                        val maxYear = endMonth.year
+                        val maxYear = visibleMonth.year
                         val years = (maxYear downTo minYear).toList()
                         years.forEach { year ->
                             DropdownMenuItem(
@@ -146,7 +154,7 @@ fun BirthdayCalendar(
                     )
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -160,6 +168,7 @@ fun BirthdayCalendar(
             }
             Spacer(Modifier.height(8.dp))
             HorizontalCalendar(
+                modifier = Modifier.wrapContentHeight(),
                 state = state,
                 dayContent = { day ->
                     Day(
@@ -178,6 +187,7 @@ fun BirthdayCalendar(
 
 @Composable
 private fun Day(day: CalendarDay, isSelected: Boolean, onClick: (CalendarDay) -> Unit) {
+    val isFuture = day.date > LocalDate.now()
     Box(
         modifier = Modifier
             .aspectRatio(1f)
@@ -186,14 +196,15 @@ private fun Day(day: CalendarDay, isSelected: Boolean, onClick: (CalendarDay) ->
             .clip(CircleShape)
             .background(color = if (isSelected) buttonColor else Color.Transparent)
             .clickable(
-                enabled = day.position == DayPosition.MonthDate,
+                enabled = day.position == DayPosition.MonthDate && !isFuture,
                 onClick = { onClick(day) },
             ),
         contentAlignment = Alignment.Center,
     ) {
-        val textColor = when (day.position) {
-            DayPosition.MonthDate -> if (isSelected) Color.White else Color.Black
-            DayPosition.InDate, DayPosition.OutDate -> smallTextColor
+        val textColor = when {
+            isFuture -> smallTextColor
+            day.position == DayPosition.MonthDate -> if (isSelected) Color.White else Color.Black
+            else -> smallTextColor
         }
         TextMaker(day.date.dayOfMonth.toString(), 12.sp, textColor)
     }
