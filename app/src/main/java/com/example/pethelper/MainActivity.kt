@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.pethelper.db.NoteViewModel
 import com.example.pethelper.db.PetsViewModel
 
 class MainActivity : ComponentActivity() {
     private val petsViewModel: PetsViewModel by viewModels()
+    private val noteViewModel: NoteViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -22,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(petsViewModel)
+                    AppNavigation(petsViewModel, noteViewModel)
                 }
             }
         }

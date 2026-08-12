@@ -6,11 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [Pet::class],
+    entities = [Pet::class, Note::class],
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun petsDao(): PetsDao
+    abstract fun notesDao(): NoteDao
 
     companion object {
         @Volatile

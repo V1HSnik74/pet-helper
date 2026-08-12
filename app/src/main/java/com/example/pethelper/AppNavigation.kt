@@ -7,8 +7,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.pethelper.compose.MyPetScreen
+import com.example.pethelper.compose.NotesScreen
 import com.example.pethelper.compose.PetProfileScreen
 import com.example.pethelper.compose.PetSelectionScreen
+import com.example.pethelper.db.NoteViewModel
 import com.example.pethelper.db.PetsViewModel
 
 sealed class Screen(val route: String){
@@ -19,10 +21,13 @@ sealed class Screen(val route: String){
     object Profile: Screen("PetProfileScreen/{petId}"){
         fun createRoute(petId: Int) = "PetProfileScreen/$petId"
     }
+    object Notes: Screen("NotesScreen/{petId}"){
+        fun createRoute(petId: Int) = "NotesScreen/$petId"
+    }
 }
 
 @Composable
-fun AppNavigation(viewModel: PetsViewModel){
+fun AppNavigation(viewModel: PetsViewModel, noteViewModel: NoteViewModel){
     val navController = rememberNavController()
     NavHost(
         navController = navController,
@@ -40,7 +45,7 @@ fun AppNavigation(viewModel: PetsViewModel){
             val petId = backStackEntry.arguments?.getInt("petId") ?: -1
             MyPetScreen(viewModel, petId, onCardClick = {
                 id -> navController.navigate(Screen.Profile.createRoute(id))
-            })
+            }, onButtonClick = {id -> navController.navigate(Screen.Notes.createRoute(id))})
         }
 
         composable(Screen.Profile.route,
@@ -49,5 +54,13 @@ fun AppNavigation(viewModel: PetsViewModel){
             val petId = backStackEntry.arguments?.getInt("petId") ?: -1
             PetProfileScreen(viewModel, petId)
         }
+
+        composable(Screen.Notes.route,
+            arguments = listOf(navArgument("petId") {type = NavType.IntType})){
+            backStackEntry ->
+            val petId = backStackEntry.arguments?.getInt("petId") ?: -1
+            NotesScreen(petId, noteViewModel)
+        }
+
     }
 }
