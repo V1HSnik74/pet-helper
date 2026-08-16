@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import com.example.pethelper.R
 import com.example.pethelper.db.NoteViewModel
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -121,12 +120,16 @@ fun NotesScreen(petId: Int, noteViewModel: NoteViewModel) {
                 contentDescription = "back"
             )
             TextMaker("Notes", 18.sp, fontWeight = FontWeight.SemiBold)
-            IconButton({ isDialogActive = true }) {
-                Icon(
-                    painter = painterResource(R.drawable.plus),
-                    contentDescription = "add note"
-                )
-            }
+
+            Icon(
+                painter = painterResource(R.drawable.plus),
+                contentDescription = "add note",
+                modifier = Modifier.clickable(
+                    interactionSource = null,
+                    indication = null
+                ) { isDialogActive = true }
+            )
+
         }
         Spacer(Modifier.height(24.dp))
         Column(
