@@ -16,6 +16,6 @@ interface AllergyDao {
     @Upsert
     suspend fun addAllergy(allergy: Allergy)
 
-    @Query("DELETE FROM food_items WHERE id=:id")
+    @Query("DELETE FROM allergies WHERE id=:id")
     suspend fun deleteAllergy(id: Int)
 }

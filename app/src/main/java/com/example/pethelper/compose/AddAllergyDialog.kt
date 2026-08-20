@@ -17,8 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,7 +33,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.pethelper.R
 
-private enum class PopularAllergies(val allergy: String){
+private enum class PopularAllergies(val allergy: String) {
     CHICKEN("Chicken"),
     BEEF("Beef"),
     DAIRY("Dairy"),
@@ -47,7 +45,10 @@ private enum class PopularAllergies(val allergy: String){
 }
 
 @Composable
-fun AddAllergyDialog(onDismiss: () -> Unit, onUpdateAllergy: (String) -> Unit){
+fun AddAllergyDialog(
+    onDismiss: () -> Unit, onUpdateAllergy: (name: String, petId: Int) -> Unit,
+    petId: Int
+) {
     var allergy by remember { mutableStateOf("") }
     Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)) {
         Card(
@@ -77,36 +78,35 @@ fun AddAllergyDialog(onDismiss: () -> Unit, onUpdateAllergy: (String) -> Unit){
                     Spacer(Modifier.height(16.dp))
                     TextMaker("Allergy", 12.sp, modifier = Modifier.align(Alignment.Start))
                     Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = allergy, onValueChange = { allergy = it },
-                        singleLine = true,
-                        placeholder = { TextMaker("Write your note here", 10.sp) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = textFieldContainerColor,
-                            unfocusedContainerColor = textFieldContainerColor,
-                            focusedBorderColor = textFieldCursorColor,
-                            unfocusedBorderColor = textFieldCursorColor,
-                            cursorColor = textFieldCursorColor
-                        ),
-                        modifier = Modifier
+                    BasicTextFieldMaker(
+                        allergy,
+                        { allergy = it },
+                        "e.g. Fish", Modifier
+                            .height(40.dp)
                             .fillMaxWidth()
-                            .height(30.dp),
-                        shape = RoundedCornerShape(10.dp)
                     )
                     Spacer(Modifier.height(16.dp))
-                    TextMaker("Popular Allergies", 12.sp)
+                    TextMaker(
+                        "Popular Allergies",
+                        12.sp,
+                        modifier = Modifier.align(Alignment.Start)
+                    )
                     Spacer(Modifier.height(8.dp))
-                    FlowRow(Modifier.fillMaxWidth(),
+                    FlowRow(
+                        Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         PopularAllergies.entries.forEach {
-                            PopularAllergyButton(it.allergy == allergy, it.allergy) { allergy = it.allergy }
+                            PopularAllergyButton(it.allergy == allergy, it.allergy) {
+                                allergy = it.allergy
+                            }
                         }
                     }
                     Spacer(Modifier.height(16.dp))
                     ButtonMaker(
                         "Save Allergy/Sensitive",
-                        { onUpdateAllergy(allergy) },
+                        { onUpdateAllergy(allergy, petId) },
                         enabled = allergy.isNotEmpty()
                     )
                 }
@@ -126,18 +126,21 @@ fun AddAllergyDialog(onDismiss: () -> Unit, onUpdateAllergy: (String) -> Unit){
 }
 
 @Composable
-fun PopularAllergyButton(isSelected: Boolean, text: String, onClick: () -> Unit){
-    Card(Modifier.wrapContentSize().clickable(interactionSource = null, indication = null){onClick()},
+fun PopularAllergyButton(isSelected: Boolean, text: String, onClick: () -> Unit) {
+    Card(
+        Modifier
+            .wrapContentSize()
+            .clickable(interactionSource = null, indication = null) { onClick() },
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(selectedColor),
         border = BorderStroke(1.dp, if (isSelected) buttonColor else Color.Transparent)
-    ){
+    ) {
         TextMaker(
             text,
             10.sp,
             Color(0xFF2B2B2B),
             FontWeight.SemiBold,
-            Modifier.padding(10.dp, 8.dp)
+            Modifier.padding(10.dp, 2.dp)
         )
     }
 }

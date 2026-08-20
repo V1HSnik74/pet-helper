@@ -17,8 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,15 +36,16 @@ import com.example.pethelper.R
 private enum class Categories(val category: String) {
     FEEDING("Feeding"),
     ALLERGY("Allergy"),
-    SUPPLEMENTS("Supplements"),
     TREATS("Treats"),
-    Other("Other")
+    OTHER("Other"),
+    SUPPLEMENTS("Supplements"),
 }
 
 @Composable
 fun AddNoteNutritionDialog(
     onDismiss: () -> Unit,
-    onUpdateNote: (note: String, category: String) -> Unit
+    onUpdateNote: (note: String, category: String, petId: Int) -> Unit,
+    petId: Int
 ) {
     var note by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("") }
@@ -78,28 +77,23 @@ fun AddNoteNutritionDialog(
                     Spacer(Modifier.height(16.dp))
                     TextMaker("Note", 12.sp, modifier = Modifier.align(Alignment.Start))
                     Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = note, onValueChange = { note = it },
-                        singleLine = true,
-                        placeholder = { TextMaker("Write your note here", 10.sp) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = textFieldContainerColor,
-                            unfocusedContainerColor = textFieldContainerColor,
-                            focusedBorderColor = textFieldCursorColor,
-                            unfocusedBorderColor = textFieldCursorColor,
-                            cursorColor = textFieldCursorColor
-                        ),
-                        modifier = Modifier
+                    BasicTextFieldMaker(
+                        note,
+                        { note = it },
+                        "Write down your note here",
+                        Modifier
                             .fillMaxWidth()
-                            .height(30.dp),
-                        shape = RoundedCornerShape(10.dp)
+                            .height(100.dp),
+                        singleLine = false
                     )
                     Spacer(Modifier.height(16.dp))
-                    TextMaker("Category", 12.sp)
+                    TextMaker("Category", 12.sp, modifier = Modifier.align(Alignment.Start))
                     Spacer(Modifier.height(8.dp))
-                    FlowRow(Modifier.fillMaxWidth(),
+                    FlowRow(
+                        Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         Categories.entries.forEach {
                             CategoryButtonNutrition(
                                 selectedCategory == it.category,
@@ -110,7 +104,7 @@ fun AddNoteNutritionDialog(
                     Spacer(Modifier.height(16.dp))
                     ButtonMaker(
                         "Save Note",
-                        { onUpdateNote(note, selectedCategory) },
+                        { onUpdateNote(note, selectedCategory, petId) },
                         enabled = note.isNotEmpty() && selectedCategory.isNotEmpty()
                     )
                 }
@@ -141,10 +135,10 @@ fun CategoryButtonNutrition(isSelected: Boolean, text: String, onClick: () -> Un
     ) {
         TextMaker(
             text,
-            10.sp,
+            12.sp,
             Color(0xFF2B2B2B),
-            FontWeight.SemiBold,
-            Modifier.padding(10.dp, 8.dp)
+            FontWeight.Medium,
+            Modifier.padding(10.dp, 2.dp)
         )
     }
 }

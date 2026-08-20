@@ -45,7 +45,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun MyPetScreen(petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Unit, onButtonClick: (Int) -> Unit) {
+fun MyPetScreen(
+    petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Unit, onButtonClick: (Int) -> Unit,
+    onNutritionClick: (Int) -> Unit
+) {
     val pet by petsViewModel.getPetById(id).collectAsState(initial = null)
     Box(
         Modifier
@@ -108,9 +111,8 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Uni
                             painterResource(R.drawable.bone_icon),
                             "Nutrition",
                             14.sp,
-                            Modifier.weight(1f),
-                            {}
-                        )
+                            Modifier.weight(1f)
+                        ) { onNutritionClick(id) }
                         SectionButton(
                             painterResource(R.drawable.bell_icon),
                             "Reminders",
@@ -123,7 +125,7 @@ fun MyPetScreen(petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Uni
                             "Notes",
                             14.sp,
                             Modifier.weight(1f),
-                        ){onButtonClick(id)}
+                        ) { onButtonClick(id) }
                     }
                 }
                 item { Spacer(Modifier.height(20.dp)) }
@@ -253,9 +255,17 @@ fun AgeCard(age: String) {
 }
 
 @Composable
-fun SectionButton(painter: Painter, text: String, fontSize: TextUnit, modifier: Modifier, onClick: () -> Unit) {
+fun SectionButton(
+    painter: Painter,
+    text: String,
+    fontSize: TextUnit,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
     Card(
-        modifier.height(92.dp).clickable(interactionSource = null, indication = null){onClick()},
+        modifier
+            .height(92.dp)
+            .clickable(interactionSource = null, indication = null) { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)

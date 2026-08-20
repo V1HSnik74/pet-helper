@@ -12,8 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,10 +30,11 @@ import com.example.pethelper.R
 
 fun AddSupplementTreatDialog(
     onDismiss: () -> Unit,
-    onUpdateInfo: (String) -> Unit,
+    onUpdateInfo: (name: String, petId: Int) -> Unit,
     label: String,
     icon: Int,
-    placeholder: String
+    placeholder: String,
+    petId: Int
 ) {
     var value by remember { mutableStateOf("") }
     Dialog(onDismiss, DialogProperties(usePlatformDefaultWidth = false)) {
@@ -63,26 +62,15 @@ fun AddSupplementTreatDialog(
                     Spacer(Modifier.height(16.dp))
                     TextMaker(label, 12.sp, modifier = Modifier.align(Alignment.Start))
                     Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = value, onValueChange = { value = it },
-                        singleLine = true,
-                        placeholder = { TextMaker("e.g $placeholder", 10.sp) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = textFieldContainerColor,
-                            unfocusedContainerColor = textFieldContainerColor,
-                            focusedBorderColor = textFieldCursorColor,
-                            unfocusedBorderColor = textFieldCursorColor,
-                            cursorColor = textFieldCursorColor
-                        ),
-                        modifier = Modifier
+                    BasicTextFieldMaker(
+                        value, { value = it }, placeholder, Modifier
+                            .height(40.dp)
                             .fillMaxWidth()
-                            .height(30.dp),
-                        shape = RoundedCornerShape(10.dp)
                     )
                     Spacer(Modifier.height(16.dp))
                     ButtonMaker(
                         "Save $label",
-                        { onUpdateInfo(value) },
+                        { onUpdateInfo(value, petId) },
                         enabled = value.isNotEmpty()
                     )
                 }

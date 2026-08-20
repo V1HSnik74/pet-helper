@@ -20,13 +20,12 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,12 +34,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.pethelper.R
+import com.example.pethelper.ui.theme.InterFamily
 
 private val measures = listOf("g", "cup", "oz", "kg", "lb")
 
@@ -63,7 +67,8 @@ private enum class FoodItems(val foodItem: String, val icon: Int) {
 @Composable
 fun AddFoodDialog(
     onDismiss: () -> Unit,
-    onSaveFoodItem: (item: String, note: String, portionSize: String, icon: Int) -> Unit
+    onSaveFoodItem: (item: String, note: String, portionSize: String, icon: Int, unit: String, petId: Int) -> Unit,
+    petId: Int
 ) {
     var foodItem by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
@@ -99,21 +104,10 @@ fun AddFoodDialog(
                     Spacer(Modifier.height(16.dp))
                     TextMaker("Food Item", 12.sp, modifier = Modifier.align(Alignment.Start))
                     Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = foodItem, onValueChange = { foodItem = it },
-                        singleLine = true,
-                        placeholder = { TextMaker("e.g. vegetables", 10.sp) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = textFieldContainerColor,
-                            unfocusedContainerColor = textFieldContainerColor,
-                            focusedBorderColor = textFieldCursorColor,
-                            unfocusedBorderColor = textFieldCursorColor,
-                            cursorColor = textFieldCursorColor
-                        ),
-                        modifier = Modifier
+                    BasicTextFieldMaker(
+                        foodItem, { foodItem = it }, "e.g. Vegetables", Modifier
+                            .height(40.dp)
                             .fillMaxWidth()
-                            .height(30.dp),
-                        shape = RoundedCornerShape(10.dp)
                     )
                     Spacer(Modifier.height(16.dp))
                     Row(Modifier.fillMaxWidth(), Arrangement.Start) {
@@ -121,21 +115,10 @@ fun AddFoodDialog(
                         TextMaker("(optional)", 12.sp, smallTextColor)
                     }
                     Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = note, onValueChange = { note = it },
-                        singleLine = true,
-                        placeholder = { TextMaker("e.g. pumpkin, zucchini", 10.sp) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = textFieldContainerColor,
-                            unfocusedContainerColor = textFieldContainerColor,
-                            focusedBorderColor = textFieldCursorColor,
-                            unfocusedBorderColor = textFieldCursorColor,
-                            cursorColor = textFieldCursorColor
-                        ),
-                        modifier = Modifier
+                    BasicTextFieldMaker(
+                        note, { note = it }, "e.g. Zucchini, pumpkin", Modifier
+                            .height(40.dp)
                             .fillMaxWidth()
-                            .height(30.dp),
-                        shape = RoundedCornerShape(10.dp)
                     )
                     Spacer(Modifier.height(16.dp))
                     Row(
@@ -151,7 +134,7 @@ fun AddFoodDialog(
                         }, isMenuOpened, { isMenuOpened = false }, measure, { isMenuOpened = true })
                     }
                     Spacer(Modifier.height(16.dp))
-                    TextMaker("Choose an Icon", 12.sp)
+                    TextMaker("Choose an Icon", 12.sp, modifier = Modifier.align(Alignment.Start))
                     Spacer(Modifier.height(8.dp))
                     FlowRow(
                         Modifier.fillMaxWidth(),
@@ -182,7 +165,16 @@ fun AddFoodDialog(
                     Spacer(Modifier.height(16.dp))
                     ButtonMaker(
                         "Save Food Item",
-                        { onSaveFoodItem(foodItem, note, portionSize, selectedIcon!!) },
+                        {
+                            onSaveFoodItem(
+                                foodItem,
+                                note,
+                                portionSize,
+                                selectedIcon!!,
+                                measure,
+                                petId
+                            )
+                        },
                         enabled = foodItem.isNotEmpty() && portionSize.isNotEmpty() && selectedIcon != null
                     )
                 }
@@ -214,30 +206,42 @@ fun PortionSizeValue(
     Card(
         Modifier.wrapContentSize(),
         shape = RoundedCornerShape(10.dp),
-        border = BorderStroke(1.dp, Color(0xFFFFD8C1)),
+        border = BorderStroke(1.dp, textFieldCursorColor),
         colors = CardDefaults.cardColors(cardColor)
     ) {
         Row(
             Modifier
                 .wrapContentWidth()
-                .padding(8.dp, 4.dp)
+                .padding(8.dp, 4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(
-                value = value, {
-                    onValueChange(it.filter { char ->
-                        char.isDigit()
-                    })
-                },
+            BasicTextField(
+                value = value,
+                onValueChange = { onValueChange(it.filter { char -> char.isDigit() }) },
                 singleLine = true,
-                placeholder = { TextMaker("20", 10.sp) },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
-                    cursorColor = textFieldCursorColor
-                ),
-                modifier = Modifier.wrapContentSize()
+                modifier = Modifier
+                    .width(30.dp)
+                    .height(40.dp),
+                textStyle = TextStyle(
+                    fontSize = 12.sp, fontFamily = InterFamily, textAlign = TextAlign.Center),
+                cursorBrush = SolidColor(textFieldCursorColor),
+                decorationBox = {
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                cardColor
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (value.isEmpty()) {
+                            TextMaker(
+                                "20", 12.sp, smallTextColor,
+                                FontWeight.Normal
+                            )
+                        }
+                        it.invoke()
+                    }
+                }
             )
             Spacer(Modifier.width(4.dp))
             TextMaker(measure, 10.sp)
