@@ -95,7 +95,8 @@ fun AppNavigation(
             NutritionScreen(
                 petId, foodItemViewModel, supplementViewModel,
                 treatViewModel, noteNutritionViewModel, allergyViewModel,
-                onBackClick = {navController.popBackStack()}
+                onBackClick = {navController.popBackStack()},
+                viewModel
             )
         }
 

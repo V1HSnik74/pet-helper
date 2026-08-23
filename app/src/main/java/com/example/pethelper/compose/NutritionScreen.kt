@@ -8,21 +8,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,13 +42,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pethelper.R
+import com.example.pethelper.ai.RationRecommendation
 import com.example.pethelper.db.AllergyViewModel
 import com.example.pethelper.db.FoodItem
 import com.example.pethelper.db.FoodItemViewModel
 import com.example.pethelper.db.NoteNutrition
 import com.example.pethelper.db.NoteNutritionViewModel
+import com.example.pethelper.db.PetsViewModel
 import com.example.pethelper.db.SupplementViewModel
 import com.example.pethelper.db.TreatViewModel
+import kotlinx.coroutines.launch
+import com.example.pethelper.BuildConfig
 
 @Composable
 fun NutritionScreen(
@@ -62,7 +62,8 @@ fun NutritionScreen(
     treatViewModel: TreatViewModel,
     noteNutritionViewModel: NoteNutritionViewModel,
     allergyViewModel: AllergyViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    petViewModel: PetsViewModel
 ) {
     val allFoodItems by remember(petId) {
         foodItemViewModel.allFoodItemsByPet(petId)
@@ -80,6 +81,21 @@ fun NutritionScreen(
         noteNutritionViewModel.getAllNoteNutritionByPet(petId)
     }.collectAsState(emptyList())
     var activeDialog by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    var generatedRation by remember { mutableStateOf<List<FoodItem>?>(null) }
+    var isGenerating by remember { mutableStateOf(false) }
+    val rationRecommendation = remember(petId) {
+        RationRecommendation(
+            apiKey = BuildConfig.GEMINI_API_KEY,
+            petId
+        )
+    }
+    val currentPet by petViewModel.getPetById(petId).collectAsState(initial = null)
+    val breed = currentPet?.breed ?: "None"
+    val birthday = currentPet?.birthday ?: "None"
+    val neutered = currentPet?.neutered ?: "None"
+    val weight = currentPet?.weight.toString().ifEmpty { "None" }
+
     Column(
         Modifier
             .fillMaxSize()
@@ -175,8 +191,29 @@ fun NutritionScreen(
                             }
                         }
                     }
+                    Spacer(Modifier.height(8.dp))
+                    ButtonMaker(
+                        if (isGenerating) "Generating ration..." else "Generate Ration",
+                        {
+                            if (isGenerating) return@ButtonMaker
+                            isGenerating = true
+                            scope.launch {
+                                try {
+                                    rationRecommendation.getNutritionRecommendation(
+                                        breed,
+                                        weight, allAllergies, birthday, allSupplements, neutered
+                                    ).collect {
+                                        generatedRation = it
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                } finally {
+                                    isGenerating = false
+                                }
+                            }
+                        }
+                    )
                 }
-
             }
             Spacer(Modifier.height(20.dp))
             OtherNutritionCard(
@@ -252,6 +289,21 @@ fun NutritionScreen(
             },
             petId
         )
+    }
+    generatedRation?.let { ration ->
+        ShowGeneratedRationDialog({ generatedRation = null }, {
+            ration.forEach {
+                foodItemViewModel.addFoodItem(
+                    it.name,
+                    it.description,
+                    it.portionSize,
+                    it.unit,
+                    it.icon,
+                    petId
+                )
+            }
+            generatedRation = null
+        }, ration)
     }
 }
 
@@ -447,7 +499,11 @@ private fun NotesCard(allNotes: List<NoteNutrition>, onAddNote: () -> Unit) {
                     verticalAlignment = Alignment.Top
                 ) { currentPage ->
                     val pageItems = pages[currentPage]
-                    Column(Modifier.fillMaxWidth().height(225.dp)) {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(225.dp)
+                    ) {
                         pageItems.forEachIndexed { index, note ->
                             NoteItemCard(note, !(pageItems.size == 5 && index == 4))
                         }
