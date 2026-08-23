@@ -84,7 +84,8 @@ fun AddNoteNutritionDialog(
                         Modifier
                             .fillMaxWidth()
                             .height(100.dp),
-                        singleLine = false
+                        singleLine = false,
+                        contentAlignment = Alignment.TopStart
                     )
                     Spacer(Modifier.height(16.dp))
                     TextMaker("Category", 12.sp, modifier = Modifier.align(Alignment.Start))

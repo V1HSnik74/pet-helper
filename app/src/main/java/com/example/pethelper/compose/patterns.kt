@@ -72,7 +72,8 @@ fun BasicTextFieldMaker(
     modifier: Modifier,
     singleLine: Boolean = true,
     paddingHor: Dp = 16.dp,
-    paddingVert: Dp = 8.dp
+    paddingVert: Dp = 8.dp,
+    contentAlignment: Alignment = Alignment.CenterStart
 ) {
     BasicTextField(
         value = value, onValueChange = { onValueChange(it) },
@@ -89,7 +90,7 @@ fun BasicTextFieldMaker(
                     )
                     .border(1.dp, textFieldCursorColor, RoundedCornerShape(10.dp))
                     .padding(paddingHor, paddingVert),
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = contentAlignment
             ) {
                 if (value.isEmpty()) {
                     TextMaker(

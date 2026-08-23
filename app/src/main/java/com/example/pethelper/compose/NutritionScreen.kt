@@ -14,13 +14,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -152,14 +156,23 @@ fun NutritionScreen(
                         1.dp,
                         Color(0xFFF2F2F2)
                     )
-                    LazyColumn(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(300.dp),
-                        contentPadding = PaddingValues(bottom = 8.dp)
-                    ) {
-                        itemsIndexed(allFoodItems) { index, foodItem ->
-                            FoodItemCard(foodItem, index < allFoodItems.lastIndex)
+                    if (allFoodItems.isNotEmpty()) {
+                        val pages = remember(allFoodItems) { allFoodItems.chunked(4) }
+                        val pagerState = rememberPagerState(pageCount = { pages.size })
+                        HorizontalPager(
+                            pagerState,
+                            Modifier
+                                .fillMaxWidth()
+                                .height(272.dp),
+                            verticalAlignment = Alignment.Top
+                        ) { currentPage ->
+                            val pageItems = pages[currentPage]
+                            Column(Modifier.fillMaxWidth()) {
+                                pageItems.forEachIndexed { index, foodItem ->
+                                    FoodItemCard(foodItem, !(pageItems.size == 4 && index == 3))
+                                }
+
+                            }
                         }
                     }
                 }
@@ -187,6 +200,7 @@ fun NutritionScreen(
             }, onAddClick = { activeDialog = "treatDialog" })
             Spacer(Modifier.height(20.dp))
             NotesCard(allNotes) { activeDialog = "notesDialog" }
+            Spacer(Modifier.height(30.dp))
         }
     }
     when (activeDialog) {
@@ -424,16 +438,22 @@ private fun NotesCard(allNotes: List<NoteNutrition>, onAddNote: () -> Unit) {
                 1.dp,
                 Color(0xFFF2F2F2)
             )
-            LazyColumn(
-                Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-            ) {
-                itemsIndexed(allNotes) { index, note ->
-                    NoteItemCard(note, index < allNotes.lastIndex)
+            if (allNotes.isNotEmpty()) {
+                val pages = remember(allNotes) { allNotes.chunked(5) }
+                val pagerState = rememberPagerState(pageCount = { pages.size })
+                HorizontalPager(
+                    pagerState,
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top
+                ) { currentPage ->
+                    val pageItems = pages[currentPage]
+                    Column(Modifier.fillMaxWidth().height(225.dp)) {
+                        pageItems.forEachIndexed { index, note ->
+                            NoteItemCard(note, !(pageItems.size == 5 && index == 4))
+                        }
+                    }
                 }
             }
-
         }
 
     }
@@ -451,7 +471,11 @@ private fun NoteItemCard(note: NoteNutrition, isLine: Boolean) {
                 .padding(16.dp, 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            TextMaker(note.note.replaceFirstChar{char -> char.uppercase()}, 12.sp, fontWeight = FontWeight.Normal)
+            TextMaker(
+                note.note.replaceFirstChar { char -> char.uppercase() },
+                12.sp,
+                fontWeight = FontWeight.Normal
+            )
             TextMaker(note.category, 12.sp, fontWeight = FontWeight.Normal)
         }
         if (isLine) {
