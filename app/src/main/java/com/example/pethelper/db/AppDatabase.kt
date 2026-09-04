@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [Pet::class, Note::class, FoodItem::class,
         Allergy::class, Supplement::class, Treat::class,
-        NoteNutrition::class],
+        NoteNutrition::class, Vaccine::class],
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -19,6 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun SupplementDao(): SupplementDao
     abstract fun TreatDao(): TreatDao
     abstract fun NoteNutritionDao(): NoteNutritionDao
+    abstract fun VaccineDao(): VaccineDao
 
     companion object {
         @Volatile

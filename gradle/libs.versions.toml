@@ -1,5 +1,6 @@
 [versions]
-agp = "9.3.1"
+accompanistPermissions = "0.37.3"
+agp = "9.3.2"
 coreKtx = "1.19.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -13,14 +14,19 @@ ksp = "2.3.6"
 lifecycleCompose = "2.11.0"
 googleFonts = "1.12.0"
 coil = "2.7.0"
-androidx-navigation = "2.9.8"
+androidx-navigation = "2.10.0"
 foundation = "1.12.0"
 foundationLayout = "1.12.0"
-foundationVersion = "1.12.0"
 ui = "1.12.0"
+composeWheelPicker = "1.0.0-rc02"
+kizitonwoseCalendar = "2.10.1"
+generativeai = "0.9.0"
+workRuntimeKtxVersion = "2.11.2"
 
 [libraries]
+accompanist-permissions-v0373 = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-work-runtime-ktx-v2112 = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtxVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -43,8 +49,11 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
-androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundationVersion" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
+compose-wheel-picker = {group = "com.github.zj565061763", name = "compose-wheel-picker", version.ref = "composeWheelPicker"}
+kizitonwose-calendar-compose = {group = "com.kizitonwose.calendar", name = "compose", version.ref = "kizitonwoseCalendar"}
+google-generativeai = {group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai"}
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
