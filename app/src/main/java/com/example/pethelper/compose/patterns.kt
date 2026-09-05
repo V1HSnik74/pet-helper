@@ -36,6 +36,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -62,6 +63,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 val buttonColor = Color(0xFFE27380)
 val backgroundColor = Color(0xFFFFF8F2)
@@ -74,6 +76,13 @@ val brownColor = Color(0xFFAF8268)
 val times = (0..23).map { LocalTime.of(it, 0).format(DateTimeFormatter.ofPattern("HH:mm")) }
 val daySelector =
     listOf("1 day before", "same day", "2 days before", "3 days before", "1 week before")
+
+val medicineTimeSelector =
+    listOf("1 hour before", "5 minutes before", "10 minutes before", "30 minutes before")
+
+
+
+val dateParser: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)
 
 @Composable
 fun TextMaker(
@@ -228,46 +237,49 @@ fun DialogPattern(
 }
 
 @Composable
-fun LabelAndTextField(
-    modifier: Modifier, label: String, value: String, onValueChange: (String) -> Unit,
+fun LabelAndTextField(label: String, value: String, onValueChange: (String) -> Unit,
     placeholder: String
 ) {
-    TextMaker(label, 12.sp, modifier = modifier)
-    Spacer(Modifier.height(8.dp))
-    BasicTextFieldMaker(
-        value, { onValueChange(it) }, placeholder, Modifier
-            .height(40.dp)
-            .fillMaxWidth()
-    )
+    Column(horizontalAlignment = Alignment.Start){
+        TextMaker(label, 12.sp)
+        Spacer(Modifier.height(8.dp))
+        BasicTextFieldMaker(
+            value, { onValueChange(it) }, placeholder, Modifier
+                .height(40.dp)
+                .fillMaxWidth()
+        )
+    }
 }
 
 @Composable
-fun LabelAndDateTime(modifier: Modifier, label: String, value: String, onClick: () -> Unit) {
-    TextMaker(label, 12.sp, modifier = modifier)
-    Spacer(Modifier.height(8.dp))
-    Card(
-        Modifier
-            .fillMaxWidth()
-            .height(40.dp),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(cardColor),
-        border = BorderStroke(1.dp, textFieldCursorColor)
-    ) {
-        Row(
+fun LabelAndDateTime(label: String, value: String, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.Start){
+        TextMaker(label, 12.sp)
+        Spacer(Modifier.height(8.dp))
+        Card(
             Modifier
                 .fillMaxWidth()
-                .padding(16.dp, 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .height(40.dp),
+            shape = RoundedCornerShape(10.dp),
+            colors = CardDefaults.cardColors(cardColor),
+            border = BorderStroke(1.dp, textFieldCursorColor)
         ) {
-            TextMaker(value, 12.sp, fontWeight = FontWeight.Normal)
-            IconButton(
-                onClick,
-                interactionSource = null,
-                modifier = Modifier
-                    .size(18.dp)
-                    .rotate(-90f)
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp, 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(painterResource(R.drawable.back), "choose value")
+                TextMaker(value, 12.sp, fontWeight = FontWeight.Normal)
+                IconButton(
+                    onClick,
+                    interactionSource = null,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .rotate(-90f)
+                ) {
+                    Icon(painterResource(R.drawable.back), "choose value")
+                }
             }
         }
     }
@@ -328,8 +340,8 @@ fun ReminderBlock(
     hasTwoBlocks: Boolean,
     value: String,
     onClick: () -> Unit,
-    secondValue: String,
-    onClickSecond: () -> Unit
+    secondValue: String = "",
+    onClickSecond: () -> Unit = {}
 ) {
     TextMaker("Reminder & Notifications", 12.sp, modifier = modifier)
     Spacer(Modifier.height(16.dp))

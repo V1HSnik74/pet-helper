@@ -20,35 +20,31 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-class VaccineWorker(
-    context: Context,
-    params: WorkerParameters
-) : Worker(context, params) {
-
+class PreventionWorker(context: Context,
+    params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
-        val vaccineName = inputData.getString("VACCINE")
-        val vaccineId = inputData.getInt("VACCINE_ID", 0)
+        val actionName = inputData.getString("ACTION")
+        val preventionId = inputData.getInt("PREVENTION_ID", 0)
         val notifManager =
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "vaccine_channel"
-        val channel =
-            NotificationChannel(channelId, "Vaccine Reminders", NotificationManager.IMPORTANCE_HIGH)
+        val channelId = "prevention_channel"
+        val channel = NotificationChannel(channelId, "Prevention Reminders", NotificationManager.IMPORTANCE_HIGH)
         notifManager.createNotificationChannel(channel)
         val notif = NotificationCompat.Builder(applicationContext, channelId)
-            .setSmallIcon(R.drawable.vaccine_dialog)
-            .setContentTitle("Upcoming Vaccination")
-            .setContentText("$vaccineName is soon!")
+            .setSmallIcon(R.drawable.parasites_dialog)
+            .setContentTitle("Upcoming Prevention")
+            .setContentText("$actionName is soon!")
             .setAutoCancel(true)
             .build()
-        notifManager.notify(vaccineId, notif)
+        notifManager.notify(preventionId, notif)
         return Result.success()
     }
 }
 
-fun scheduleVaccineNotif(
+fun schedulePreventionNotif(
     context: Context,
-    vaccineId: Int,
-    vaccineName: String,
+    preventionId: Int,
+    action: String,
     date: String,
     notifDate: String,
     notifTime: String
@@ -69,15 +65,15 @@ fun scheduleVaccineNotif(
     val delayMillis = targetTimeMillis - currentTimeMillis
     if (delayMillis <= 0) return
     val inputData = Data.Builder()
-        .putInt("VACCINE_ID", vaccineId)
-        .putString("VACCINE", vaccineName)
+        .putInt("PREVENTION_ID", preventionId)
+        .putString("ACTION", action)
         .build()
     val workRequest = OneTimeWorkRequestBuilder<VaccineWorker>()
         .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
         .setInputData(inputData)
         .build()
     WorkManager.getInstance(context).enqueueUniqueWork(
-        "vaccine_work_$vaccineId",
+        "prevention_work_$preventionId",
         ExistingWorkPolicy.REPLACE,
         workRequest
     )

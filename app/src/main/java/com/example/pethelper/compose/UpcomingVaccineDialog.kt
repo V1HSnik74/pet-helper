@@ -32,7 +32,7 @@ fun AddUpcomingVaccine(
 ) {
     var vaccine by remember { mutableStateOf("") }
     var date by remember { mutableStateOf(LocalDate.now()) }
-    var dateString by remember { mutableStateOf("") }
+    var dateString by remember { mutableStateOf(LocalDate.now().format(dateParser)) }
     var time by remember { mutableStateOf("") }
     var isNotif by remember { mutableStateOf(false) }
     var notifDate by remember { mutableStateOf("1 day before") }
@@ -41,21 +41,19 @@ fun AddUpcomingVaccine(
             && (!isNotif || notifDate.isNotEmpty() && notifTime.isNotEmpty())
     var isCalendarOpened by remember { mutableStateOf(false) }
     var isTimeOpened by remember { mutableStateOf(false) }
-    val dateFormatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH) }
     var isNotifDateOpened by remember { mutableStateOf(false) }
     var isNotifTimeOpened by remember { mutableStateOf(false) }
     DialogPattern(
         label = "Add Upcoming Vaccine", icon = R.drawable.vaccine_dialog,
         onDismiss = onDismiss, onSaveInfo = {
             onSaveInfo(
-                vaccine, dateString,
+                vaccine, date.format(DateTimeFormatter.ISO_LOCAL_DATE),
                 time, isNotif, notifDate, notifTime,
                 petId
             )
         }, isEnabled = isEnabled
     ) {
         LabelAndTextField(
-            Modifier.align(Alignment.Start),
             "Vaccine",
             vaccine,
             { vaccine = it },
@@ -76,16 +74,15 @@ fun AddUpcomingVaccine(
         Spacer(Modifier.height(16.dp))
         Box(Modifier.fillMaxWidth()) {
             LabelAndDateTime(
-                Modifier.align(Alignment.TopStart),
                 "Date",
-                date.format(dateFormatter)
+                date.format(dateParser)
             ) { isCalendarOpened = true }
             if (isCalendarOpened) {
                 PopupCalendar(
                     { isCalendarOpened = false },
                     {
                         date = it
-                        dateString = it.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                        dateString = it.format(dateParser)
                         isCalendarOpened = false
                     },
                     date, { it >= LocalDate.now() },
@@ -96,7 +93,6 @@ fun AddUpcomingVaccine(
         }
         Spacer(Modifier.height(16.dp))
         LabelAndDateTime(
-            Modifier.align(Alignment.Start),
             "Time",
             time
         ) { isTimeOpened = true }
