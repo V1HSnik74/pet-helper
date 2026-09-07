@@ -1,9 +1,9 @@
 package com.example.pethelper.ai
 
 import com.example.pethelper.R
-import com.example.pethelper.db.Allergy
-import com.example.pethelper.db.FoodItem
-import com.example.pethelper.db.Supplement
+import com.example.pethelper.db.entity.Allergy
+import com.example.pethelper.db.entity.FoodItem
+import com.example.pethelper.db.entity.Supplement
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.generationConfig
 import kotlinx.coroutines.Dispatchers

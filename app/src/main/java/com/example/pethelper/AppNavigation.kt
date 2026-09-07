@@ -6,18 +6,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.pethelper.compose.MyPetScreen
-import com.example.pethelper.compose.NotesScreen
-import com.example.pethelper.compose.NutritionScreen
-import com.example.pethelper.compose.PetProfileScreen
-import com.example.pethelper.compose.PetSelectionScreen
-import com.example.pethelper.db.AllergyViewModel
-import com.example.pethelper.db.FoodItemViewModel
-import com.example.pethelper.db.NoteNutritionViewModel
-import com.example.pethelper.db.NoteViewModel
-import com.example.pethelper.db.PetsViewModel
-import com.example.pethelper.db.SupplementViewModel
-import com.example.pethelper.db.TreatViewModel
+import com.example.pethelper.compose.petScreens.MyPetScreen
+import com.example.pethelper.compose.notes.NotesScreen
+import com.example.pethelper.compose.nutrition.NutritionScreen
+import com.example.pethelper.compose.petScreens.PetProfileScreen
+import com.example.pethelper.compose.petScreens.PetSelectionScreen
+import com.example.pethelper.db.viewModel.AllergyViewModel
+import com.example.pethelper.db.viewModel.FoodItemViewModel
+import com.example.pethelper.db.viewModel.NoteNutritionViewModel
+import com.example.pethelper.db.viewModel.NoteViewModel
+import com.example.pethelper.db.viewModel.PetsViewModel
+import com.example.pethelper.db.viewModel.SupplementViewModel
+import com.example.pethelper.db.viewModel.TreatViewModel
 
 sealed class Screen(val route: String) {
     object Selection : Screen("PetSelectionScreen")

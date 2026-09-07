@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.pethelper.db.AllergyViewModel
-import com.example.pethelper.db.FoodItemViewModel
-import com.example.pethelper.db.NoteNutritionViewModel
-import com.example.pethelper.db.NoteViewModel
-import com.example.pethelper.db.PetsViewModel
-import com.example.pethelper.db.SupplementViewModel
-import com.example.pethelper.db.TreatViewModel
+import com.example.pethelper.db.viewModel.AllergyViewModel
+import com.example.pethelper.db.viewModel.FoodItemViewModel
+import com.example.pethelper.db.viewModel.NoteNutritionViewModel
+import com.example.pethelper.db.viewModel.NoteViewModel
+import com.example.pethelper.db.viewModel.PetsViewModel
+import com.example.pethelper.db.viewModel.SupplementViewModel
+import com.example.pethelper.db.viewModel.TreatViewModel
 
 class MainActivity : ComponentActivity() {
     private val petsViewModel: PetsViewModel by viewModels()
