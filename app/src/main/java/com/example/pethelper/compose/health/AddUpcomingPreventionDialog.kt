@@ -23,14 +23,13 @@ import com.example.pethelper.compose.patterns.PopupCalendar
 import com.example.pethelper.compose.patterns.ReminderBlock
 import com.example.pethelper.compose.patterns.dateParser
 import com.example.pethelper.compose.patterns.daySelector
+import com.example.pethelper.compose.patterns.preventions
 import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.compose.patterns.times
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 
-val preventions =
-    listOf("Deworming", "Flea Prevention", "Tick Prevention", "Flea & Tick Prevention")
 
 @Composable
 fun AddUpcomingPreventionDialog(onDismiss: () -> Unit, onAddPrevention: () -> Unit) {

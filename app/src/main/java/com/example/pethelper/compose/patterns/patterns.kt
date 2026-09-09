@@ -81,6 +81,8 @@ val daySelector =
 val medicineTimeSelector =
     listOf("1 hour before", "5 minutes before", "10 minutes before", "30 minutes before")
 
+val preventions =
+    listOf("Deworming", "Flea Prevention", "Tick Prevention", "Flea & Tick Prevention")
 
 val dateParser: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)
 val timeParser: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH)
