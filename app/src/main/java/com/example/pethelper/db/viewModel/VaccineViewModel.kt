@@ -26,7 +26,7 @@ class VaccineViewModel(application: Application) : AndroidViewModel(application)
         return vaccineDao.getVaccineById(id)
     }
 
-    fun addUpcomingVaccine(
+    fun addVaccine(
         name: String,
         date: String,
         time: String,
@@ -34,7 +34,8 @@ class VaccineViewModel(application: Application) : AndroidViewModel(application)
         notifDate: String?,
         notifTime: String?,
         petId: Int,
-        petName: String
+        petName: String,
+        isDone: Boolean
     ) {
         viewModelScope.launch {
             val id = vaccineDao.addVaccine(
@@ -45,7 +46,7 @@ class VaccineViewModel(application: Application) : AndroidViewModel(application)
                     isNotif,
                     notifDate,
                     notifTime,
-                    false,
+                    isDone,
                     petId
                 )
             )

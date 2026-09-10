@@ -21,7 +21,7 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
         return checkUpDao.getCheckUpsHistoryByPet(petId)
     }
 
-    fun addUpcomingCheckUp(
+    fun addCheckUp(
         name: String,
         note: String?,
         date: String,
@@ -30,7 +30,8 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
         dateNotif: String?,
         timeNotif: String?,
         petId: Int,
-        petName: String
+        petName: String,
+        isDone: Boolean
     ) {
         viewModelScope.launch {
             val checkUpId = checkUpDao.addCheckUp(
@@ -42,7 +43,7 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
                     isNotif,
                     dateNotif,
                     timeNotif,
-                    false,
+                    isDone,
                     petId
                 )
             )

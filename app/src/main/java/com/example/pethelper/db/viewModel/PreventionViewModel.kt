@@ -22,7 +22,7 @@ class PreventionViewModel(application: Application) : AndroidViewModel(applicati
         return preventionDao.getPreventionHistoryByPet(petId)
     }
 
-    fun addUpcomingPrevention(
+    fun addPrevention(
         action: String,
         note: String?,
         date: String,
@@ -30,7 +30,8 @@ class PreventionViewModel(application: Application) : AndroidViewModel(applicati
         dateNotif: String?,
         timeNotif: String?,
         petId: Int,
-        petName: String
+        petName: String,
+        isDone: Boolean
     ) {
         viewModelScope.launch {
             val id = preventionDao.addPrevention(
@@ -42,7 +43,7 @@ class PreventionViewModel(application: Application) : AndroidViewModel(applicati
                     dateNotif,
                     timeNotif,
                     petId,
-                    false
+                    isDone
                 )
             )
             if (isNotif) {

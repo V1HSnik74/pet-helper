@@ -14,21 +14,28 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
@@ -36,11 +43,13 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +74,8 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.collections.chunked
+import kotlin.collections.forEachIndexed
 
 val buttonColor = Color(0xFFE27380)
 val backgroundColor = Color(0xFFFFF8F2)
@@ -242,7 +253,8 @@ fun DialogPattern(
 @Composable
 fun LabelAndTextField(
     label: String, value: String, onValueChange: (String) -> Unit,
-    placeholder: String
+    placeholder: String, singleLine: Boolean = true,
+    contentAlignment: Alignment = Alignment.CenterStart
 ) {
     Column(horizontalAlignment = Alignment.Start) {
         TextMaker(label, 12.sp)
@@ -250,7 +262,9 @@ fun LabelAndTextField(
         BasicTextFieldMaker(
             value, { onValueChange(it) }, placeholder, Modifier
                 .height(40.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            singleLine,
+            contentAlignment = contentAlignment
         )
     }
 }
@@ -439,5 +453,261 @@ private fun CardWithDropdown(value: String, onClick: () -> Unit, modifier: Modif
                 Icon(painterResource(R.drawable.back), "choose value")
             }
         }
+    }
+}
+
+@Composable
+fun ScreenTitle(text: String, onBackClick: () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(top = 64.dp, start = 16.dp, end = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painterResource(R.drawable.back),
+            contentDescription = "Back button",
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .size(24.dp)
+                .clickable(indication = null, interactionSource = null) { onBackClick() }
+        )
+        TextMaker(
+            text, 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+}
+
+@Composable
+fun <T> PagerCard(
+    label: String, onAddItem: () -> Unit, content: List<T>,
+    itemContent: @Composable (item: T, hasLine: Boolean) -> Unit
+) {
+    Card(
+        Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(cardColor),
+        shape = RoundedCornerShape(15.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp, 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextMaker(label, 12.sp, fontWeight = FontWeight.SemiBold)
+                Icon(
+                    painterResource(R.drawable.prime_plus),
+                    contentDescription = "Add item",
+                    modifier = Modifier.clickable(
+                        indication = null,
+                        interactionSource = null
+                    ) { onAddItem() }
+                )
+            }
+            HorizontalDivider(
+                Modifier.fillMaxWidth(),
+                1.dp,
+                Color(0xFFF2F2F2)
+            )
+            if (content.isNotEmpty()) {
+                val pages = remember(content) { content.chunked(5) }
+                val pagerState = rememberPagerState(pageCount = { pages.size })
+                HorizontalPager(
+                    pagerState,
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top
+                ) { currentPage ->
+                    val pageItems = pages[currentPage]
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(225.dp)
+                    ) {
+                        pageItems.forEachIndexed { index, item ->
+                            itemContent(item, !(pageItems.size == 5 && index == 4))
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun PagerCardItem(
+    icon: Int,
+    label: String,
+    note: String,
+    date: String,
+    time: String,
+    hasAddInfoLeft: Boolean,
+    hasAddInfoRight: Boolean,
+    hasLine: Boolean = true,
+    hasNote: Boolean
+) {
+    val parsedDate =
+        remember(date) {
+            LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE).format(dateParser)
+        }
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                Modifier.wrapContentSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(painterResource(icon), "Item Icon")
+                Spacer(Modifier.width(10.dp))
+                Column(Modifier.wrapContentSize()) {
+                    TextMaker(label, 12.sp, fontWeight = FontWeight.SemiBold)
+                    if (hasAddInfoLeft && hasNote) {
+                        Spacer(Modifier.height(4.dp))
+                        TextMaker(note, 10.sp, Color(0xFF727272), fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+            Row(
+                Modifier.wrapContentSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.wrapContentSize()) {
+                    TextMaker(parsedDate, 10.sp, fontWeight = FontWeight.Medium)
+                    if (hasAddInfoRight) {
+                        Spacer(Modifier.height(4.dp))
+                        TextMaker(time, 10.sp, fontWeight = FontWeight.Medium)
+                    }
+                }
+                Spacer(Modifier.width(10.dp))
+                Icon(
+                    painterResource(R.drawable.pen_notes),
+                    "edit information",
+                    Modifier.size(18.dp),
+                    Color(0xFF4B332E)
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        if (hasLine) {
+            HorizontalDivider(thickness = 1.dp, color = Color(0xFFF2F2F2))
+        }
+    }
+}
+
+@Composable
+fun UpcomingBlock(
+    label: String,
+    isVaccine: Boolean,
+    info: String,
+    date: String,
+    time: String,
+    onClick: () -> Unit
+) {
+    Card(
+        Modifier
+            .fillMaxHeight()
+            .clickable(indication = null, interactionSource = null, onClick = onClick),
+        colors = CardDefaults.cardColors(cardColor),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            Modifier
+                .fillMaxHeight()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painterResource(R.drawable.birthday_calendar),
+                    "calendar icon",
+                    Modifier.size(20.dp)
+                )
+                Image(
+                    painterResource(R.drawable.notifications),
+                    "edit notifications settings"
+                )
+            }
+            TextMaker(label, 12.sp, fontWeight = FontWeight.SemiBold)
+            Column(Modifier.fillMaxWidth()) {
+                if (isVaccine) {
+                    TextMaker("Next vaccination:", 10.sp, fontWeight = FontWeight.Medium)
+                }
+                TextMaker(info, 10.sp, buttonColor, FontWeight.Medium)
+            }
+            Column(Modifier.fillMaxWidth()) {
+                TextMaker(date, 10.sp, fontWeight = FontWeight.SemiBold)
+                TextMaker(time, 10.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProgressBar(
+    percentage: Float
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.size(100.dp)
+    ) {
+        CircularProgressIndicator(
+            progress = { 1f },
+            Modifier.fillMaxSize(),
+            color = Color(0xFFD9D9D9),
+            5.dp,
+            strokeCap = StrokeCap.Round
+        )
+        CircularProgressIndicator(
+            progress = { percentage.coerceIn(0f, 1f) },
+            modifier = Modifier.fillMaxSize(),
+            color = if (percentage == 1f) Color(0xFF008400) else Color(0xFFD27918),
+            5.dp,
+            strokeCap = StrokeCap.Round
+        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            TextMaker("${(percentage * 100).toInt()}%", 16.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(2.dp))
+            TextMaker(
+                if (percentage == 1f) "Up to date" else "Needs action",
+                10.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+fun StatusProgBar(label: String, isVaccine: Boolean){
+    Card(
+        Modifier
+            .fillMaxHeight(),
+        colors = CardDefaults.cardColors(cardColor),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(Modifier.padding(10.dp)) { }
     }
 }
