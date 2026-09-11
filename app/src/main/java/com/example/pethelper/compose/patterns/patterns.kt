@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -534,7 +535,9 @@ fun <T> PagerCard(
                             .height(225.dp)
                     ) {
                         pageItems.forEachIndexed { index, item ->
-                            itemContent(item, !(pageItems.size == 5 && index == 4))
+                            val hasLine = !(pageItems.size == 5 && index == 4)
+                            itemContent(item, hasLine)
+
                         }
                     }
                 }
@@ -545,7 +548,7 @@ fun <T> PagerCard(
 }
 
 @Composable
-private fun PagerCardItem(
+fun PagerCardItem(
     icon: Int,
     label: String,
     note: String,
@@ -611,6 +614,7 @@ private fun PagerCardItem(
 
 @Composable
 fun UpcomingBlock(
+    modifier: Modifier,
     label: String,
     isVaccine: Boolean,
     info: String,
@@ -619,7 +623,7 @@ fun UpcomingBlock(
     onClick: () -> Unit
 ) {
     Card(
-        Modifier
+        modifier
             .fillMaxHeight()
             .clickable(indication = null, interactionSource = null, onClick = onClick),
         colors = CardDefaults.cardColors(cardColor),
@@ -700,14 +704,153 @@ private fun ProgressBar(
 }
 
 @Composable
-fun StatusProgBar(label: String, isVaccine: Boolean){
+fun StatusProgBar(
+    isVaccine: Boolean, percentage: Float,
+    text: String,
+    onClick: () -> Unit = {},
+    isProtectedFleas: Boolean = false,
+    isProtectedTicks: Boolean = false,
+    isProtectedWorms: Boolean = false,
+    modifier: Modifier = Modifier
+) {
     Card(
-        Modifier
+        modifier
             .fillMaxHeight(),
         colors = CardDefaults.cardColors(cardColor),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Column(Modifier.padding(10.dp)) { }
+        Column(
+            Modifier
+                .padding(10.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            TextMaker(
+                if (isVaccine) "Vaccination Status" else "Protection Status",
+                12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ProgressBar(percentage)
+                Column(Modifier.weight(1f)) {
+                    TextMaker(
+                        if (percentage == 1f) "Great Job!" else "Needs Action",
+                        12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    TextMaker(text, 10.sp, fontWeight = FontWeight.Normal)
+                    if (isVaccine) {
+                        Spacer(Modifier.height(8.dp))
+                        Button(
+                            onClick,
+                            shape = RoundedCornerShape(5.dp),
+                            content = {
+                                TextMaker(
+                                    "Learn More",
+                                    10.sp,
+                                    Color.White,
+                                    FontWeight.SemiBold
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(buttonColor),
+                            contentPadding = PaddingValues(8.dp, 4.dp),
+                            interactionSource = null
+                        )
+                    }
+                }
+
+            }
+            if (!isVaccine) {
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ProtectionStatusProtected(
+                        Modifier.weight(1f),
+                        isProtectedFleas,
+                        R.drawable.fleas_icon,
+                        "Fleas"
+                    )
+                    ProtectionStatusProtected(
+                        Modifier.weight(1f),
+                        isProtectedTicks,
+                        R.drawable.tick,
+                        "Ticks"
+                    )
+                    ProtectionStatusProtected(
+                        Modifier.weight(1f),
+                        isProtectedWorms,
+                        R.drawable.worm,
+                        "Worms"
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProtectionStatusProtected(
+    modifier: Modifier,
+    isProtected: Boolean,
+    icon: Int,
+    label: String
+) {
+    Card(
+        colors = CardDefaults.cardColors(if (isProtected) Color(0xFFEFF6E9) else Color(0xFFFFF6E8)),
+        shape = RoundedCornerShape(15.dp),
+        border = BorderStroke(1.dp, if (isProtected) Color(0xFFDFEEDF) else Color(0xFFFDF1ED)),
+        modifier = modifier
+    ) {
+        Column(Modifier.padding(12.dp, 6.dp)) {
+            Icon(painterResource(icon), "$label Icon")
+            Spacer(Modifier.height(2.dp))
+            TextMaker(label, 12.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(2.dp))
+            TextMaker(
+                if (isProtected) "Protected" else "Not Protected", 10.sp,
+                if (isProtected) Color(0xFF008400) else Color(0xFFD27918),
+                FontWeight.SemiBold
+            )
+
+        }
+    }
+}
+
+@Composable
+fun HealthTip(
+    color: Color,
+    iconColor: Color,
+    borderColor: Color,
+    label: String,
+    text: String,
+    icon: Int
+) {
+    Card(
+        Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(color),
+        border = BorderStroke(1.dp, borderColor)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp, 12.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Icon(painterResource(icon), "tips icon", tint = iconColor)
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f)) {
+                TextMaker(label, 12.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(6.dp))
+                TextMaker(text, 12.sp, fontWeight = FontWeight.Normal)
+            }
+        }
     }
 }

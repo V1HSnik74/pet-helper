@@ -29,10 +29,23 @@ import com.example.pethelper.compose.patterns.times
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun AddUpcomingPreventionDialog(onDismiss: () -> Unit, onAddPrevention: () -> Unit) {
+fun AddUpcomingPreventionDialog(
+    onDismiss: () -> Unit,
+    onAddPrevention: (
+        action: String,
+        note: String,
+        date: String,
+        isNotif: Boolean,
+        dateNotif: String,
+        timeNotif: String,
+        petId: Int
+    ) -> Unit,
+    petId: Int
+) {
     var action by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var date by remember { mutableStateOf(LocalDate.now()) }
@@ -43,8 +56,18 @@ fun AddUpcomingPreventionDialog(onDismiss: () -> Unit, onAddPrevention: () -> Un
     var isDateNotifOpened by remember { mutableStateOf(false) }
     var isTimeNotifOpened by remember { mutableStateOf(false) }
     DialogPattern(
-        "Add Upcoming Prevention", R.drawable.parasites_dialog,
-        onDismiss, onAddPrevention, action.isNotEmpty()
+        "Add Upcoming Prevention",
+        R.drawable.parasites_dialog,
+        onDismiss,
+        {onAddPrevention(
+            action,
+            note,
+            date.format(DateTimeFormatter.ISO_LOCAL_DATE),
+            isNotif,
+            dayNotif,
+            timeNotif,
+            petId)},
+        action.isNotEmpty()
     ) {
         LabelAndTextField(
             "Action",

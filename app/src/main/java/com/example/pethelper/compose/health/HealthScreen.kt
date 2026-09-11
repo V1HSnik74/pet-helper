@@ -28,10 +28,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +48,8 @@ import com.example.pethelper.compose.patterns.buttonColor
 import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.db.entity.Pet
 import com.example.pethelper.db.viewModel.PetsViewModel
+import com.example.pethelper.db.viewModel.PreventionViewModel
+import com.example.pethelper.db.viewModel.VaccineViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Period
@@ -65,40 +65,57 @@ enum class TabButtonsHealth(val icon: Int, val title: String) {
 }
 
 @Composable
-fun HealthScreen(petId: Int, onBackClick: () -> Unit, petsViewModel: PetsViewModel) {
-    val currPet by petsViewModel.getPetById(petId).collectAsState(null)
-    val tabs = TabButtonsHealth.entries
-    val pagerState = rememberPagerState(0) { tabs.size }
-    val scope = rememberCoroutineScope()
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(backgroundColor)
-    ) {
-        ScreenTitle("Health") { onBackClick() }
-        Spacer(Modifier.height(20.dp))
-        currPet?.let { PetCardHealth(it) }
-        Spacer(Modifier.height(16.dp))
-        TabButtonsRow(
-            { scope.launch { pagerState.animateScrollToPage(it) } },
-            pagerState.currentPage
-        )
-        Spacer(Modifier.height(16.dp))
-        HorizontalPager(
-            pagerState,
+fun HealthScreen(
+    petId: Int,
+    onBackClick: () -> Unit,
+    petsViewModel: PetsViewModel,
+    vaccineViewModel: VaccineViewModel,
+    preventionViewModel: PreventionViewModel
+) {
+    val pet by petsViewModel.getPetById(petId).collectAsState(null)
+    pet?.let {
+        val petName = remember(petId) { it.name }
+        val tabs = TabButtonsHealth.entries
+        val pagerState = rememberPagerState(0) { tabs.size }
+        val scope = rememberCoroutineScope()
+        Column(
             Modifier
-                .fillMaxWidth()
-                .weight(1f)
+                .fillMaxSize()
+                .background(backgroundColor)
         ) {
-            when (tabs[it]) {
-                TabButtonsHealth.OVERALL -> {}
-                TabButtonsHealth.VACCINATIONS -> {}
-                TabButtonsHealth.MEDICATIONS -> {}
-                TabButtonsHealth.PARASITES -> {}
-                TabButtonsHealth.CHECKUPS -> {}
+            ScreenTitle("Health") { onBackClick() }
+            Spacer(Modifier.height(20.dp))
+            pet?.let { pet -> PetCardHealth(pet) }
+            Spacer(Modifier.height(16.dp))
+            TabButtonsRow(
+                { index -> scope.launch { pagerState.animateScrollToPage(index) } },
+                pagerState.currentPage
+            )
+            Spacer(Modifier.height(16.dp))
+            HorizontalPager(
+                pagerState,
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) { index ->
+                when (tabs[index]) {
+                    TabButtonsHealth.OVERALL -> {}
+                    TabButtonsHealth.VACCINATIONS -> VaccinationsTab(
+                        vaccineViewModel,
+                        petId,
+                        petName
+                    )
+                    TabButtonsHealth.MEDICATIONS -> {}
+                    TabButtonsHealth.PARASITES -> PreventionTab(
+                        preventionViewModel,
+                        petId,
+                        petName)
+                    TabButtonsHealth.CHECKUPS -> {}
+                }
             }
         }
     }
+
 }
 
 @Composable
