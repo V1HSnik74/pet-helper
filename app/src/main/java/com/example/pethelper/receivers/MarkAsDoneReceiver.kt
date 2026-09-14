@@ -12,8 +12,9 @@ import kotlinx.coroutines.launch
 class MarkAsDoneReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val id = intent.getIntExtra("ID_KEY", -1)
+        val notifId = intent.getIntExtra("NOTIF_ID_KEY", -1)
         val notifManager = NotificationManagerCompat.from(context)
-        notifManager.cancel(id)
+        notifManager.cancel(notifId)
         val db = AppDatabase.getInstance(context)
         CoroutineScope(Dispatchers.IO).launch {
             when (intent.action) {
