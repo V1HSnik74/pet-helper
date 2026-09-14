@@ -47,6 +47,8 @@ import com.example.pethelper.compose.patterns.backgroundColor
 import com.example.pethelper.compose.patterns.buttonColor
 import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.db.entity.Pet
+import com.example.pethelper.db.viewModel.CheckUpViewModel
+import com.example.pethelper.db.viewModel.NoteHealthViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
 import com.example.pethelper.db.viewModel.PreventionViewModel
 import com.example.pethelper.db.viewModel.VaccineViewModel
@@ -58,9 +60,9 @@ import java.util.Locale
 
 enum class TabButtonsHealth(val icon: Int, val title: String) {
     OVERALL(R.drawable.overall_button, "Overall"),
-    VACCINATIONS(R.drawable.vaccine_button, "Vaccinations"),
     MEDICATIONS(R.drawable.medicine_button, "Medications"),
     PARASITES(R.drawable.parasites_button, "Parasites"),
+    VACCINATIONS(R.drawable.vaccine_button, "Vaccinations"),
     CHECKUPS(R.drawable.checkups_button, "Check-ups")
 }
 
@@ -70,7 +72,9 @@ fun HealthScreen(
     onBackClick: () -> Unit,
     petsViewModel: PetsViewModel,
     vaccineViewModel: VaccineViewModel,
-    preventionViewModel: PreventionViewModel
+    preventionViewModel: PreventionViewModel,
+    checkUpViewModel: CheckUpViewModel,
+    noteHealthViewModel: NoteHealthViewModel
 ) {
     val pet by petsViewModel.getPetById(petId).collectAsState(null)
     pet?.let {
@@ -82,6 +86,8 @@ fun HealthScreen(
             Modifier
                 .fillMaxSize()
                 .background(backgroundColor)
+                .padding(start = 22.dp, end = 22.dp, bottom = 50.dp),
+            verticalArrangement = Arrangement.Top
         ) {
             ScreenTitle("Health") { onBackClick() }
             Spacer(Modifier.height(20.dp))
@@ -96,7 +102,7 @@ fun HealthScreen(
                 pagerState,
                 Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .wrapContentHeight()
             ) { index ->
                 when (tabs[index]) {
                     TabButtonsHealth.OVERALL -> {}
@@ -105,12 +111,20 @@ fun HealthScreen(
                         petId,
                         petName
                     )
+
                     TabButtonsHealth.MEDICATIONS -> {}
                     TabButtonsHealth.PARASITES -> PreventionTab(
                         preventionViewModel,
                         petId,
-                        petName)
-                    TabButtonsHealth.CHECKUPS -> {}
+                        petName
+                    )
+
+                    TabButtonsHealth.CHECKUPS -> CheckUpTab(
+                        checkUpViewModel,
+                        petId,
+                        noteHealthViewModel,
+                        petName
+                    )
                 }
             }
         }
@@ -141,7 +155,9 @@ private fun PetCardHealth(pet: Pet) {
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
-            Modifier.fillMaxWidth(),
+            Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -155,7 +171,7 @@ private fun PetCardHealth(pet: Pet) {
                 else ContentScale.Crop
             )
             Spacer(Modifier.width(20.dp))
-            Column(Modifier.wrapContentSize()) {
+            Column(Modifier.weight(1f)) {
                 Row(Modifier.fillMaxWidth()) {
                     TextMaker(pet.name, 16.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(2.dp))
@@ -203,39 +219,53 @@ private fun PetCardChip(text: String) {
 }
 
 @Composable
-private fun TabButton(isSelected: Boolean, icon: Int, label: String, onClick: () -> Unit) {
+private fun TabButton(
+    isSelected: Boolean, icon: Int, label: String,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
     Column(
-        Modifier
-            .wrapContentSize()
-            .clickable(indication = null, interactionSource = null, onClick = onClick)
+        modifier
+            .clickable(indication = null, interactionSource = null, onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             painterResource(icon), "Tab Icon",
-            tint = if (isSelected) Color(0xFF4B332E) else buttonColor
+            tint = if (isSelected) buttonColor else Color(0xFF4B332E)
         )
         Spacer(Modifier.height(2.dp))
-        TextMaker(label, 10.sp, if (isSelected) Color(0xFF4B332E) else buttonColor)
+        TextMaker(label, 10.sp, if (isSelected) buttonColor else Color(0xFF4B332E))
         Spacer(Modifier.height(8.dp))
-        if (isSelected) HorizontalDivider(thickness = 1.dp, color = buttonColor)
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(if (isSelected) buttonColor else Color.Transparent)
+                .height(1.dp)
+        )
     }
 }
 
 @Composable
 private fun TabButtonsRow(onSwipe: (Int) -> Unit, selectedTabIndex: Int) {
     Box(Modifier.fillMaxWidth()) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            TabButtonsHealth.entries.forEachIndexed { index, tab ->
-                TabButton(selectedTabIndex == index, tab.icon, tab.title) { onSwipe(index) }
-            }
-        }
         HorizontalDivider(
             Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomStart),
             color = Color(0xFFE8E8E8), thickness = 1.dp
         )
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            TabButtonsHealth.entries.forEachIndexed { index, tab ->
+                TabButton(
+                    selectedTabIndex == index,
+                    tab.icon,
+                    tab.title,
+                    Modifier.weight(1f)
+                ) { onSwipe(index) }
+            }
+        }
     }
 }

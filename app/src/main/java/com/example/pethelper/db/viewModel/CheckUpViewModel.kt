@@ -50,7 +50,7 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
             if (isNotif) {
                 scheduleNotif(
                     getApplication<Application>().applicationContext,
-                    checkUpId,
+                    checkUpId.toInt(),
                     name,
                     date,
                     dateNotif!!,
@@ -62,7 +62,7 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
             }
             scheduleMarkAsDoneNotif(
                 getApplication<Application>().applicationContext,
-                checkUpId,
+                checkUpId.toInt(),
                 date,
                 "Prevention",
                 R.drawable.parasites_dialog,

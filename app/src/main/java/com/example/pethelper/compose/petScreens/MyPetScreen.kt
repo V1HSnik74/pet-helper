@@ -51,7 +51,7 @@ import java.util.Locale
 @Composable
 fun MyPetScreen(
     petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Unit, onButtonClick: (Int) -> Unit,
-    onNutritionClick: (Int) -> Unit
+    onNutritionClick: (Int) -> Unit, onHealthClick: (Int) -> Unit
 ) {
     val pet by petsViewModel.getPetById(id).collectAsState(initial = null)
     Box(
@@ -109,8 +109,7 @@ fun MyPetScreen(
                             "Health",
                             14.sp,
                             Modifier.weight(1f),
-                            {}
-                        )
+                        ) { onHealthClick(id) }
                         SectionButton(
                             painterResource(R.drawable.bone_icon),
                             "Nutrition",

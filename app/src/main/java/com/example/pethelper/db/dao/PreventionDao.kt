@@ -16,7 +16,7 @@ interface PreventionDao {
     fun getAllUpcomingPreventionsByPet(petId: Int): Flow<List<Prevention>>
 
     @Upsert
-    suspend fun addPrevention(prevention: Prevention): Int
+    suspend fun addPrevention(prevention: Prevention): Long
 
     @Query("UPDATE vaccines SET isDone=1 WHERE id=:id")
     suspend fun markPreventionAsDone(id: Int)

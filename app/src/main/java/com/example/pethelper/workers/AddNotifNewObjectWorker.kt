@@ -10,7 +10,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.example.pethelper.compose.patterns.dateParser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -62,7 +61,8 @@ fun scheduleNotif(
     petName: String
 ) {
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH)
-    val parsedDate = LocalDate.parse(date, dateParser)
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
+    val parsedDate = LocalDate.parse(date, dateFormatter)
     val parsedTime = LocalTime.parse(notifTime, timeFormatter)
     val daysBefore = when (notifDate) {
         "1 day before" -> 1L

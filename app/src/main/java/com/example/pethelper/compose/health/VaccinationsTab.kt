@@ -1,13 +1,14 @@
 package com.example.pethelper.compose.health
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -40,43 +41,46 @@ fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: Str
     var isReminderOpened by remember { mutableStateOf(false) }
     var isAddUpcomingDialogOpened by remember { mutableStateOf(false) }
     var isAddHistoryVaccineOpened by remember { mutableStateOf(false) }
+    val percentage =
+        remember(vaccineHistory) { countVaccinePercentage(vaccineHistory, catVaccines) }
     Column(
         Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
+            .padding(start = 2.dp, end = 2.dp, bottom = 20.dp, top = 2.dp)
     ) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Max),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .wrapContentHeight()
         ) {
             StatusProgBar(
                 true,
-                countVaccinePercentage(vaccineHistory, catVaccines),
-                "",
+                percentage,
+                if (percentage == 1f)
+                    "$petName is up to date on most core vaccines"
+                else
+                    "$petName is not totally up to date on most core vaccines",
                 {},
-                modifier = if (theMostUpcomingVaccine != null) Modifier
-                    .weight(1.5f)
-                    .fillMaxHeight()
-                else Modifier
-                    .fillMaxWidth(0.6f)
-                    .fillMaxHeight()
+                modifier = Modifier
+                    .weight(2f)
+                    .wrapContentHeight()
             )
-            theMostUpcomingVaccine?.let {
-                UpcomingBlock(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    "Vaccine Reminder",
-                    true,
-                    theMostUpcomingVaccine.name,
-                    theMostUpcomingVaccine.date,
-                    theMostUpcomingVaccine.time
-                ) {
-                    isReminderOpened = true
-                }
+            Spacer(Modifier.width(4.dp))
+            UpcomingBlock(
+                Modifier
+                    .weight(1f)
+                    .wrapContentHeight(),
+                "Vaccine Reminder",
+                true,
+                theMostUpcomingVaccine?.name.orEmpty(),
+                theMostUpcomingVaccine?.date.orEmpty(),
+                theMostUpcomingVaccine?.time.orEmpty(),
+                theMostUpcomingVaccine != null
+            ) {
+                isReminderOpened = true
             }
+
         }
         Spacer(Modifier.height(16.dp))
         PagerCard(
@@ -102,22 +106,24 @@ fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: Str
             { isReminderOpened = false },
             DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            PagerCard(
-                "Upcoming",
-                { isAddUpcomingDialogOpened = true },
-                allUpcomingVaccines
-            ) { item, hasLine ->
-                PagerCardItem(
-                    R.drawable.core_vaccine_icon,
-                    item.name,
-                    "",
-                    item.date,
-                    item.time,
-                    hasAddInfoLeft = false,
-                    hasAddInfoRight = false,
-                    hasLine = hasLine,
-                    hasNote = false
-                )
+            Box(Modifier.fillMaxWidth(0.9f)) {
+                PagerCard(
+                    "Upcoming",
+                    { isAddUpcomingDialogOpened = true },
+                    allUpcomingVaccines,
+                ) { item, hasLine ->
+                    PagerCardItem(
+                        R.drawable.core_vaccine_icon,
+                        item.name,
+                        "",
+                        item.date,
+                        item.time,
+                        hasAddInfoLeft = false,
+                        hasAddInfoRight = false,
+                        hasLine = hasLine,
+                        hasNote = false
+                    )
+                }
             }
         }
     }
@@ -136,6 +142,7 @@ fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: Str
                     petName,
                     false
                 )
+                isAddUpcomingDialogOpened = false
             }, petId
         )
     }
@@ -154,6 +161,7 @@ fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: Str
                     petName,
                     isDone
                 )
+                isAddHistoryVaccineOpened = false
             },
             petId
         )

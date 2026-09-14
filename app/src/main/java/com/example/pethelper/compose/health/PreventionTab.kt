@@ -3,6 +3,8 @@ package com.example.pethelper.compose.health
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -61,7 +63,8 @@ fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName:
     Column(
         Modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .padding(start = 2.dp, end = 2.dp, bottom = 20.dp, top = 2.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         StatusProgBar(
@@ -70,7 +73,8 @@ fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName:
             if (percentage == 1f) "$petName is protected against all parasites" else "$petName is not totally protected from parasites",
             isProtectedFleas = isProtectedFleas,
             isProtectedTicks = isProtectedTicks,
-            isProtectedWorms = isProtectedWorms
+            isProtectedWorms = isProtectedWorms,
+            modifier = Modifier.wrapContentWidth()
         )
         PagerCard(
             "Upcoming",
@@ -138,6 +142,7 @@ fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName:
                     petName,
                     false
                 )
+                isUpcomingOpened = false
             },
             petId
         )
@@ -157,6 +162,7 @@ fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName:
                     petName,
                     isDone
                 )
+                isTreatmentHistoryOpened = false
             },
             petId
         )

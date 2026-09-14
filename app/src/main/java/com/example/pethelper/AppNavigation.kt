@@ -6,18 +6,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.pethelper.compose.health.HealthScreen
 import com.example.pethelper.compose.petScreens.MyPetScreen
 import com.example.pethelper.compose.notes.NotesScreen
 import com.example.pethelper.compose.nutrition.NutritionScreen
 import com.example.pethelper.compose.petScreens.PetProfileScreen
 import com.example.pethelper.compose.petScreens.PetSelectionScreen
 import com.example.pethelper.db.viewModel.AllergyViewModel
+import com.example.pethelper.db.viewModel.CheckUpViewModel
 import com.example.pethelper.db.viewModel.FoodItemViewModel
+import com.example.pethelper.db.viewModel.NoteHealthViewModel
 import com.example.pethelper.db.viewModel.NoteNutritionViewModel
 import com.example.pethelper.db.viewModel.NoteViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
+import com.example.pethelper.db.viewModel.PreventionViewModel
 import com.example.pethelper.db.viewModel.SupplementViewModel
 import com.example.pethelper.db.viewModel.TreatViewModel
+import com.example.pethelper.db.viewModel.VaccineViewModel
 
 sealed class Screen(val route: String) {
     object Selection : Screen("PetSelectionScreen")
@@ -36,6 +41,10 @@ sealed class Screen(val route: String) {
     object Nutrition : Screen("NutritionScreen/{petId}") {
         fun createRoute(petId: Int) = "NutritionScreen/$petId"
     }
+
+    object Health : Screen("HealthScreen/{petId}") {
+        fun createRoute(petId: Int) = "HealthScreen/$petId"
+    }
 }
 
 @Composable
@@ -46,7 +55,11 @@ fun AppNavigation(
     allergyViewModel: AllergyViewModel,
     supplementViewModel: SupplementViewModel,
     noteNutritionViewModel: NoteNutritionViewModel,
-    treatViewModel: TreatViewModel
+    treatViewModel: TreatViewModel,
+    vaccineViewModel: VaccineViewModel,
+    preventionViewModel: PreventionViewModel,
+    checkUpViewModel: CheckUpViewModel,
+    noteHealthViewModel: NoteHealthViewModel
 ) {
     val navController = rememberNavController()
     NavHost(
@@ -68,7 +81,8 @@ fun AppNavigation(
                 viewModel, petId, onCardClick = {
                     navController.navigate(Screen.Profile.createRoute(it))
                 }, onButtonClick = { navController.navigate(Screen.Notes.createRoute(it)) },
-                onNutritionClick = { navController.navigate(Screen.Nutrition.createRoute(it)) })
+                onNutritionClick = { navController.navigate(Screen.Nutrition.createRoute(it)) },
+                onHealthClick = {navController.navigate(Screen.Health.createRoute(it))})
         }
 
         composable(
@@ -95,8 +109,24 @@ fun AppNavigation(
             NutritionScreen(
                 petId, foodItemViewModel, supplementViewModel,
                 treatViewModel, noteNutritionViewModel, allergyViewModel,
-                onBackClick = {navController.popBackStack()},
+                onBackClick = { navController.popBackStack() },
                 viewModel
+            )
+        }
+
+        composable(
+            Screen.Health.route,
+            arguments = listOf(navArgument("petId") { type = NavType.IntType })
+        ) {
+            val petId = it.arguments?.getInt("petId") ?: -1
+            HealthScreen(
+                petId,
+                { navController.popBackStack() },
+                viewModel,
+                vaccineViewModel,
+                preventionViewModel,
+                checkUpViewModel,
+                noteHealthViewModel
             )
         }
 

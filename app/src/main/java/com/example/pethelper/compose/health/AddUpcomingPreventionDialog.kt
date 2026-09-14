@@ -1,6 +1,7 @@
 package com.example.pethelper.compose.health
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,13 +11,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.DialogChip
 import com.example.pethelper.compose.patterns.DialogPattern
-import com.example.pethelper.compose.patterns.DropdownMenuPattern
 import com.example.pethelper.compose.patterns.LabelAndDateTime
 import com.example.pethelper.compose.patterns.LabelAndTextField
 import com.example.pethelper.compose.patterns.PopupCalendar
@@ -96,46 +95,40 @@ fun AddUpcomingPreventionDialog(
             "e.g. Milbemax"
         )
         Spacer(Modifier.height(16.dp))
-        LabelAndDateTime(
-            "Date",
-            date.format(dateParser)
-        ) { isDateOpened = true }
-        if (isDateOpened) {
-            PopupCalendar(
-                { isDateOpened = false },
-                { date = it },
-                date,
-                { it >= LocalDate.now() },
-                YearMonth.now(),
-                YearMonth.now().plusMonths(12)
-            )
+        Box(){
+            LabelAndDateTime(
+                "Date",
+                date.format(dateParser)
+            ) { isDateOpened = true }
+            if (isDateOpened) {
+                PopupCalendar(
+                    { isDateOpened = false },
+                    { date = it },
+                    date,
+                    { it >= LocalDate.now() },
+                    YearMonth.now(),
+                    YearMonth.now().plusMonths(12)
+                )
+            }
         }
         Spacer(Modifier.height(16.dp))
         ReminderBlock(
-            Modifier.align(Alignment.Start),
+            Modifier,
             isNotif,
             { isNotif = it },
             true,
             dayNotif,
-            { isDateNotifOpened = true },
+            {
+                dayNotif = it
+                isDateNotifOpened = false
+            },
+            daySelector,
             timeNotif,
-            { isTimeNotifOpened = false }
-        )
-        DropdownMenuPattern(
-            isDateNotifOpened,
-            { isDateNotifOpened = false },
-            daySelector
-        ) {
-            dayNotif = it
-            isDateNotifOpened = false
-        }
-        DropdownMenuPattern(
-            isTimeNotifOpened,
-            { isTimeNotifOpened = false },
+            {
+                timeNotif = it
+                isTimeNotifOpened = false
+            },
             times
-        ) {
-            timeNotif = it
-            isTimeNotifOpened = false
-        }
+        )
     }
 }

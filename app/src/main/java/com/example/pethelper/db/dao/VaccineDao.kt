@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface VaccineDao {
 
     @Upsert
-    suspend fun addVaccine(vaccine: Vaccine): Int
+    suspend fun addVaccine(vaccine: Vaccine): Long
 
     @Query("SELECT * FROM vaccines WHERE isDone=0 AND petId=:petId ORDER BY date ASC")
     fun getAllUpcomingVaccinesByPet(petId: Int): Flow<List<Vaccine>>

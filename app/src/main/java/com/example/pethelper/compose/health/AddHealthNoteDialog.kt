@@ -1,5 +1,6 @@
 package com.example.pethelper.compose.health
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -55,22 +56,24 @@ fun AddHealthNoteDialog(
             Alignment.TopStart
         )
         Spacer(Modifier.height(16.dp))
-        LabelAndDateTime(
-            "Date",
-            date.format(dateParser)
-        ) { isDateOpened = true }
-        if (isDateOpened) {
-            PopupCalendar(
-                { isDateOpened = false },
-                {
-                    date = it
-                    isDateOpened = false
-                },
-                date,
-                { it <= curDay },
-                curMonth.minusYears(2),
-                curMonth
-            )
+        Box {
+            LabelAndDateTime(
+                "Date",
+                date.format(dateParser)
+            ) { isDateOpened = true }
+            if (isDateOpened) {
+                PopupCalendar(
+                    { isDateOpened = false },
+                    {
+                        date = it
+                        isDateOpened = false
+                    },
+                    date,
+                    { it <= curDay },
+                    curMonth.minusYears(2),
+                    curMonth
+                )
+            }
         }
     }
 }

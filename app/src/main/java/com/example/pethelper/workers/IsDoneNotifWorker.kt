@@ -13,13 +13,14 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.pethelper.R
-import com.example.pethelper.compose.patterns.dateParser
 import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.receivers.MarkAsDoneReceiver
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class IsDoneNotifWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
@@ -38,12 +39,13 @@ class IsDoneNotifWorker(context: Context, params: WorkerParameters) : Worker(con
             NotificationManager.IMPORTANCE_HIGH
         )
         notifManager.createNotificationChannel(channel)
+        val requestCode = "${title}_${id}_done".hashCode()
         val intent = Intent(applicationContext, MarkAsDoneReceiver::class.java)
             .apply {
                 action = markAsFun
                 putExtra("ID_KEY", id)
+                putExtra("NOTIF_ID_KEY", requestCode)
             }
-        val requestCode = "${title}_${id}_done".hashCode()
         val pendingIntent = PendingIntent.getBroadcast(
             applicationContext,
             requestCode,
@@ -76,7 +78,8 @@ fun scheduleMarkAsDoneNotif(
     contentText: String,
     markAsFun: String
 ) {
-    val parsedDate = LocalDate.parse(date, dateParser)
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
+    val parsedDate = LocalDate.parse(date, dateFormatter)
     val parsedTime = LocalTime.parse(time, timeParser)
     val notifDateTime = LocalDateTime.of(parsedDate, parsedTime)
     val targetTimeMillis = notifDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()

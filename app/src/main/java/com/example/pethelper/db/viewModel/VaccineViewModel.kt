@@ -53,7 +53,7 @@ class VaccineViewModel(application: Application) : AndroidViewModel(application)
             if (isNotif) {
                 scheduleNotif(
                     getApplication<Application>().applicationContext,
-                    id,
+                    id.toInt(),
                     name,
                     date,
                     notifDate!!,
@@ -65,7 +65,7 @@ class VaccineViewModel(application: Application) : AndroidViewModel(application)
             }
             scheduleMarkAsDoneNotif(
                 getApplication<Application>().applicationContext,
-                id,
+                id.toInt(),
                 date,
                 "Vaccine",
                 R.drawable.vaccine_dialog,

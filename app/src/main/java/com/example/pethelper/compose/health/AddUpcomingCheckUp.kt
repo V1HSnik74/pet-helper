@@ -1,5 +1,6 @@
 package com.example.pethelper.compose.health
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -7,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.pethelper.R
@@ -24,9 +24,23 @@ import com.example.pethelper.compose.patterns.times
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 @Composable
-fun AddUpcomingCheckUp(onDismiss: () -> Unit, onAddCheckUp: () -> Unit) {
+fun AddUpcomingCheckUp(
+    onDismiss: () -> Unit,
+    onAddCheckUp: (
+        name: String,
+        note: String,
+        date: String,
+        time: String,
+        isNotif: Boolean,
+        dateNotif: String,
+        timeNotif: String,
+        petId: Int
+    ) -> Unit,
+    petId: Int
+) {
     var checkUp by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var date by remember { mutableStateOf(LocalDate.now()) }
@@ -42,7 +56,18 @@ fun AddUpcomingCheckUp(onDismiss: () -> Unit, onAddCheckUp: () -> Unit) {
         "Add Upcoming Check-up",
         R.drawable.checkup_dialog,
         onDismiss,
-        onAddCheckUp,
+        {
+            onAddCheckUp(
+                checkUp,
+                note,
+                date.format(DateTimeFormatter.ISO_LOCAL_DATE),
+                time,
+                isNotif,
+                notifDate,
+                notifTime,
+                petId
+            )
+        },
         checkUp.isNotEmpty()
     ) {
         LabelAndTextField(
@@ -59,62 +84,58 @@ fun AddUpcomingCheckUp(onDismiss: () -> Unit, onAddCheckUp: () -> Unit) {
             "e.g. Veterinary \"Cute Paws\""
         )
         Spacer(Modifier.height(16.dp))
-        LabelAndDateTime(
-            "Date",
-            date.format(dateParser)
-        ) { isDateOpened = true }
-        if (isDateOpened) {
-            PopupCalendar(
-                { isDateOpened = false },
-                {
-                    date = it
-                    isDateOpened = false
-                },
-                date,
-                { it >= LocalDate.now() },
-                YearMonth.now(),
-                YearMonth.now().plusMonths(24)
-            )
+        Box() {
+            LabelAndDateTime(
+                "Date",
+                date.format(dateParser)
+            ) { isDateOpened = true }
+            if (isDateOpened) {
+                PopupCalendar(
+                    { isDateOpened = false },
+                    {
+                        date = it
+                        isDateOpened = false
+                    },
+                    date,
+                    { it >= LocalDate.now() },
+                    YearMonth.now(),
+                    YearMonth.now().plusMonths(24)
+                )
+            }
         }
         Spacer(Modifier.height(16.dp))
-        LabelAndDateTime(
-            "Time",
-            time
-        ) { isTimeOpened = true }
-        DropdownMenuPattern(
-            isTimeOpened,
-            { isTimeOpened = false },
-            times
-        ) {
-            time = it
-            isTimeOpened = false
+        Box() {
+            LabelAndDateTime(
+                "Time",
+                time
+            ) { isTimeOpened = true }
+            DropdownMenuPattern(
+                isTimeOpened,
+                { isTimeOpened = false },
+                times
+            ) {
+                time = it
+                isTimeOpened = false
+            }
         }
         Spacer(Modifier.height(16.dp))
         ReminderBlock(
-            Modifier.align(Alignment.Start),
+            Modifier,
             isNotif,
             { isNotif = it },
             true,
             notifDate,
-            { isNotifDateOpened = true },
+            {
+                notifDate = it
+                isNotifDateOpened = false
+            },
+            daySelector,
             notifTime,
-            { isNotifTimeOpened = true }
-        )
-        DropdownMenuPattern(
-            isNotifDateOpened,
-            { isNotifDateOpened = false },
-            daySelector
-        ) {
-            notifDate = it
-            isNotifDateOpened = false
-        }
-        DropdownMenuPattern(
-            isNotifTimeOpened,
-            { isNotifTimeOpened = false },
+            {
+                notifTime = it
+                isNotifTimeOpened = false
+            },
             times
-        ) {
-            notifTime = it
-            isNotifTimeOpened = false
-        }
+        )
     }
 }

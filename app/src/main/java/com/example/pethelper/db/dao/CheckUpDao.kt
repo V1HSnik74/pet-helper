@@ -8,14 +8,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CheckUpDao {
-    @Query("SELECT * FROM checkUps WHERE isDone=0 AND petId=:petId")
+    @Query("SELECT * FROM checkUps WHERE isDone=0 AND petId=:petId ORDER BY date ASC")
     fun getAllUpcomingCheckUpsByPet(petId: Int): Flow<List<CheckUp>>
 
-    @Query("SELECT * FROM checkUps WHERE isDone=1 AND petId=:petId")
+    @Query("SELECT * FROM checkUps WHERE isDone=1 AND petId=:petId ORDER BY date DESC")
     fun getCheckUpsHistoryByPet(petId: Int): Flow<List<CheckUp>>
 
     @Upsert
-    suspend fun addCheckUp(checkUp: CheckUp): Int
+    suspend fun addCheckUp(checkUp: CheckUp): Long
 
     @Query("SELECT * FROM checkUps WHERE id=:id")
     fun getCheckUpById(id: Int): Flow<CheckUp?>

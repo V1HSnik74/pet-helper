@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.pethelper.R
@@ -106,38 +105,37 @@ fun AddUpcomingVaccine(
             }
         }
         Spacer(Modifier.height(16.dp))
-        LabelAndDateTime(
-            "Time",
-            time
-        ) { isTimeOpened = true }
-        DropdownMenuPattern(
-            isTimeOpened, { isTimeOpened = false },
-            times
-        ) {
-            time = it
-            isTimeOpened = false
+        Box {
+            LabelAndDateTime(
+                "Time",
+                time
+            ) { isTimeOpened = true }
+            DropdownMenuPattern(
+                isTimeOpened, { isTimeOpened = false },
+                times
+            ) {
+                time = it
+                isTimeOpened = false
+            }
         }
         Spacer(Modifier.height(16.dp))
         ReminderBlock(
-            Modifier.align(Alignment.Start),
-            isNotif, { isNotif = it },
-            true, notifDate, { isNotifDateOpened = true },
-            notifTime, { isNotifTimeOpened = true }
-        )
-        DropdownMenuPattern(
-            isNotifDateOpened, { isNotifDateOpened = false },
-            daySelector
-        ) {
-            notifDate = it
-            isNotifDateOpened = false
-        }
-        DropdownMenuPattern(
-            isNotifTimeOpened,
-            { isNotifTimeOpened = false },
+            Modifier.fillMaxWidth(),
+            isNotif,
+            { isNotif = it },
+            true,
+            notifDate,
+            {
+                notifDate = it
+                isNotifDateOpened = false
+            },
+            daySelector,
+            notifTime,
+            {
+                notifTime = it
+                isNotifTimeOpened = false
+            },
             times
-        ) {
-            notifTime = it
-            isNotifTimeOpened = false
-        }
+        )
     }
 }

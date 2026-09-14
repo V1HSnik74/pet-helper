@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.pethelper.R
@@ -109,38 +108,38 @@ fun AddCheckUpHistory(
         Row(Modifier.fillMaxWidth()) {
             Box(Modifier.weight(1f)) {
                 LabelAndDateTime("Date", date.format(dateParser)) { isDateOpened = true }
+                if (isDateOpened) {
+                    PopupCalendar(
+                        { isDateOpened = false },
+                        {
+                            date = it
+                            dateUpc = it.plusMonths(12)
+                            isDateOpened = false
+                        },
+                        date,
+                        { it <= curDay },
+                        curMonth.minusMonths(24),
+                        curMonth
+                    )
+                }
             }
             Spacer(Modifier.width(16.dp))
             Box(Modifier.weight(1f)) {
                 LabelAndDateTime("Date Due", dateUpc.format(dateParser)) { isDateUpcOpened = true }
+                if (isDateUpcOpened) {
+                    PopupCalendar(
+                        { isDateUpcOpened = false },
+                        {
+                            dateUpc = it
+                            isDateUpcOpened = false
+                        },
+                        dateUpc,
+                        { it >= curDay },
+                        curMonth,
+                        curMonth.plusMonths(24)
+                    )
+                }
             }
-        }
-        if (isDateOpened) {
-            PopupCalendar(
-                { isDateOpened = false },
-                {
-                    date = it
-                    dateUpc = it.plusMonths(12)
-                    isDateOpened = false
-                },
-                date,
-                { it <= curDay },
-                curMonth.minusMonths(24),
-                curMonth
-            )
-        }
-        if (isDateUpcOpened) {
-            PopupCalendar(
-                { isDateUpcOpened = false },
-                {
-                    dateUpc = it
-                    isDateUpcOpened = false
-                },
-                dateUpc,
-                { it >= curDay },
-                curMonth,
-                curMonth.plusMonths(24)
-            )
         }
         Spacer(Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth()) {
@@ -161,37 +160,23 @@ fun AddCheckUpHistory(
             }
         }
         Spacer(Modifier.height(16.dp))
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .align(Alignment.Start)
-        ) {
-            ReminderBlock(
-                Modifier,
-                isNotif,
-                { isNotif = it },
-                true,
-                notifDate,
-                { isNotifDateOpened = true },
-                notifTime,
-                { isNotifTimeOpened = true }
-            )
-            DropdownMenuPattern(
-                isNotifDateOpened,
-                { isNotifDateOpened = false },
-                daySelector
-            ) {
+        ReminderBlock(
+            Modifier,
+            isNotif,
+            { isNotif = it },
+            true,
+            notifDate,
+            {
                 notifDate = it
                 isNotifDateOpened = false
-            }
-            DropdownMenuPattern(
-                isNotifTimeOpened,
-                { isNotifTimeOpened = false },
-                times
-            ) {
+            },
+            daySelector,
+            notifTime,
+            {
                 notifTime = it
                 isNotifTimeOpened = false
-            }
-        }
+            },
+            times
+        )
     }
 }

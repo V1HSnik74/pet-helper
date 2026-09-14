@@ -49,7 +49,7 @@ class PreventionViewModel(application: Application) : AndroidViewModel(applicati
             if (isNotif) {
                 scheduleNotif(
                     getApplication<Application>().applicationContext,
-                    id,
+                    id.toInt(),
                     action,
                     date,
                     dateNotif!!,
@@ -61,7 +61,7 @@ class PreventionViewModel(application: Application) : AndroidViewModel(applicati
             }
             scheduleMarkAsDoneNotif(
                 getApplication<Application>().applicationContext,
-                id,
+                id.toInt(),
                 date,
                 "Prevention",
                 R.drawable.parasites_dialog,
