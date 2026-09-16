@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pethelper.db.AppDatabase
 import com.example.pethelper.db.entity.Note
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -20,7 +21,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun addNote(description: String, category: String, date: String, petId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             noteDao.addNote(
                 Note(
                     date = date,
@@ -33,13 +34,13 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateCategory(category: String, id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             noteDao.updateCategory(category, id)
         }
     }
 
     fun updateDescription(description: String, id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             noteDao.updateDescription(description, id)
         }
     }

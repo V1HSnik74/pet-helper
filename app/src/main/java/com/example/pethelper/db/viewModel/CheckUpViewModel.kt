@@ -8,6 +8,7 @@ import com.example.pethelper.db.AppDatabase
 import com.example.pethelper.db.entity.CheckUp
 import com.example.pethelper.workers.scheduleMarkAsDoneNotif
 import com.example.pethelper.workers.scheduleNotif
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -33,7 +34,7 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
         petName: String,
         isDone: Boolean
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val checkUpId = checkUpDao.addCheckUp(
                 CheckUp(
                     name,
@@ -78,7 +79,7 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun markCheckUpAsDone(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             checkUpDao.markCheckUpAsDone(id)
         }
     }

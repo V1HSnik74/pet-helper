@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pethelper.db.AppDatabase
 import com.example.pethelper.db.entity.NoteNutrition
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -20,13 +21,13 @@ class NoteNutritionViewModel(application: Application) : AndroidViewModel(applic
     }
 
     fun addNoteNutrition(note: String, category: String, petId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             noteNutritionDao.addNoteNutrition(NoteNutrition(note, category, petId))
         }
     }
 
     fun deleteNoteNutrition(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             noteNutritionDao.deleteNoteNutrition(id)
         }
     }

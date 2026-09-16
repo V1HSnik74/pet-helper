@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pethelper.db.AppDatabase
 import com.example.pethelper.db.entity.FoodItem
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -27,7 +28,7 @@ class FoodItemViewModel(application: Application) : AndroidViewModel(application
         icon: Int,
         petId: Int
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             foodItemDao.addFoodItem(FoodItem(name, description, portionSize, unit, icon, petId))
         }
     }

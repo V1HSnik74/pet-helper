@@ -23,6 +23,7 @@ import com.example.pethelper.compose.patterns.PopupCalendar
 import com.example.pethelper.compose.patterns.ReminderBlock
 import com.example.pethelper.compose.patterns.dateParser
 import com.example.pethelper.compose.patterns.daySelector
+import com.example.pethelper.compose.patterns.getAvailableTimes
 import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.compose.patterns.times
 import java.time.LocalDate
@@ -112,7 +113,7 @@ fun AddUpcomingVaccine(
             ) { isTimeOpened = true }
             DropdownMenuPattern(
                 isTimeOpened, { isTimeOpened = false },
-                times
+                getAvailableTimes(true, date)
             ) {
                 time = it
                 isTimeOpened = false

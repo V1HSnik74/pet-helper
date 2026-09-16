@@ -95,7 +95,7 @@ fun AddUpcomingPreventionDialog(
             "e.g. Milbemax"
         )
         Spacer(Modifier.height(16.dp))
-        Box(){
+        Box{
             LabelAndDateTime(
                 "Date",
                 date.format(dateParser)

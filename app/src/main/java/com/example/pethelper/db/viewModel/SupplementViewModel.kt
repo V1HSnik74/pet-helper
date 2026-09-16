@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pethelper.db.AppDatabase
 import com.example.pethelper.db.entity.Supplement
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -20,13 +21,13 @@ class SupplementViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun addSupplement(name: String, petId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             supplementDao.addSupplement(Supplement(name, petId))
         }
     }
 
     fun deleteSupplement(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             supplementDao.deleteSupplement(id)
         }
     }

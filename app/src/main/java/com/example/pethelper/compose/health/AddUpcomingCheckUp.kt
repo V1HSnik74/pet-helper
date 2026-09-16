@@ -19,6 +19,7 @@ import com.example.pethelper.compose.patterns.PopupCalendar
 import com.example.pethelper.compose.patterns.ReminderBlock
 import com.example.pethelper.compose.patterns.dateParser
 import com.example.pethelper.compose.patterns.daySelector
+import com.example.pethelper.compose.patterns.getAvailableTimes
 import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.compose.patterns.times
 import java.time.LocalDate
@@ -84,7 +85,7 @@ fun AddUpcomingCheckUp(
             "e.g. Veterinary \"Cute Paws\""
         )
         Spacer(Modifier.height(16.dp))
-        Box() {
+        Box {
             LabelAndDateTime(
                 "Date",
                 date.format(dateParser)
@@ -104,7 +105,7 @@ fun AddUpcomingCheckUp(
             }
         }
         Spacer(Modifier.height(16.dp))
-        Box() {
+        Box {
             LabelAndDateTime(
                 "Time",
                 time
@@ -112,7 +113,7 @@ fun AddUpcomingCheckUp(
             DropdownMenuPattern(
                 isTimeOpened,
                 { isTimeOpened = false },
-                times
+                getAvailableTimes(true, date)
             ) {
                 time = it
                 isTimeOpened = false

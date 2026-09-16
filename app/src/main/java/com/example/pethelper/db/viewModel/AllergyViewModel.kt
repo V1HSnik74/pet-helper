@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pethelper.db.AppDatabase
 import com.example.pethelper.db.entity.Allergy
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -20,13 +21,13 @@ class AllergyViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun addAllergy(name: String, petId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             allergyDao.addAllergy(Allergy(name, petId))
         }
     }
 
     fun deleteAllergy(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             allergyDao.deleteAllergy(id)
         }
     }

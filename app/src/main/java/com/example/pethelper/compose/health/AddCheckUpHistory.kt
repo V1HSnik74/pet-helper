@@ -22,6 +22,7 @@ import com.example.pethelper.compose.patterns.PopupCalendar
 import com.example.pethelper.compose.patterns.ReminderBlock
 import com.example.pethelper.compose.patterns.dateParser
 import com.example.pethelper.compose.patterns.daySelector
+import com.example.pethelper.compose.patterns.getAvailableTimes
 import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.compose.patterns.times
 import java.time.LocalDate
@@ -145,7 +146,7 @@ fun AddCheckUpHistory(
         Row(Modifier.fillMaxWidth()) {
             Box(Modifier.weight(1f)) {
                 LabelAndDateTime("Time", time) { isTimeOpened = true }
-                DropdownMenuPattern(isTimeOpened, { isTimeOpened = false }, times) {
+                DropdownMenuPattern(isTimeOpened, { isTimeOpened = false }, getAvailableTimes(false, date)) {
                     time = it
                     isTimeOpened = false
                 }
@@ -153,7 +154,7 @@ fun AddCheckUpHistory(
             Spacer(Modifier.width(16.dp))
             Box(Modifier.weight(1f)) {
                 LabelAndDateTime("Time Due", timeUpc) { isTimeUpcOpened = true }
-                DropdownMenuPattern(isTimeUpcOpened, { isTimeUpcOpened = false }, times) {
+                DropdownMenuPattern(isTimeUpcOpened, { isTimeUpcOpened = false }, getAvailableTimes(true, date)) {
                     timeUpc = it
                     isTimeUpcOpened = false
                 }

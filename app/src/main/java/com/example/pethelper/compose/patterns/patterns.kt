@@ -91,9 +91,10 @@ val selectedColor = Color(0xFFFDF1ED)
 val cardColor = Color(0xFFFFFCF9)
 val brownColor = Color(0xFFAF8268)
 
-val times = (0..23).map { LocalTime.of(it, 0).format(DateTimeFormatter.ofPattern("HH:mm")) }
+val timeParser: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH)
 val daySelector =
     listOf("1 day before", "same day", "2 days before", "3 days before", "1 week before")
+val times = (0..23).map { LocalTime.of(it, 0).format(timeParser) }
 
 val medicineTimeSelector =
     listOf("1 hour before", "5 minutes before", "10 minutes before", "30 minutes before")
@@ -102,7 +103,23 @@ val preventions =
     listOf("Deworming", "Flea Prevention", "Tick Prevention", "Flea & Tick Prevention")
 
 val dateParser: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)
-val timeParser: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH)
+
+fun getAvailableTimes(isTimeDue: Boolean, date: LocalDate): List<String> {
+    val currTime = LocalTime.now()
+    val hour = if (currTime.minute > 0) currTime.hour + 1 else currTime.hour
+    val isToday = date == LocalDate.now()
+    val range = when {
+        isToday && !isTimeDue -> (0..currTime.hour)
+
+        date == LocalDate.now() && isTimeDue -> {
+            if (hour == 24) return emptyList()
+            (hour..23)
+        }
+
+        else -> (0..23)
+    }
+    return range.map { LocalTime.of(it, 0).format(timeParser) }
+}
 
 @Composable
 fun TextMaker(
@@ -843,7 +860,8 @@ private fun ProtectionStatusProtected(
         modifier = modifier
     ) {
         Column(
-            Modifier.padding(12.dp, 6.dp)
+            Modifier
+                .padding(12.dp, 6.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

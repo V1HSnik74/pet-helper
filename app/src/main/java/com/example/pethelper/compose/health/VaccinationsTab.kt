@@ -28,6 +28,8 @@ import com.example.pethelper.compose.patterns.StatusProgBar
 import com.example.pethelper.compose.patterns.UpcomingBlock
 import com.example.pethelper.db.entity.Vaccine
 import com.example.pethelper.db.viewModel.VaccineViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: String) {
@@ -42,7 +44,13 @@ fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: Str
     var isAddUpcomingDialogOpened by remember { mutableStateOf(false) }
     var isAddHistoryVaccineOpened by remember { mutableStateOf(false) }
     val percentage =
-        remember(vaccineHistory) { countVaccinePercentage(vaccineHistory, catVaccines) }
+        remember(vaccineHistory) {
+            countVaccinePercentage(
+                vaccineHistory,
+                catVaccines,
+                allUpcomingVaccines
+            )
+        }
     Column(
         Modifier
             .fillMaxWidth()
@@ -168,11 +176,37 @@ fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: Str
     }
 }
 
-private fun countVaccinePercentage(vaccines: List<Vaccine>, vaccinesList: List<String>): Float {
-    if (vaccinesList.isEmpty()) return 0f
-    val doneVaccines = vaccines.map { it.name }
-    val userCount = vaccinesList.count { requiredVac ->
-        doneVaccines.any { it.contains(requiredVac, ignoreCase = true) }
+private fun countVaccinePercentage(
+    vaccines: List<Vaccine>,
+    vaccinesList: List<String>,
+    upcomingVaccines: List<Vaccine>
+): Float {
+    if (vaccines.isEmpty()) return 0f
+    val curDate = LocalDate.now()
+    val doneVaccines = vaccines.filter {
+        val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
+        val expirationDateDef = date.plusYears(1)
+        val dateDue = (upcomingVaccines.find { vac ->
+            it.name.contains(
+                vac.name,
+                ignoreCase = true
+            ) || vac.name.contains(it.name, ignoreCase = true)
+        })?.date.orEmpty()
+        val expirationDate = if (dateDue.isEmpty()) expirationDateDef
+        else {
+            val dateDueLD = LocalDate.parse(dateDue, DateTimeFormatter.ISO_LOCAL_DATE)
+            if (dateDueLD.isBefore(expirationDateDef)) dateDueLD else expirationDateDef
+        }
+        !expirationDate.isBefore(curDate)
+    }.map { it.name }
+        .toList()
+    var userCount = 0
+    for (vac in vaccinesList) {
+        val isDone = doneVaccines.any {
+            it.contains(vac, ignoreCase = true)
+        }
+        if (isDone)
+            userCount += 1
     }
     return userCount.toFloat() / vaccinesList.size
 }

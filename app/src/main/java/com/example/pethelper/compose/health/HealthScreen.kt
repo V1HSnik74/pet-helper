@@ -194,8 +194,8 @@ private fun PetCardHealth(pet: Pet) {
                     PetCardChip(
                         if (age == 1) "$age year old" else "$age years old"
                     )
-                    PetCardChip("${pet.weight} kg")
-                    PetCardChip("${pet.height} cm")
+                    PetCardChip("${pet.weight ?: "N/A"} kg")
+                    PetCardChip("${pet.height ?: "N/A"} cm")
                 }
             }
         }

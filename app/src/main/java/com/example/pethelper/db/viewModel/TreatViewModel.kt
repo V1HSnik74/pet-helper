@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pethelper.db.AppDatabase
 import com.example.pethelper.db.entity.Treat
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -20,13 +21,13 @@ class TreatViewModel(application: Application): AndroidViewModel(application) {
     }
 
     fun addTreat(name: String, petId: Int){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             treatDao.addTreat(Treat(name, petId))
         }
     }
 
     fun deleteTreat(id: Int){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             treatDao.deleteTreat(id)
         }
     }

@@ -23,14 +23,16 @@ import com.example.pethelper.compose.patterns.PagerCardItem
 import com.example.pethelper.compose.patterns.StatusProgBar
 import com.example.pethelper.db.entity.Prevention
 import com.example.pethelper.db.viewModel.PreventionViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName: String) {
-    val allUpcomingPrevention by preventionViewModel.getAllUpcomingPreventionsByPet(petId)
+    val allUpcomingPreventions by preventionViewModel.getAllUpcomingPreventionsByPet(petId)
         .collectAsState(emptyList())
     val preventionHistory by preventionViewModel.getPreventionsHistoryByPet(petId)
         .collectAsState(emptyList())
-    val percentage = getPreventionPercentage(preventionHistory)
+    val percentage = getPreventionPercentage(preventionHistory, allUpcomingPreventions)
     val isProtectedFleas =
         remember(preventionHistory) {
             preventionHistory.any {
@@ -79,7 +81,7 @@ fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName:
         PagerCard(
             "Upcoming",
             { isUpcomingOpened = true },
-            allUpcomingPrevention
+            allUpcomingPreventions
         ) { item, hasLine ->
             PagerCardItem(
                 if (item.action.contains(
@@ -169,12 +171,36 @@ fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName:
     }
 }
 
-private fun getPreventionPercentage(preventionHistory: List<Prevention>): Float {
+private fun getPreventionPercentage(
+    preventionHistory: List<Prevention>,
+    upcomingPreventions: List<Prevention>
+): Float {
     if (preventionHistory.isEmpty()) return 0f
     val preventions = listOf("flea", "tick", "worm")
-    val donePreventions = preventionHistory.map { it.action }
-    val userCount = preventions.count { requiredPrevention ->
-        donePreventions.any { it.contains(requiredPrevention, ignoreCase = true) }
+    val currDate = LocalDate.now()
+    val donePreventions = preventionHistory.filter {
+        val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
+        val monthsToAdd = if (it.action.contains("worm", true)) 3L else 1L
+        val expirationDateDef = date.plusMonths(monthsToAdd)
+        val dateDue = upcomingPreventions.find { prev ->
+            prev.action.contains(it.action, true)
+                    || it.action.contains(prev.action, true)
+        }?.date.orEmpty()
+        val expirationDate = if (dateDue.isEmpty()) expirationDateDef
+        else {
+            val dateDueLD = LocalDate.parse(dateDue, DateTimeFormatter.ISO_LOCAL_DATE)
+            if (dateDueLD.isBefore(expirationDateDef)) dateDueLD else expirationDateDef
+        }
+        !expirationDate.isBefore(currDate)
+    }.map { it.action }
+        .toList()
+    var userCount = 0
+    for (prev in preventions) {
+        val isDone = donePreventions.any {
+            it.contains(prev, true)
+        }
+        if (isDone)
+            userCount += 1
     }
     return userCount.toFloat() / preventions.size
 }
