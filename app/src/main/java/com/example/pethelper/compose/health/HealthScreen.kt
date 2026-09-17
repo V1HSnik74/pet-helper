@@ -48,6 +48,7 @@ import com.example.pethelper.compose.patterns.buttonColor
 import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.db.entity.Pet
 import com.example.pethelper.db.viewModel.CheckUpViewModel
+import com.example.pethelper.db.viewModel.MedicineViewModel
 import com.example.pethelper.db.viewModel.NoteHealthViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
 import com.example.pethelper.db.viewModel.PreventionViewModel
@@ -74,7 +75,8 @@ fun HealthScreen(
     vaccineViewModel: VaccineViewModel,
     preventionViewModel: PreventionViewModel,
     checkUpViewModel: CheckUpViewModel,
-    noteHealthViewModel: NoteHealthViewModel
+    noteHealthViewModel: NoteHealthViewModel,
+    medicineViewModel: MedicineViewModel
 ) {
     val pet by petsViewModel.getPetById(petId).collectAsState(null)
     pet?.let {
@@ -112,7 +114,12 @@ fun HealthScreen(
                         petName
                     )
 
-                    TabButtonsHealth.MEDICATIONS -> {}
+                    TabButtonsHealth.MEDICATIONS -> MedicineTab(
+                        medicineViewModel,
+                        petId,
+                        petName
+                    )
+
                     TabButtonsHealth.PARASITES -> PreventionTab(
                         preventionViewModel,
                         petId,

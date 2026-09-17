@@ -441,7 +441,7 @@ private fun RemindMeRow(
     onClickSecond: (String) -> Unit = {}
 ) {
     Row(
-        Modifier.fillMaxWidth(),
+        Modifier.wrapContentWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -608,7 +608,9 @@ fun PagerCardItem(
 ) {
     val parsedDate =
         remember(date) {
-            LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE).format(dateParser)
+            runCatching {
+                LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE).format(dateParser)
+            }.getOrDefault(date)
         }
     Column(Modifier.fillMaxWidth()) {
         Row(

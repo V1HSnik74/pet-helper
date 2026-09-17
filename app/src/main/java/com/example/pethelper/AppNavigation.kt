@@ -15,6 +15,7 @@ import com.example.pethelper.compose.petScreens.PetSelectionScreen
 import com.example.pethelper.db.viewModel.AllergyViewModel
 import com.example.pethelper.db.viewModel.CheckUpViewModel
 import com.example.pethelper.db.viewModel.FoodItemViewModel
+import com.example.pethelper.db.viewModel.MedicineViewModel
 import com.example.pethelper.db.viewModel.NoteHealthViewModel
 import com.example.pethelper.db.viewModel.NoteNutritionViewModel
 import com.example.pethelper.db.viewModel.NoteViewModel
@@ -59,7 +60,8 @@ fun AppNavigation(
     vaccineViewModel: VaccineViewModel,
     preventionViewModel: PreventionViewModel,
     checkUpViewModel: CheckUpViewModel,
-    noteHealthViewModel: NoteHealthViewModel
+    noteHealthViewModel: NoteHealthViewModel,
+    medicineViewModel: MedicineViewModel
 ) {
     val navController = rememberNavController()
     NavHost(
@@ -126,7 +128,8 @@ fun AppNavigation(
                 vaccineViewModel,
                 preventionViewModel,
                 checkUpViewModel,
-                noteHealthViewModel
+                noteHealthViewModel,
+                medicineViewModel
             )
         }
 

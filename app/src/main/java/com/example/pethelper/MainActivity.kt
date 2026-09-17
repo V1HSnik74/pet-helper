@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import com.example.pethelper.db.viewModel.AllergyViewModel
 import com.example.pethelper.db.viewModel.CheckUpViewModel
 import com.example.pethelper.db.viewModel.FoodItemViewModel
+import com.example.pethelper.db.viewModel.MedicineViewModel
 import com.example.pethelper.db.viewModel.NoteHealthViewModel
 import com.example.pethelper.db.viewModel.NoteNutritionViewModel
 import com.example.pethelper.db.viewModel.NoteViewModel
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
     private val vaccineViewModel: VaccineViewModel by viewModels()
     private val preventionViewModel: PreventionViewModel by viewModels()
     private val checkUpViewModel: CheckUpViewModel by viewModels()
+    private val medicineViewModel: MedicineViewModel by viewModels()
     private val healthNoteViewModel: NoteHealthViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +55,8 @@ class MainActivity : ComponentActivity() {
                         vaccineViewModel,
                         preventionViewModel,
                         checkUpViewModel,
-                        healthNoteViewModel
+                        healthNoteViewModel,
+                        medicineViewModel
                     )
                 }
             }
