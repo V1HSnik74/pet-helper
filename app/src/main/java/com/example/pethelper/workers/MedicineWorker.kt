@@ -4,30 +4,42 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
+import androidx.work.CoroutineWorker
 import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.timeParser
+import com.example.pethelper.db.AppDatabase
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
-import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.minutes
 
 class MedicineWorker(
     context: Context,
     params: WorkerParameters
-) : Worker(context, params) {
-    override fun doWork(): Result {
+) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): Result {
         val name = inputData.getString("NAME_KEY")
         val id = inputData.getLong("ID_KEY", 0)
-        val time = inputData.getString("TIME_KEY")
+        val notifTime = inputData.getLong("NOTIF_TIME_KEY", 0L)
         val petName = inputData.getString("PET_NAME_KEY")
+        val stepHours = inputData.getLong("STEP_KEY", 24L)
+        val dao = AppDatabase.getInstance(applicationContext).MedicineDao()
+        val medicine = dao.getMedicineById(id).firstOrNull() ?: return Result.success()
+        val curGivingDT =
+            LocalDateTime.parse(medicine.nextTaking, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val notifTargetTime = curGivingDT.minusMinutes(notifTime)
+        if (LocalDateTime.now().isBefore(notifTargetTime))
+            return Result.success()
         val notifManager =
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "medicine_channel"
@@ -44,13 +56,18 @@ class MedicineWorker(
             .setContentText("$name is soon for $petName")
             .setAutoCancel(true)
             .build()
-        val requestCode = "${id}_medicine_$time".hashCode()
+        val requestCode = "medicine_${id}_$petName".hashCode()
         notifManager.notify(requestCode, notif)
+        if (notifTime > 0) {
+            delay(notifTime.minutes)
+        }
+        val nextGivingDT = curGivingDT.plusHours(stepHours)
+        dao.updateNextTaking(nextGivingDT.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), id)
         return Result.success()
     }
 }
 
-fun scheduleMedicineNotif (
+fun scheduleMedicineNotif(
     context: Context,
     id: Long,
     name: String,
@@ -60,101 +77,46 @@ fun scheduleMedicineNotif (
     timeNotif: String,
     petName: String,
     isNotif: Boolean
-) : LocalDateTime {
+): LocalDateTime {
     val timeLT = LocalTime.parse(startTime, timeParser)
-    val curDate = LocalDate.now()
     val minutesBefore = when (timeNotif) {
-        "1 hour before" -> 60L
         "5 minutes before" -> 5L
         "10 minutes before" -> 10L
-        "30 minutes before" -> 30L
+        "1 minute before" -> 1L
         else -> 0L
     }
-    val scheduledDateTimes = mutableListOf<LocalDateTime>()
-    when (intervalPeriod) {
-        "day" -> {
-            val scheduledIntervals = calculateNotifTimesForDay(timeLT, intervalTimes.toInt())
-            scheduledIntervals.forEachIndexed { index, time ->
-                val timeLT = LocalTime.parse(time, timeParser)
-                var targetDateTime = LocalDateTime.of(curDate, timeLT).minusMinutes(minutesBefore)
-                while (targetDateTime.isBefore(LocalDateTime.now()))
-                    targetDateTime = targetDateTime.plusDays(1)
-                scheduledDateTimes.add(targetDateTime.plusMinutes(minutesBefore))
-                if (isNotif) enqueueRequest(context, id, name, time, petName, targetDateTime, index)
-            }
-        }
-
-        "week" -> {
-            val daysStep = (7 / intervalTimes.toInt()).toLong()
-            (0 until intervalTimes.toInt()).forEach {
-                val targetDate = curDate.plusDays(it * daysStep)
-                var targetDateTime =
-                    LocalDateTime.of(targetDate, timeLT).minusMinutes(minutesBefore)
-                while (targetDateTime.isBefore(LocalDateTime.now()))
-                    targetDateTime = targetDateTime.plusWeeks(1)
-                scheduledDateTimes.add(targetDateTime.plusMinutes(minutesBefore))
-                if (isNotif) enqueueRequest(context, id, name, startTime, petName, targetDateTime, it)
-            }
-        }
-
-        "month" -> {
-            val daysStep =
-                (YearMonth.now().lengthOfMonth() / intervalTimes.toInt()).toLong()
-            (0 until intervalTimes.toInt()).forEach {
-                val targetDate = curDate.plusDays(it * daysStep)
-                var targetDateTime =
-                    LocalDateTime.of(targetDate, timeLT).minusMinutes(minutesBefore)
-                while (targetDateTime.isBefore(LocalDateTime.now()))
-                    targetDateTime = targetDateTime.plusMonths(1)
-                scheduledDateTimes.add(targetDateTime.plusMinutes(minutesBefore))
-                if (isNotif) enqueueRequest(context, id, name, startTime, petName, targetDateTime, it)
-            }
-        }
+    val stepHours = when (intervalPeriod) {
+        "day" -> 12L / intervalTimes.toInt()
+        "week" -> (7 * 24L) / intervalTimes.toInt()
+        "month" -> (YearMonth.now().lengthOfMonth() * 24L) / intervalTimes.toInt()
+        else -> 24L / intervalTimes.toInt()
     }
-   return scheduledDateTimes.min()
-}
-
-private fun enqueueRequest(
-    context: Context,
-    id: Long,
-    name: String,
-    time: String,
-    petName: String,
-    targetDateTime: LocalDateTime,
-    index: Int
-) {
-    val targetTimeMillis =
-        targetDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-    val curTimeMillis = System.currentTimeMillis()
-    val delayMillis = targetTimeMillis - curTimeMillis
-    if (delayMillis > 0) {
+    var givingDateTime = LocalDateTime.of(LocalDate.now(), timeLT)
+    var firstNotifDT = givingDateTime.minusMinutes(minutesBefore)
+    while (firstNotifDT.isBefore(LocalDateTime.now())) {
+        firstNotifDT = firstNotifDT.plusHours(stepHours)
+        givingDateTime = givingDateTime.plusHours(stepHours)
+    }
+    if (isNotif) {
+        val initDelay = java.time.Duration.between(LocalDateTime.now(), firstNotifDT).toMillis()
         val inputData = Data.Builder()
             .putLong("ID_KEY", id)
             .putString("NAME_KEY", name)
-            .putString("TIME_KEY", time)
+            .putLong("NOTIF_TIME_KEY", minutesBefore)
             .putString("PET_NAME_KEY", petName)
+            .putLong("STEP_KEY", stepHours)
             .build()
-        val workRequest = OneTimeWorkRequestBuilder<MedicineWorker>()
-            .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
+        val workRequest = PeriodicWorkRequestBuilder<MedicineWorker>(
+            stepHours, TimeUnit.HOURS
+        )
+            .setInitialDelay(initDelay, TimeUnit.MILLISECONDS)
             .setInputData(inputData)
             .build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            "medicine_work_${id}_time_$index",
-            ExistingWorkPolicy.REPLACE,
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "medicine_${id}_$petName",
+            ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
     }
-}
-
-
-private fun calculateNotifTimesForDay(
-    startTime: LocalTime,
-    intervalTimes: Int
-): List<String> {
-    if (intervalTimes == 1)
-        return listOf(startTime.format(timeParser))
-    val intervals = (24 / intervalTimes).toLong()
-    return (0 until intervalTimes).map {
-        startTime.plusHours(intervals * it).format(timeParser)
-    }
+    return givingDateTime
 }

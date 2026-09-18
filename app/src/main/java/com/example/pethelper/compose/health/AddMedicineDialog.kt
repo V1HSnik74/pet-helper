@@ -24,9 +24,7 @@ import com.example.pethelper.compose.patterns.LabelAndTextField
 import com.example.pethelper.compose.patterns.ReminderBlock
 import com.example.pethelper.compose.patterns.TextMaker
 import com.example.pethelper.compose.patterns.medicineTimeSelector
-import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.compose.patterns.times
-import java.time.LocalTime
 
 val medicineTimes =
     (1..5).map { it.toString() }
@@ -50,7 +48,7 @@ fun AddMedicineDialog(
 ) {
     var medicine by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf(LocalTime.now().format(timeParser)) }
+    var time by remember { mutableStateOf("12:00") }
     var intervalTimes by remember { mutableStateOf("1") }
     var intervalPeriod by remember { mutableStateOf("day") }
     var isNotif by remember { mutableStateOf(false) }

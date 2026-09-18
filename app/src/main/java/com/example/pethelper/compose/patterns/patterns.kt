@@ -97,7 +97,7 @@ val daySelector =
 val times = (0..23).map { LocalTime.of(it, 0).format(timeParser) }
 
 val medicineTimeSelector =
-    listOf("1 hour before", "5 minutes before", "10 minutes before", "30 minutes before")
+    listOf("5 minutes before", "1 minute before", "10 minutes before")
 
 val preventions =
     listOf("Deworming", "Flea Prevention", "Tick Prevention", "Flea & Tick Prevention")
