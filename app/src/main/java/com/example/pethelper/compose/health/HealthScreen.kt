@@ -107,7 +107,15 @@ fun HealthScreen(
                     .wrapContentHeight()
             ) { index ->
                 when (tabs[index]) {
-                    TabButtonsHealth.OVERALL -> {}
+                    TabButtonsHealth.OVERALL -> OverallTab(
+                        vaccineViewModel,
+                        medicineViewModel,
+                        preventionViewModel,
+                        checkUpViewModel,
+                        noteHealthViewModel,
+                        petId
+                    )
+
                     TabButtonsHealth.VACCINATIONS -> VaccinationsTab(
                         vaccineViewModel,
                         petId,

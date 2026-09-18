@@ -176,7 +176,7 @@ fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: Str
     }
 }
 
-private fun countVaccinePercentage(
+fun countVaccinePercentage(
     vaccines: List<Vaccine>,
     vaccinesList: List<String>,
     upcomingVaccines: List<Vaccine>

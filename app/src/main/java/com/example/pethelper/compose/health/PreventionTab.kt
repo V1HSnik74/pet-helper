@@ -171,7 +171,7 @@ fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName:
     }
 }
 
-private fun getPreventionPercentage(
+fun getPreventionPercentage(
     preventionHistory: List<Prevention>,
     upcomingPreventions: List<Prevention>
 ): Float {
