@@ -154,7 +154,7 @@ fun AddCheckUpHistory(
             Spacer(Modifier.width(16.dp))
             Box(Modifier.weight(1f)) {
                 LabelAndDateTime("Time Due", timeUpc) { isTimeUpcOpened = true }
-                DropdownMenuPattern(isTimeUpcOpened, { isTimeUpcOpened = false }, getAvailableTimes(true, date)) {
+                DropdownMenuPattern(isTimeUpcOpened, { isTimeUpcOpened = false }, getAvailableTimes(true, dateUpc)) {
                     timeUpc = it
                     isTimeUpcOpened = false
                 }

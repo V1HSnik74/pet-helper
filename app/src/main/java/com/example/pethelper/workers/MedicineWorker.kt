@@ -34,9 +34,9 @@ class MedicineWorker(
         val intervalValue = inputData.getString("INTERVAL_VALUE_KEY")
         val startTime = inputData.getString("START_TIME_KEY")
         val intervalTimes = inputData.getString("INTERVAL_TIMES_KEY")
+        val curRemaining = inputData.getInt("REMAINING_KEY", intervalTimes!!.toInt())
         val dao = AppDatabase.getInstance(applicationContext).MedicineDao()
         val medicine = dao.getMedicineById(id).firstOrNull() ?: return Result.success()
-
         val notifManager =
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "medicine_channel"
@@ -57,32 +57,29 @@ class MedicineWorker(
         notifManager.notify(requestCode, notif)
 
         val startTimeLT = LocalTime.parse(startTime, timeParser)
-        val nextGivingDT = when (intervalPeriod) {
-            "week" -> getNextGivingDT(intervalValue!!, LocalDateTime.now(), startTimeLT)
-            "month" -> getNextGivingDT(intervalValue!!, LocalDateTime.now(), startTimeLT)
-            else -> {
-                var remainingTimes = intervalTimes!!.toInt() - 1
-                val stepHours = intervalValue!!.toLong()
-                var givingDateTime = LocalDateTime.parse(medicine.nextTaking)
-                while (!givingDateTime.isAfter(LocalDateTime.now())) {
-                    if (remainingTimes > 0) {
-                        givingDateTime = givingDateTime.plusHours(stepHours)
-                        remainingTimes -= 1
-                    } else {
-                        givingDateTime = LocalDateTime.of(LocalDate.now().plusDays(1), startTimeLT)
-                        remainingTimes = intervalTimes.toInt() - 1
-                    }
-                }
-                givingDateTime
-            }
+        val lastGivingDT = LocalDateTime.parse(medicine.nextTaking)
+        val (nextGivingDT, updatedRemTimes) = when (intervalPeriod) {
+            "week" -> Pair(getNextGivingDT(intervalValue!!, lastGivingDT, startTimeLT), 0)
+            "month" -> Pair(getNextGivingDTForMonth(intervalValue!!, lastGivingDT, startTimeLT), 0)
+            else -> getNextGivingDTForDay(
+                lastGivingDT,
+                startTimeLT,
+                intervalValue!!.toLong(),
+                intervalTimes.toInt(),
+                curRemaining
+            )
         }
         dao.updateNextTaking(nextGivingDT.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), id)
         val nextNotifTargetTime = nextGivingDT.minusMinutes(notifTime)
         val delay = java.time.Duration.between(LocalDateTime.now(), nextNotifTargetTime).toMillis()
+        val nextInputData = Data.Builder()
+            .putAll(inputData)
+            .putInt("REMAINING_KEY", updatedRemTimes)
+            .build()
         if (delay > 0) {
             val nextWorkRequest = OneTimeWorkRequestBuilder<MedicineWorker>()
-                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-                .setInputData(inputData)
+                .setInitialDelay(maxOf(0L, delay), TimeUnit.MILLISECONDS)
+                .setInputData(nextInputData)
                 .build()
             WorkManager.getInstance(applicationContext).enqueueUniqueWork(
                 "medicine_${id}_$petName",
@@ -108,28 +105,26 @@ fun scheduleMedicineNotif(
 ): LocalDateTime {
     val timeLT = LocalTime.parse(startTime, timeParser)
     var givingDateTime = LocalDateTime.of(LocalDate.now(), timeLT)
+    var initRemaining = intervalTimes.toInt()
     when (intervalPeriod) {
         "day" -> {
-            var remainingTimes = intervalTimes.toInt() - 1
             val stepHours = intervalValue.toLong()
             while (!givingDateTime.isAfter(LocalDateTime.now())) {
-                if (remainingTimes > 0) {
+                if (initRemaining > 1) {
                     givingDateTime = givingDateTime.plusHours(stepHours)
-                    remainingTimes -= 1
+                    initRemaining--
                 } else {
-                    givingDateTime = LocalDateTime.of(LocalDate.now().plusDays(1), timeLT)
-                    remainingTimes = intervalTimes.toInt() - 1
+                    givingDateTime =
+                        LocalDateTime.of(givingDateTime.toLocalDate().plusDays(1), timeLT)
+                    initRemaining = intervalTimes.toInt()
                 }
             }
         }
 
-        "week" -> {
-            givingDateTime = getNextGivingDT(intervalValue, LocalDateTime.now(), timeLT)
-        }
+        "week" -> givingDateTime = getNextGivingDT(intervalValue, LocalDateTime.now(), timeLT)
+        "month" -> givingDateTime =
+            getNextGivingDTForMonth(intervalValue, LocalDateTime.now(), timeLT)
 
-        "month" -> {
-            givingDateTime = getNextGivingDTForMonth(intervalValue, LocalDateTime.now(), timeLT)
-        }
     }
     if (isNotif) {
         val minutesBefore = when (timeNotif) {
@@ -150,6 +145,7 @@ fun scheduleMedicineNotif(
             .putString("START_TIME_KEY", startTime)
             .putString("PET_NAME_KEY", petName)
             .putString("INTERVAL_TIMES_KEY", intervalTimes)
+            .putInt("REMAINING_KEY", initRemaining)
             .build()
         val workRequest = OneTimeWorkRequestBuilder<MedicineWorker>()
             .setInitialDelay(initDelay, TimeUnit.MILLISECONDS)
@@ -205,5 +201,20 @@ private fun getNextGivingDTForMonth(
             }
         }
         candidateDate = candidateDate.plusDays(1)
+    }
+}
+
+private fun getNextGivingDTForDay(
+    lastGivingDT: LocalDateTime,
+    startTime: LocalTime,
+    stepHours: Long,
+    totalTimes: Int,
+    curRemaining: Int
+): Pair<LocalDateTime, Int> {
+    return if (curRemaining > 1)
+        Pair(lastGivingDT.plusHours(stepHours), curRemaining - 1)
+    else {
+        val nextDay = lastGivingDT.toLocalDate().plusDays(1)
+        Pair(LocalDateTime.of(nextDay, startTime), totalTimes)
     }
 }

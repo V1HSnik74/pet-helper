@@ -125,7 +125,7 @@ fun OverallTab(
         )
         PagerCard(
             "Next Up",
-            {},
+            null,
             allUpcomingSorted
         ) { it, hasLine ->
             val icon = when (it) {
@@ -215,7 +215,7 @@ private fun HealthOverviewTab(
     checkUps: List<CheckUp>
 ) {
     val medicationsSize = remember(medications) { medications.size }
-    val isParasitesDone = getPreventionPercentage(preventions, upcomingPreventions) == 1f
+    val isParasitesDone = getPreventionPercentage(preventions, upcomingPreventions).percentage == 1f
     val isVaccinesDone = countVaccinePercentage(vaccines, catVaccines, vaccinesUpc) == 1f
     val isCheckUpsDone = isCheckUpDone(checkUps)
     Card(

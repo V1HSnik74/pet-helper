@@ -177,7 +177,7 @@ fun AddCoreVaccineDialog(
                 DropdownMenuPattern(
                     isTimeUpcOpened,
                     { isTimeUpcOpened = false },
-                    getAvailableTimes(true, date)
+                    getAvailableTimes(true, dateUpc)
                 ) {
                     timeUpc = it
                     isTimeUpcOpened = false
@@ -201,7 +201,11 @@ fun AddCoreVaccineDialog(
                 notifTime = it
                 isNotifTimeOpened = false
             },
-            times
+            if (notifDate == "same day") (0..LocalTime.parse(
+                timeUpc,
+                timeParser
+            ).hour).map { LocalTime.of(it, 0).format(timeParser) }
+            else times
         )
     }
 }

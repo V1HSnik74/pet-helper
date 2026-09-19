@@ -104,7 +104,8 @@ fun HealthScreen(
                 pagerState,
                 Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight()
+                    .weight(1f),
+                verticalAlignment = Alignment.Top
             ) { index ->
                 when (tabs[index]) {
                     TabButtonsHealth.OVERALL -> OverallTab(

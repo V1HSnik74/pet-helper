@@ -37,7 +37,7 @@ fun MedicineTab(medicineViewModel: MedicineViewModel, petId: Int, petName: Strin
             .padding(start = 2.dp, end = 2.dp, bottom = 20.dp, top = 2.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        PagerCard("Upcoming", {}, allUpcomingMedicines) { item, hasLine ->
+        PagerCard("Upcoming", null, allUpcomingMedicines) { item, hasLine ->
             val dateTime = LocalDateTime.parse(item.nextTaking, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             val date = dateTime.format(dateParser)
             val time = dateTime.format(timeParser)

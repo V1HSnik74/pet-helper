@@ -18,14 +18,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.HorizontalCalendar
@@ -58,7 +56,7 @@ fun CalendarMedicine(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .padding(16.dp)
         ) {
             val state = rememberCalendarState(
                 startMonth = curMonth,
@@ -79,7 +77,7 @@ fun CalendarMedicine(
                                 Locale.ENGLISH
                             )
                         } ${visibleMonth.year}",
-                        12.sp, textDecoration = TextDecoration.Underline
+                        12.sp
                     )
                 }
             }

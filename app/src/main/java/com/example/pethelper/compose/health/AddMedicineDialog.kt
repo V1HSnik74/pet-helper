@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -105,135 +107,133 @@ fun AddMedicineDialog(
             else -> medicine.isNotEmpty()
         }
     ) {
-        LabelAndTextField(
-            "Medicine", medicine, { medicine = it }, "e.g. Probiotic"
-        )
-        Spacer(Modifier.height(16.dp))
-        LabelAndTextField(
-            "Note (optional)", note, { note = it }, "e.g. FortiFlora"
-        )
-        Spacer(Modifier.height(16.dp))
-        Column(Modifier.fillMaxWidth()) {
-            TextMaker("Start Time (time you give the first portion by day)", 12.sp)
-            Spacer(Modifier.height(8.dp))
-            DropdownField(Modifier, time, times) {
-                time = it
-            }
-
-        }
-        Spacer(Modifier.height(16.dp))
         Column(
-            Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
-            TextMaker("Frequency", 12.sp)
-            Spacer(Modifier.height(8.dp))
-            Row(
-                Modifier.wrapContentWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            LabelAndTextField(
+                "Medicine", medicine, { medicine = it }, "e.g. Probiotic"
+            )
+            Spacer(Modifier.height(16.dp))
+            LabelAndTextField(
+                "Note (optional)", note, { note = it }, "e.g. FortiFlora"
+            )
+            Spacer(Modifier.height(16.dp))
+            Column(Modifier.fillMaxWidth()) {
+                TextMaker("Start Time (time you give the first portion by day)", 12.sp)
+                Spacer(Modifier.height(8.dp))
+                DropdownField(Modifier.fillMaxWidth(), time, times) {
+                    time = it
+                }
+
+            }
+            Spacer(Modifier.height(16.dp))
+            Column(
+                Modifier.fillMaxWidth()
             ) {
-                DropdownField(Modifier.weight(1f), intervalTimes, medicineTimes) {
-                    intervalTimes = it
-                }
-                Spacer(Modifier.width(8.dp))
-                TextMaker("time(s)", 12.sp, fontWeight = FontWeight.Normal)
-                Spacer(Modifier.width(8.dp))
-                TextMaker("a", 12.sp, fontWeight = FontWeight.Normal)
-                Spacer(Modifier.width(8.dp))
-                DropdownField(Modifier.weight(1f), intervalPeriod, medicinePeriods) {
-                    intervalPeriod = it
-                }
-            }
-        }
-        Spacer(Modifier.height(16.dp))
-        TextMaker("Interval", 12.sp)
-        Spacer(Modifier.height(8.dp))
-        when (intervalPeriod) {
-            "day" -> {
+                TextMaker("Frequency", 12.sp)
+                Spacer(Modifier.height(8.dp))
                 Row(
-                    Modifier.wrapContentWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextMaker("every", 12.sp, fontWeight = FontWeight.Normal)
-                    DropdownField(Modifier, intervalDays, dayIntervals) {
-                        intervalDays = it
+                    DropdownField(Modifier.width(65.dp), intervalTimes, medicineTimes) {
+                        intervalTimes = it
                     }
-                    TextMaker("hour", 12.sp, fontWeight = FontWeight.Normal)
-                }
-            }
-
-            "week" -> {
-                Row(
-                    Modifier.wrapContentWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FlowRow(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        daysOfWeek.forEach { day ->
-                            val isSelected = intervalWeeks.any {
-                                day == it
-                            }
-                            DialogChip(
-                                isSelected,
-                                day
-                            ) {
-                                if (isSelected)
-                                    intervalWeeks.remove(day)
-                                else
-                                    intervalWeeks.add(day)
-                            }
-                        }
+                    Spacer(Modifier.width(8.dp))
+                    TextMaker("time(s)", 12.sp, fontWeight = FontWeight.Normal)
+                    Spacer(Modifier.width(8.dp))
+                    TextMaker("a", 12.sp, fontWeight = FontWeight.Normal)
+                    Spacer(Modifier.width(8.dp))
+                    DropdownField(Modifier.width(100.dp), intervalPeriod, medicinePeriods) {
+                        intervalPeriod = it
                     }
                 }
             }
-
-            "month" -> {
+            Spacer(Modifier.height(16.dp))
+            Column(Modifier.fillMaxWidth()) {
+                TextMaker("Interval", 12.sp)
+                Spacer(Modifier.height(8.dp))
                 Row(
-                    Modifier.wrapContentWidth(),
+                    Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    TextMaker("the", 12.sp, fontWeight = FontWeight.Normal)
-                    Box {
-                        CardWithDropdown(
-                            intervalMonths.map { it.dayOfMonth }.sorted().joinToString(", ")
-                                .ifEmpty { "Select days" }) {
-                            isCalendarOpened = true
+                    when (intervalPeriod) {
+                        "day" -> {
+                            TextMaker("every", 12.sp, fontWeight = FontWeight.Normal)
+                            DropdownField(Modifier.width(65.dp), intervalDays, dayIntervals) {
+                                intervalDays = it
+                            }
+                            TextMaker("hour(s)", 12.sp, fontWeight = FontWeight.Normal)
                         }
-                        if (isCalendarOpened) {
-                            Popup(
-                                onDismissRequest = { isCalendarOpened = false },
-                                alignment = Alignment.TopStart,
-                                offset = IntOffset(0, 100)
+
+                        "week" -> {
+                            FlowRow(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Box(Modifier.fillMaxWidth(0.7f)) {
-                                    CalendarMedicine(intervalMonths) {
-                                        intervalMonths.clear()
-                                        intervalMonths.addAll(it)
+                                daysOfWeek.forEach { day ->
+                                    val isSelected = intervalWeeks.any {
+                                        day == it
+                                    }
+                                    DialogChip(
+                                        isSelected,
+                                        day
+                                    ) {
+                                        if (isSelected)
+                                            intervalWeeks.remove(day)
+                                        else
+                                            intervalWeeks.add(day)
                                     }
                                 }
                             }
                         }
+
+                        "month" -> {
+                            TextMaker("the", 12.sp, fontWeight = FontWeight.Normal)
+                            Box {
+                                CardWithDropdown(
+                                    Modifier.width(100.dp),
+                                    intervalMonths.map { it.dayOfMonth }.sorted().joinToString(", ")
+                                ) {
+                                    isCalendarOpened = true
+                                }
+                                if (isCalendarOpened) {
+                                    Popup(
+                                        onDismissRequest = { isCalendarOpened = false },
+                                        alignment = Alignment.TopStart,
+                                        offset = IntOffset(0, 100)
+                                    ) {
+                                        Box(Modifier.fillMaxWidth(0.7f)) {
+                                            CalendarMedicine(intervalMonths) {
+                                                intervalMonths.clear()
+                                                intervalMonths.addAll(it)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            TextMaker("of every month", 12.sp, fontWeight = FontWeight.Normal)
+                        }
                     }
                 }
+
             }
+            Spacer(Modifier.height(16.dp))
+            ReminderBlock(
+                Modifier.wrapContentWidth(),
+                isNotif,
+                { isNotif = it },
+                false,
+                timeNotif,
+                {
+                    timeNotif = it
+                },
+                medicineTimeSelector
+            )
         }
-        Spacer(Modifier.height(16.dp))
-        ReminderBlock(
-            Modifier.wrapContentWidth(),
-            isNotif,
-            { isNotif = it },
-            false,
-            timeNotif,
-            {
-                timeNotif = it
-            },
-            medicineTimeSelector
-        )
     }
 }

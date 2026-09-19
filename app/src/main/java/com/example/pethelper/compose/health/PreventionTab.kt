@@ -26,40 +26,29 @@ import com.example.pethelper.db.viewModel.PreventionViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+data class PreventionStatus(
+    val percentage: Float,
+    val isProtectedFleas: Boolean,
+    val isProtectedWorms: Boolean,
+    val isProtectedTicks: Boolean
+)
+
 @Composable
 fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName: String) {
     val allUpcomingPreventions by preventionViewModel.getAllUpcomingPreventionsByPet(petId)
         .collectAsState(emptyList())
     val preventionHistory by preventionViewModel.getPreventionsHistoryByPet(petId)
         .collectAsState(emptyList())
-    val percentage = getPreventionPercentage(preventionHistory, allUpcomingPreventions)
-    val isProtectedFleas =
-        remember(preventionHistory) {
-            preventionHistory.any {
-                it.action.contains(
-                    "flea",
-                    ignoreCase = true
-                )
-            }
-        }
-    val isProtectedTicks =
-        remember(preventionHistory) {
-            preventionHistory.any {
-                it.action.contains(
-                    "tick",
-                    ignoreCase = true
-                )
-            }
-        }
-    val isProtectedWorms =
-        remember(preventionHistory) {
-            preventionHistory.any {
-                it.action.contains(
-                    "worm",
-                    ignoreCase = true
-                )
-            }
-        }
+    val preventionCompletionInfo = remember(preventionHistory, allUpcomingPreventions) {
+        getPreventionPercentage(
+            preventionHistory,
+            allUpcomingPreventions
+        )
+    }
+    val percentage = preventionCompletionInfo.percentage
+    val isProtectedFleas = preventionCompletionInfo.isProtectedFleas
+    val isProtectedTicks = preventionCompletionInfo.isProtectedTicks
+    val isProtectedWorms = preventionCompletionInfo.isProtectedWorms
     var isUpcomingOpened by remember { mutableStateOf(false) }
     var isTreatmentHistoryOpened by remember { mutableStateOf(false) }
     Column(
@@ -174,8 +163,16 @@ fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName:
 fun getPreventionPercentage(
     preventionHistory: List<Prevention>,
     upcomingPreventions: List<Prevention>
-): Float {
-    if (preventionHistory.isEmpty()) return 0f
+): PreventionStatus {
+    if (preventionHistory.isEmpty()) return PreventionStatus(
+        0f,
+        isProtectedFleas = false,
+        isProtectedWorms = false,
+        isProtectedTicks = false
+    )
+    var isProtectedFleas = false
+    var isProtectedWorms = false
+    var isProtectedTicks = false
     val preventions = listOf("flea", "tick", "worm")
     val currDate = LocalDate.now()
     val donePreventions = preventionHistory.filter {
@@ -202,5 +199,19 @@ fun getPreventionPercentage(
         if (isDone)
             userCount += 1
     }
-    return userCount.toFloat() / preventions.size
+    if (donePreventions.any {
+            it.contains("flea", true)
+        }) isProtectedFleas = true
+    if (donePreventions.any {
+            it.contains("tick", true)
+        }) isProtectedTicks = true
+    if (donePreventions.any {
+            it.contains("worm", true)
+        }) isProtectedWorms = true
+    return PreventionStatus(
+        userCount.toFloat() / 3,
+        isProtectedFleas,
+        isProtectedWorms,
+        isProtectedTicks
+    )
 }

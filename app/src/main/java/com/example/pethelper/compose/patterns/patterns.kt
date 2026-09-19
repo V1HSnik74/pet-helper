@@ -1,6 +1,5 @@
 package com.example.pethelper.compose.patterns
 
-
 import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.BorderStroke
@@ -100,7 +99,7 @@ val medicineTimeSelector =
     listOf("5 minutes before", "1 minute before", "10 minutes before")
 
 val preventions =
-    listOf("Deworming", "Flea Prevention", "Tick Prevention", "Flea & Tick Prevention")
+    listOf("Deworming", "Flea Prevention", "Tick Prevention")
 
 val dateParser: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)
 
@@ -111,7 +110,7 @@ fun getAvailableTimes(isTimeDue: Boolean, date: LocalDate): List<String> {
     val range = when {
         isToday && !isTimeDue -> (0..currTime.hour)
 
-        date == LocalDate.now() && isTimeDue -> {
+        isToday && isTimeDue -> {
             if (hour == 24) return emptyList()
             (hour..23)
         }
@@ -202,13 +201,13 @@ fun DialogChip(isSelected: Boolean, text: String, onClick: () -> Unit) {
             .wrapContentSize()
             .clickable(interactionSource = null, indication = null) { onClick() },
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(selectedColor),
-        border = BorderStroke(1.dp, if (isSelected) buttonColor else Color.Transparent)
+        colors = CardDefaults.cardColors(if (isSelected) Color(0xFFAF8268) else cardColor),
+        border = BorderStroke(1.dp, if (isSelected) Color.Transparent else textFieldCursorColor)
     ) {
         TextMaker(
             text,
             10.sp,
-            Color(0xFF2B2B2B),
+            if (isSelected) Color.White else Color.Black,
             FontWeight.SemiBold,
             Modifier.padding(8.dp)
         )
@@ -294,19 +293,10 @@ fun LabelAndTextField(
 
 @Composable
 fun LabelAndDateTime(label: String, value: String, onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.Start) {
+    Column(Modifier.fillMaxWidth()) {
         TextMaker(label, 12.sp)
         Spacer(Modifier.height(8.dp))
-        Card(
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(cardColor),
-            border = BorderStroke(1.dp, textFieldCursorColor)
-        ) {
-            CardWithDropdown(value, onClick)
-        }
+        CardWithDropdown(Modifier.fillMaxWidth(), value, onClick)
     }
 }
 
@@ -320,8 +310,8 @@ fun DropdownMenuPattern(
     DropdownMenu(
         isExpanded, onDismiss,
         Modifier
-            .heightIn(max = 100.dp)
             .background(cardColor)
+            .height(100.dp)
     ) {
         content.forEach {
             DropdownMenuItem(
@@ -441,7 +431,7 @@ private fun RemindMeRow(
     onClickSecond: (String) -> Unit = {}
 ) {
     Row(
-        Modifier.wrapContentWidth(),
+        Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -463,8 +453,8 @@ fun DropdownField(
     onClick: (String) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    Box(modifier) {
-        CardWithDropdown(value) { isExpanded = true }
+    Box(modifier.wrapContentSize(Alignment.TopStart)) {
+        CardWithDropdown(Modifier.fillMaxWidth(), value) { isExpanded = true }
         DropdownMenuPattern(
             isExpanded, { isExpanded = false },
             content
@@ -476,9 +466,9 @@ fun DropdownField(
 }
 
 @Composable
-fun CardWithDropdown(value: String, onClick: () -> Unit) {
+fun CardWithDropdown(modifier: Modifier = Modifier, value: String, onClick: () -> Unit) {
     Card(
-        Modifier
+        modifier
             .wrapContentHeight(),
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(cardColor),
@@ -491,7 +481,12 @@ fun CardWithDropdown(value: String, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextMaker(value, 12.sp, fontWeight = FontWeight.Normal, modifier = Modifier.weight(1f))
+            TextMaker(
+                value,
+                12.sp,
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier.weight(1f, fill = false)
+            )
             Icon(
                 painterResource(R.drawable.back), "choose value",
                 Modifier
@@ -531,7 +526,7 @@ fun ScreenTitle(text: String, onBackClick: () -> Unit) {
 
 @Composable
 fun <T> PagerCard(
-    label: String, onAddItem: () -> Unit, content: List<T>,
+    label: String, onAddItem: (() -> Unit)? = null, content: List<T>,
     itemContent: @Composable (item: T, hasLine: Boolean) -> Unit
 ) {
     Card(
@@ -553,14 +548,16 @@ fun <T> PagerCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextMaker(label, 12.sp, fontWeight = FontWeight.SemiBold)
-                Icon(
-                    painterResource(R.drawable.prime_plus),
-                    contentDescription = "Add item",
-                    modifier = Modifier.clickable(
-                        indication = null,
-                        interactionSource = null
-                    ) { onAddItem() }
-                )
+                if (onAddItem != null){
+                    Icon(
+                        painterResource(R.drawable.prime_plus),
+                        contentDescription = "Add item",
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) { onAddItem() }
+                    )
+                }
             }
             HorizontalDivider(
                 Modifier.fillMaxWidth(),
