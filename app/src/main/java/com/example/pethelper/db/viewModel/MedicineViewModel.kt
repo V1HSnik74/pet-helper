@@ -25,7 +25,7 @@ class MedicineViewModel(app: Application) : AndroidViewModel(app) {
         name: String, note: String?, time: String,
         intervalTimes: String, intervalPeriod: String,
         isNotif: Boolean, timeNotif: String,
-        petId: Int, petName: String
+        petId: Int, petName: String, intervalValue: String
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val id = medicineDao.addMedicine(
@@ -38,6 +38,7 @@ class MedicineViewModel(app: Application) : AndroidViewModel(app) {
                     isNotif,
                     timeNotif,
                     "",
+                    intervalValue,
                     petId
                 )
             )
@@ -46,11 +47,12 @@ class MedicineViewModel(app: Application) : AndroidViewModel(app) {
                 id,
                 name,
                 time,
-                intervalTimes,
                 intervalPeriod,
                 timeNotif,
+                intervalValue,
                 petName,
-                isNotif
+                isNotif,
+                intervalTimes
             ).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             medicineDao.updateNextTaking(nextNotifDateTime, id)
         }

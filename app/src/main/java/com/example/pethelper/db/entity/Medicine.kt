@@ -26,6 +26,7 @@ data class Medicine(
     val isNotif: Boolean,
     val timeNotif: String,
     val nextTaking: String,
+    val intervalValue: String,
     val petId: Int,
     @PrimaryKey(true)
     val id: Long = 0

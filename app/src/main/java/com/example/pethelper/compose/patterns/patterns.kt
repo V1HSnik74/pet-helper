@@ -476,7 +476,7 @@ fun DropdownField(
 }
 
 @Composable
-private fun CardWithDropdown(value: String, onClick: () -> Unit) {
+fun CardWithDropdown(value: String, onClick: () -> Unit) {
     Card(
         Modifier
             .wrapContentHeight(),

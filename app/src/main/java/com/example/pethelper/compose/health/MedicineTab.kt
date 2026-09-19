@@ -82,7 +82,7 @@ fun MedicineTab(medicineViewModel: MedicineViewModel, petId: Int, petName: Strin
     if (isAddMedicationOpened) {
         AddMedicineDialog(
             { isAddMedicationOpened = false },
-            { medicine, note, time, intervalTimes, intervalPeriod, isNotif, timeNotif, petId ->
+            { medicine, note, time, intervalTimes, intervalPeriod, isNotif, timeNotif, intervalValue, petId ->
                 medicineViewModel.addMedicine(
                     medicine,
                     note,
@@ -92,7 +92,8 @@ fun MedicineTab(medicineViewModel: MedicineViewModel, petId: Int, petName: Strin
                     isNotif,
                     timeNotif,
                     petId,
-                    petName
+                    petName,
+                    intervalValue
                 )
                 isAddMedicationOpened = false
             },
