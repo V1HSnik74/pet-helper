@@ -13,6 +13,7 @@ import com.example.pethelper.db.dao.NoteHealthDao
 import com.example.pethelper.db.dao.NoteNutritionDao
 import com.example.pethelper.db.dao.PetsDao
 import com.example.pethelper.db.dao.PreventionDao
+import com.example.pethelper.db.dao.ReminderDao
 import com.example.pethelper.db.dao.SupplementDao
 import com.example.pethelper.db.dao.TreatDao
 import com.example.pethelper.db.dao.VaccineDao
@@ -25,6 +26,7 @@ import com.example.pethelper.db.entity.NoteHealth
 import com.example.pethelper.db.entity.NoteNutrition
 import com.example.pethelper.db.entity.Pet
 import com.example.pethelper.db.entity.Prevention
+import com.example.pethelper.db.entity.Reminder
 import com.example.pethelper.db.entity.Supplement
 import com.example.pethelper.db.entity.Treat
 import com.example.pethelper.db.entity.Vaccine
@@ -33,7 +35,8 @@ import com.example.pethelper.db.entity.Vaccine
     entities = [Pet::class, Note::class, FoodItem::class,
         Allergy::class, Supplement::class, Treat::class,
         NoteNutrition::class, Vaccine::class, Prevention::class,
-        CheckUp::class, NoteHealth::class, Medicine::class],
+        CheckUp::class, NoteHealth::class, Medicine::class,
+        Reminder::class],
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -49,6 +52,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun CheckUpDao(): CheckUpDao
     abstract fun NoteHealthDao(): NoteHealthDao
     abstract fun MedicineDao(): MedicineDao
+    abstract fun ReminderDao(): ReminderDao
 
     companion object {
         @Volatile
