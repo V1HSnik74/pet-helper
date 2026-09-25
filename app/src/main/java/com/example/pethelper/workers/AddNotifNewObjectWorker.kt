@@ -24,7 +24,7 @@ class AddNotifNewObjectWorker(
 ) : Worker(context, params) {
     override fun doWork(): Result {
         val name = inputData.getString("NAME_KEY")
-        val id = inputData.getInt("ID_KEY", 0)
+        val id = inputData.getLong("ID_KEY", 0)
         val title = inputData.getString("TITLE_KEY")
         val icon = inputData.getInt("ICON_KEY", 0)
         val petName = inputData.getString("PET_NAME_KEY")
@@ -51,7 +51,7 @@ class AddNotifNewObjectWorker(
 
 fun scheduleNotif(
     context: Context,
-    id: Int,
+    id: Long,
     name: String,
     date: String,
     notifDate: String,
@@ -77,7 +77,7 @@ fun scheduleNotif(
     val delayMillis = targetTimeMillis - currentTimeMillis
     if (delayMillis <= 0) return
     val inputData = Data.Builder()
-        .putInt("ID_KEY", id)
+        .putLong("ID_KEY", id)
         .putString("NAME_KEY", name)
         .putString("TITLE_KEY", title)
         .putInt("ICON_KEY", icon)

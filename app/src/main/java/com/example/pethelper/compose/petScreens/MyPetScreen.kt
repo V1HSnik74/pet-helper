@@ -39,11 +39,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.pethelper.R
+import com.example.pethelper.compose.patterns.PagerCard
+import com.example.pethelper.compose.patterns.PagerCardItem
 import com.example.pethelper.compose.patterns.TextMaker
 import com.example.pethelper.compose.patterns.backgroundScreenColor
 import com.example.pethelper.compose.patterns.cardColor
+import com.example.pethelper.compose.patterns.dateParser
+import com.example.pethelper.compose.patterns.timeParser
+import com.example.pethelper.db.entity.CheckUp
+import com.example.pethelper.db.entity.Medicine
+import com.example.pethelper.db.entity.Prevention
+import com.example.pethelper.db.entity.Reminder
+import com.example.pethelper.db.entity.Vaccine
+import com.example.pethelper.db.viewModel.CheckUpViewModel
+import com.example.pethelper.db.viewModel.MedicineViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
+import com.example.pethelper.db.viewModel.PreventionViewModel
+import com.example.pethelper.db.viewModel.ReminderViewModel
+import com.example.pethelper.db.viewModel.VaccineViewModel
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -51,9 +67,91 @@ import java.util.Locale
 @Composable
 fun MyPetScreen(
     petsViewModel: PetsViewModel, id: Int, onCardClick: (Int) -> Unit, onButtonClick: (Int) -> Unit,
-    onNutritionClick: (Int) -> Unit, onHealthClick: (Int) -> Unit
+    onNutritionClick: (Int) -> Unit, onHealthClick: (Int) -> Unit, onRemindersClick: (Int) -> Unit,
+    medicineViewModel: MedicineViewModel, vaccineViewModel: VaccineViewModel,
+    checkUpViewModel: CheckUpViewModel, preventionViewModel: PreventionViewModel,
+    reminderViewModel: ReminderViewModel
 ) {
     val pet by petsViewModel.getPetById(id).collectAsState(initial = null)
+    val upcomingMedicines by medicineViewModel.getAllMedicinesByPet(id)
+        .collectAsState(emptyList())
+    val upcomingVaccines by vaccineViewModel.allUpcomingVaccines(id)
+        .collectAsState(emptyList())
+    val upcomingCheckUps by checkUpViewModel.getAllUpcomingCheckUpsByPet(id)
+        .collectAsState(emptyList())
+    val upcomingPreventions by preventionViewModel.getAllUpcomingPreventionsByPet(id)
+        .collectAsState(emptyList())
+    val allReminders by reminderViewModel.getAllRemindersByPet(id)
+        .collectAsState(emptyList())
+    val upcomingReminders = remember(allReminders) {
+        allReminders.filter {
+            val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
+            val time =
+                if (!it.time.isNullOrEmpty()) LocalTime.parse(it.time, timeParser) else LocalTime.parse(
+                    "23:59",
+                    timeParser
+                )
+            val dateTime = LocalDateTime.of(date, time)
+            dateTime >= LocalDateTime.now()
+        }
+    }
+    val allUpcomingSorted = remember(
+        upcomingMedicines,
+        upcomingVaccines,
+        upcomingPreventions,
+        upcomingCheckUps,
+        upcomingReminders
+    ) {
+        buildList {
+            addAll(upcomingMedicines)
+            addAll(upcomingVaccines)
+            addAll(upcomingCheckUps)
+            addAll(upcomingPreventions)
+            addAll(upcomingReminders)
+        }.sortedBy {
+            when (it) {
+                is Vaccine -> {
+                    LocalDateTime.of(
+                        LocalDate.parse(it.date),
+                        LocalTime.parse(it.time, timeParser)
+                    )
+                }
+
+                is Prevention -> {
+                    LocalDateTime.of(
+                        LocalDate.parse(it.date),
+                        LocalTime.parse("23:59")
+                    )
+                }
+
+                is CheckUp -> {
+                    LocalDateTime.of(
+                        LocalDate.parse(it.date),
+                        LocalTime.parse(it.time, timeParser)
+                    )
+                }
+
+                is Medicine -> {
+                    LocalDateTime.parse(it.nextTaking)
+                }
+
+                is Reminder -> {
+                    LocalDateTime.of(
+                        LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE),
+                        if (!it.time.isNullOrEmpty()) LocalTime.parse(
+                            it.time,
+                            timeParser
+                        ) else LocalTime.parse(
+                            "23:59",
+                            timeParser
+                        )
+                    )
+                }
+
+                else -> null
+            }
+        }
+    }
     Box(
         Modifier
             .fillMaxSize()
@@ -120,9 +218,8 @@ fun MyPetScreen(
                             painterResource(R.drawable.bell_icon),
                             "Reminders",
                             12.sp,
-                            Modifier.weight(1f),
-                            {}
-                        )
+                            Modifier.weight(1f)
+                        ) { onRemindersClick(id) }
                         SectionButton(
                             painterResource(R.drawable.notes_icon),
                             "Notes",
@@ -132,7 +229,68 @@ fun MyPetScreen(
                     }
                 }
                 item { Spacer(Modifier.height(20.dp)) }
-                item { Upcoming() }
+                item {
+                    PagerCard(
+                        "Upcoming",
+                        null,
+                        allUpcomingSorted
+                    ) { it, hasLine ->
+                        val icon = when (it) {
+                            is Vaccine -> R.drawable.core_vaccine_icon
+                            is Prevention -> R.drawable.bug_icon
+                            is Medicine -> R.drawable.next_up
+                            is Reminder -> it.icon
+                            else -> R.drawable.checkup_icon
+                        }
+                        val title = when (it) {
+                            is Vaccine -> it.name
+                            is Prevention -> it.action
+                            is Medicine -> it.name
+                            is CheckUp -> it.name
+                            is Reminder -> it.name
+                            else -> ""
+                        }
+                        val note = when (it) {
+                            is Vaccine -> ""
+                            is Prevention -> it.note.orEmpty()
+                            is Medicine -> it.note.orEmpty()
+                            is CheckUp -> it.note.orEmpty()
+                            is Reminder -> it.note.orEmpty()
+                            else -> ""
+                        }
+                        val date = when (it) {
+                            is Vaccine -> it.date
+                            is Prevention -> it.date
+                            is Medicine -> LocalDateTime.parse(it.nextTaking).toLocalDate()
+                                .format(dateParser)
+
+                            is CheckUp -> it.date
+                            is Reminder -> it.date
+                            else -> ""
+                        }
+                        val time = when (it) {
+                            is Vaccine -> it.time
+                            is Prevention -> "23:59"
+                            is Medicine -> LocalDateTime.parse(it.nextTaking).toLocalTime()
+                                .format(timeParser)
+
+                            is CheckUp -> it.time
+                            is Reminder -> it.time ?: "23:59"
+                            else -> ""
+                        }
+                        PagerCardItem(
+                            icon,
+                            title,
+                            note,
+                            date,
+                            time,
+                            note.isNotEmpty(),
+                            true,
+                            hasLine,
+                            note.isNotEmpty()
+                        )
+                    }
+                }
                 item { Spacer(Modifier.height(20.dp)) }
                 item {
                     pet?.let { pet ->
@@ -326,34 +484,6 @@ fun AboutSection(
             }
             if (hasAbout)
                 EditAbout(modifier = Modifier, onOpenDialog = onOpenDialog)
-        }
-    }
-}
-
-
-@Composable
-fun Upcoming() {
-    Card(
-        Modifier
-            .fillMaxWidth()
-            .height(209.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(cardColor),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            Modifier
-                .fillMaxHeight()
-                .padding(16.dp)
-        ) {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TextMaker("Upcoming", 14.sp)
-                TextMaker("View all", 14.sp, Color(0xFF7B3A15))
-            }
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) { }
         }
     }
 }

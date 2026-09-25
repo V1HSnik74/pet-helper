@@ -18,6 +18,7 @@ import com.example.pethelper.db.viewModel.NoteNutritionViewModel
 import com.example.pethelper.db.viewModel.NoteViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
 import com.example.pethelper.db.viewModel.PreventionViewModel
+import com.example.pethelper.db.viewModel.ReminderViewModel
 import com.example.pethelper.db.viewModel.SupplementViewModel
 import com.example.pethelper.db.viewModel.TreatViewModel
 import com.example.pethelper.db.viewModel.VaccineViewModel
@@ -35,6 +36,7 @@ class MainActivity : ComponentActivity() {
     private val checkUpViewModel: CheckUpViewModel by viewModels()
     private val medicineViewModel: MedicineViewModel by viewModels()
     private val healthNoteViewModel: NoteHealthViewModel by viewModels()
+    private val remindersViewModel: ReminderViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -56,7 +58,8 @@ class MainActivity : ComponentActivity() {
                         preventionViewModel,
                         checkUpViewModel,
                         healthNoteViewModel,
-                        medicineViewModel
+                        medicineViewModel,
+                        remindersViewModel
                     )
                 }
             }

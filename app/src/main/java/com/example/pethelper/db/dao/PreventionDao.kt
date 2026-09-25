@@ -19,8 +19,8 @@ interface PreventionDao {
     suspend fun addPrevention(prevention: Prevention): Long
 
     @Query("UPDATE vaccines SET isDone=1 WHERE id=:id")
-    suspend fun markPreventionAsDone(id: Int)
+    suspend fun markPreventionAsDone(id: Long)
 
     @Query("SELECT * FROM preventions WHERE id=:id")
-    fun getPreventionById(id: Int): Flow<Prevention?>
+    fun getPreventionById(id: Long): Flow<Prevention?>
 }

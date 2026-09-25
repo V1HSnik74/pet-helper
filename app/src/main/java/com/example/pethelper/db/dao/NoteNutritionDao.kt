@@ -12,11 +12,11 @@ interface NoteNutritionDao {
     fun getAllNotesNutritionByPet(petId: Int): Flow<List<NoteNutrition>>
 
     @Query("SELECT * FROM notes_nutrition WHERE id=:id")
-    fun getNoteNutritionById(id: Int): Flow<NoteNutrition?>
+    fun getNoteNutritionById(id: Long): Flow<NoteNutrition?>
 
     @Upsert
     suspend fun addNoteNutrition(noteNutrition: NoteNutrition)
 
     @Query("DELETE FROM notes_nutrition WHERE id=:id")
-    suspend fun deleteNoteNutrition(id: Int)
+    suspend fun deleteNoteNutrition(id: Long)
 }

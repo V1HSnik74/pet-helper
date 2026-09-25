@@ -16,7 +16,7 @@ class TreatViewModel(application: Application): AndroidViewModel(application) {
         return treatDao.getAllTreatsByPet(petId)
     }
 
-    fun getTreatById(id: Int): Flow<Treat?>{
+    fun getTreatById(id: Long): Flow<Treat?>{
         return treatDao.getTreatById(id)
     }
 
@@ -26,7 +26,7 @@ class TreatViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
-    fun deleteTreat(id: Int){
+    fun deleteTreat(id: Long){
         viewModelScope.launch(Dispatchers.IO) {
             treatDao.deleteTreat(id)
         }

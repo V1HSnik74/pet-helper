@@ -50,7 +50,7 @@ class PreventionViewModel(application: Application) : AndroidViewModel(applicati
             if (isNotif) {
                 scheduleNotif(
                     getApplication<Application>().applicationContext,
-                    id.toInt(),
+                    id,
                     action,
                     date,
                     dateNotif!!,
@@ -62,7 +62,7 @@ class PreventionViewModel(application: Application) : AndroidViewModel(applicati
             }
             scheduleMarkAsDoneNotif(
                 getApplication<Application>().applicationContext,
-                id.toInt(),
+                id,
                 date,
                 "Prevention",
                 R.drawable.parasites_dialog,
@@ -72,13 +72,13 @@ class PreventionViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun markPreventionAsDone(id: Int) {
+    fun markPreventionAsDone(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             preventionDao.markPreventionAsDone(id)
         }
     }
 
-    fun getPreventionById(id: Int): Flow<Prevention?> {
+    fun getPreventionById(id: Long): Flow<Prevention?> {
         return preventionDao.getPreventionById(id)
     }
 

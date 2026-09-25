@@ -2,10 +2,12 @@ package com.example.pethelper.db.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
     "checkUps",
+    indices = [Index(value = ["petId"])],
     foreignKeys = [ForeignKey(
         Pet::class,
         ["id"],
@@ -24,5 +26,5 @@ data class CheckUp(
     val isDone: Boolean,
     val petId: Int,
     @PrimaryKey(true)
-    val id: Int = 0
+    val id: Long = 0
 )

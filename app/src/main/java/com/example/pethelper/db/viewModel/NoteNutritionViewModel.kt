@@ -16,7 +16,7 @@ class NoteNutritionViewModel(application: Application) : AndroidViewModel(applic
         return noteNutritionDao.getAllNotesNutritionByPet(petId)
     }
 
-    fun getNoteById(id: Int): Flow<NoteNutrition?> {
+    fun getNoteById(id: Long): Flow<NoteNutrition?> {
         return noteNutritionDao.getNoteNutritionById(id)
     }
 
@@ -26,7 +26,7 @@ class NoteNutritionViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    fun deleteNoteNutrition(id: Int) {
+    fun deleteNoteNutrition(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             noteNutritionDao.deleteNoteNutrition(id)
         }

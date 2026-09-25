@@ -12,11 +12,11 @@ interface SupplementDao {
     fun getAllSupplementsByPet(petId: Int): Flow<List<Supplement>>
 
     @Query("SELECT * FROM supplements WHERE id=:id")
-    fun getSupplementById(id: Int): Flow<Supplement>
+    fun getSupplementById(id: Long): Flow<Supplement>
 
     @Upsert
     suspend fun addSupplement(supplement: Supplement)
 
     @Query("DELETE FROM supplements WHERE id=:id")
-    suspend fun deleteSupplement(id: Int)
+    suspend fun deleteSupplement(id: Long)
 }

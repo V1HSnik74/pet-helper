@@ -18,5 +18,5 @@ interface NoteHealthDao {
     suspend fun addHealthNote(noteHealth: NoteHealth)
 
     @Query("SELECT * FROM notes_health WHERE id=:id")
-    fun getHealthNoteById(id: Int): Flow<NoteHealth?>
+    fun getHealthNoteById(id: Long): Flow<NoteHealth?>
 }

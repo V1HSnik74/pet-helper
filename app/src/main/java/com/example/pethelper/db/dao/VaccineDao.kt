@@ -19,9 +19,9 @@ interface VaccineDao {
     fun getVaccineHistoryByPet(petId: Int): Flow<List<Vaccine>>
 
     @Query("UPDATE vaccines SET isDone=1 WHERE id=:id")
-    suspend fun markVaccineAsDone(id: Int)
+    suspend fun markVaccineAsDone(id: Long)
 
     @Query("SELECT * FROM vaccines WHERE id=:id")
-    fun getVaccineById(id: Int): Flow<Vaccine?>
+    fun getVaccineById(id: Long): Flow<Vaccine?>
 
 }

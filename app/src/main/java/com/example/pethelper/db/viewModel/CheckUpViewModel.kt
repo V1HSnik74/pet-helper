@@ -51,7 +51,7 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
             if (isNotif) {
                 scheduleNotif(
                     getApplication<Application>().applicationContext,
-                    checkUpId.toInt(),
+                    checkUpId,
                     name,
                     date,
                     dateNotif!!,
@@ -63,7 +63,7 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
             }
             scheduleMarkAsDoneNotif(
                 getApplication<Application>().applicationContext,
-                checkUpId.toInt(),
+                checkUpId,
                 date,
                 "Prevention",
                 R.drawable.parasites_dialog,
@@ -74,11 +74,11 @@ class CheckUpViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun getCheckUpById(id: Int): Flow<CheckUp?> {
+    fun getCheckUpById(id: Long): Flow<CheckUp?> {
         return checkUpDao.getCheckUpById(id)
     }
 
-    fun markCheckUpAsDone(id: Int) {
+    fun markCheckUpAsDone(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             checkUpDao.markCheckUpAsDone(id)
         }

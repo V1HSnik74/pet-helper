@@ -12,11 +12,11 @@ interface TreatDao {
     fun getAllTreatsByPet(petId: Int): Flow<List<Treat>>
 
     @Query("SELECT * FROM treats WHERE id=:id")
-    fun getTreatById(id: Int): Flow<Treat?>
+    fun getTreatById(id: Long): Flow<Treat?>
 
     @Upsert
     suspend fun addTreat(treat: Treat)
 
     @Query("DELETE FROM treats WHERE id=:id")
-    suspend fun deleteTreat(id: Int)
+    suspend fun deleteTreat(id: Long)
 }

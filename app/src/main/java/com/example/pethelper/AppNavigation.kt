@@ -12,6 +12,7 @@ import com.example.pethelper.compose.notes.NotesScreen
 import com.example.pethelper.compose.nutrition.NutritionScreen
 import com.example.pethelper.compose.petScreens.PetProfileScreen
 import com.example.pethelper.compose.petScreens.PetSelectionScreen
+import com.example.pethelper.compose.reminder.RemindersScreen
 import com.example.pethelper.db.viewModel.AllergyViewModel
 import com.example.pethelper.db.viewModel.CheckUpViewModel
 import com.example.pethelper.db.viewModel.FoodItemViewModel
@@ -21,6 +22,7 @@ import com.example.pethelper.db.viewModel.NoteNutritionViewModel
 import com.example.pethelper.db.viewModel.NoteViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
 import com.example.pethelper.db.viewModel.PreventionViewModel
+import com.example.pethelper.db.viewModel.ReminderViewModel
 import com.example.pethelper.db.viewModel.SupplementViewModel
 import com.example.pethelper.db.viewModel.TreatViewModel
 import com.example.pethelper.db.viewModel.VaccineViewModel
@@ -46,6 +48,10 @@ sealed class Screen(val route: String) {
     object Health : Screen("HealthScreen/{petId}") {
         fun createRoute(petId: Int) = "HealthScreen/$petId"
     }
+
+    object Reminders : Screen("RemindersScreen/{petId}") {
+        fun createRoute(petId: Int) = "RemindersScreen/$petId"
+    }
 }
 
 @Composable
@@ -61,7 +67,8 @@ fun AppNavigation(
     preventionViewModel: PreventionViewModel,
     checkUpViewModel: CheckUpViewModel,
     noteHealthViewModel: NoteHealthViewModel,
-    medicineViewModel: MedicineViewModel
+    medicineViewModel: MedicineViewModel,
+    reminderViewModel: ReminderViewModel
 ) {
     val navController = rememberNavController()
     NavHost(
@@ -80,11 +87,21 @@ fun AppNavigation(
         ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getInt("petId") ?: -1
             MyPetScreen(
-                viewModel, petId, onCardClick = {
+                viewModel,
+                petId,
+                onCardClick = {
                     navController.navigate(Screen.Profile.createRoute(it))
-                }, onButtonClick = { navController.navigate(Screen.Notes.createRoute(it)) },
+                },
+                onButtonClick = { navController.navigate(Screen.Notes.createRoute(it)) },
                 onNutritionClick = { navController.navigate(Screen.Nutrition.createRoute(it)) },
-                onHealthClick = {navController.navigate(Screen.Health.createRoute(it))})
+                onHealthClick = { navController.navigate(Screen.Health.createRoute(it)) },
+                onRemindersClick = { navController.navigate(Screen.Reminders.createRoute(it)) },
+                medicineViewModel,
+                vaccineViewModel,
+                checkUpViewModel,
+                preventionViewModel,
+                reminderViewModel
+            )
         }
 
         composable(
@@ -133,5 +150,17 @@ fun AppNavigation(
             )
         }
 
+        composable(
+            Screen.Reminders.route,
+            arguments = listOf(navArgument("petId") { type = NavType.IntType })
+        ) {
+            val petId = it.arguments?.getInt("petId") ?: -1
+            RemindersScreen(
+                reminderViewModel,
+                petId,
+                { navController.popBackStack() },
+                viewModel
+            )
+        }
     }
 }

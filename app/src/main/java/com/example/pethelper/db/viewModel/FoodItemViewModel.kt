@@ -16,7 +16,7 @@ class FoodItemViewModel(application: Application) : AndroidViewModel(application
         return foodItemDao.getAllFoodItemsByPet(petId)
     }
 
-    fun getFoodItemById(id: Int): Flow<FoodItem?> {
+    fun getFoodItemById(id: Long): Flow<FoodItem?> {
         return foodItemDao.getFoodItemById(id)
     }
 

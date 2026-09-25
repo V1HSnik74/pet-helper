@@ -26,7 +26,7 @@ class NoteHealthViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun getHealthNoteById(id: Int): Flow<NoteHealth?> {
+    fun getHealthNoteById(id: Long): Flow<NoteHealth?> {
         return noteHealthDao.getHealthNoteById(id)
     }
 }

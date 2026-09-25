@@ -16,7 +16,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         return noteDao.getAllNotesByPet(petId)
     }
 
-    fun getNoteById(id: Int): Flow<Note?> {
+    fun getNoteById(id: Long): Flow<Note?> {
         return noteDao.getNoteById(id)
     }
 
@@ -33,13 +33,13 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateCategory(category: String, id: Int) {
+    fun updateCategory(category: String, id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             noteDao.updateCategory(category, id)
         }
     }
 
-    fun updateDescription(description: String, id: Int) {
+    fun updateDescription(description: String, id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             noteDao.updateDescription(description, id)
         }

@@ -76,7 +76,7 @@ fun RemindersCalendar(
             Row(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(40.dp)
+                horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally)
             ) {
                 Icon(
                     painterResource(R.drawable.calendar_arrow),
@@ -132,7 +132,7 @@ fun RemindersCalendar(
 private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Unit) {
     Column(
         modifier = Modifier
-            .padding(vertical = 10.dp)
+            .fillMaxWidth()
             .wrapContentSize()
             .clickable(indication = null, interactionSource = null)
             { onClick(date) },
@@ -140,7 +140,7 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         TextMaker(
-            text = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.ENGLISH),
+            text = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.ENGLISH).uppercase(),
             fontSize = 10.sp,
             color = smallTextColor,
             fontWeight = FontWeight.SemiBold,

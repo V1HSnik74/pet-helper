@@ -18,8 +18,8 @@ interface CheckUpDao {
     suspend fun addCheckUp(checkUp: CheckUp): Long
 
     @Query("SELECT * FROM checkUps WHERE id=:id")
-    fun getCheckUpById(id: Int): Flow<CheckUp?>
+    fun getCheckUpById(id: Long): Flow<CheckUp?>
 
     @Query("UPDATE checkUps SET isDone=1 WHERE id=:id")
-    suspend fun markCheckUpAsDone(id: Int)
+    suspend fun markCheckUpAsDone(id: Long)
 }

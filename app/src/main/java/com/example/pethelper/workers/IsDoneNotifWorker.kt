@@ -29,7 +29,7 @@ class IsDoneNotifWorker(context: Context, params: WorkerParameters) : Worker(con
         val icon = inputData.getInt("ICON_KEY", 0)
         val contentText = inputData.getString("CONTENT_TEXT_KEY")
         val markAsFun = inputData.getString("FUN_KEY")
-        val id = inputData.getInt("ID_KEY", 0)
+        val id = inputData.getLong("ID_KEY", 0)
         val notifManager =
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "${title}_channel"
@@ -70,7 +70,7 @@ class IsDoneNotifWorker(context: Context, params: WorkerParameters) : Worker(con
 
 fun scheduleMarkAsDoneNotif(
     context: Context,
-    id: Int,
+    id: Long,
     date: String,
     title: String,
     icon: Int,
@@ -87,7 +87,7 @@ fun scheduleMarkAsDoneNotif(
     val delayMillis = targetTimeMillis - currentTimeMillis
     if (delayMillis <= 0) return
     val inputData = Data.Builder()
-        .putInt("ID_KEY", id)
+        .putLong("ID_KEY", id)
         .putString("TITLE_KEY", title)
         .putInt("ICON_KEY", icon)
         .putString("CONTENT_TEXT_KEY", contentText)

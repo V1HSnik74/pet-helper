@@ -23,7 +23,7 @@ class VaccineViewModel(application: Application) : AndroidViewModel(application)
         return vaccineDao.getVaccineHistoryByPet(petId)
     }
 
-    fun getVaccineById(id: Int): Flow<Vaccine?> {
+    fun getVaccineById(id: Long): Flow<Vaccine?> {
         return vaccineDao.getVaccineById(id)
     }
 
@@ -54,7 +54,7 @@ class VaccineViewModel(application: Application) : AndroidViewModel(application)
             if (isNotif) {
                 scheduleNotif(
                     getApplication<Application>().applicationContext,
-                    id.toInt(),
+                    id,
                     name,
                     date,
                     notifDate!!,
@@ -66,7 +66,7 @@ class VaccineViewModel(application: Application) : AndroidViewModel(application)
             }
             scheduleMarkAsDoneNotif(
                 getApplication<Application>().applicationContext,
-                id.toInt(),
+                id,
                 date,
                 "Vaccine",
                 R.drawable.vaccine_dialog,
@@ -77,7 +77,7 @@ class VaccineViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun markVaccineAsDone(id: Int) {
+    fun markVaccineAsDone(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             vaccineDao.markVaccineAsDone(id)
         }

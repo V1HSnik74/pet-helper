@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -88,7 +89,7 @@ fun AddReminderDialog(
                 petId
             )
         },
-        name.isNotBlank() && time.isNotBlank()
+        name.isNotBlank()
     ) {
         Column(
             Modifier.fillMaxWidth(),
@@ -129,12 +130,13 @@ fun AddReminderDialog(
                                 isDateOpened = false
                             },
                             date,
-                            { date >= LocalDate.now() },
+                            { it >= LocalDate.now() },
                             YearMonth.now(),
                             YearMonth.now().plusYears(1)
                         )
                     }
                 }
+                Spacer(Modifier.width(16.dp))
                 Box(Modifier.weight(1f)) {
                     LabelAndDateTime(
                         "Time (optional)",

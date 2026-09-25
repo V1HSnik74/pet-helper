@@ -16,7 +16,7 @@ class AllergyViewModel(application: Application) : AndroidViewModel(application)
         return allergyDao.getAllAllergiesByPet(petId)
     }
 
-    fun getAllergyById(id: Int): Flow<Allergy?> {
+    fun getAllergyById(id: Long): Flow<Allergy?> {
         return allergyDao.getAllergyById(id)
     }
 
@@ -26,7 +26,7 @@ class AllergyViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun deleteAllergy(id: Int) {
+    fun deleteAllergy(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             allergyDao.deleteAllergy(id)
         }

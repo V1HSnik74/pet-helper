@@ -16,7 +16,7 @@ class SupplementViewModel(application: Application) : AndroidViewModel(applicati
         return supplementDao.getAllSupplementsByPet(petId)
     }
 
-    fun getSupplementById(id: Int): Flow<Supplement?> {
+    fun getSupplementById(id: Long): Flow<Supplement?> {
         return supplementDao.getSupplementById(id)
     }
 
@@ -26,7 +26,7 @@ class SupplementViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun deleteSupplement(id: Int) {
+    fun deleteSupplement(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             supplementDao.deleteSupplement(id)
         }

@@ -15,5 +15,5 @@ interface FoodItemDao {
     suspend fun addFoodItem(foodItem: FoodItem)
 
     @Query("SELECT * FROM food_items WHERE id=:id")
-    fun getFoodItemById(id: Int): Flow<FoodItem?>
+    fun getFoodItemById(id: Long): Flow<FoodItem?>
 }
