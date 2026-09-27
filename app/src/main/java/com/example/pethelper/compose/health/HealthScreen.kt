@@ -1,5 +1,6 @@
 package com.example.pethelper.compose.health
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -149,7 +150,7 @@ fun HealthScreen(
 }
 
 @Composable
-private fun PetCardHealth(pet: Pet) {
+fun PetCardHealth(pet: Pet) {
     val birthday = remember { pet.birthday ?: "" }
     val age = remember {
         if (birthday.isNotEmpty()) {
@@ -223,12 +224,13 @@ private fun PetCardChip(text: String) {
     Card(
         Modifier.wrapContentSize(),
         shape = RoundedCornerShape(5.dp),
-        colors = CardDefaults.cardColors(Color(0xFFFFE2D0))
+        colors = CardDefaults.cardColors(Color.Transparent),
+        border = BorderStroke(1.dp, Color(0xFFAF8268))
     ) {
         TextMaker(
             text,
             12.sp,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(8.dp, 4.dp)
         )
     }

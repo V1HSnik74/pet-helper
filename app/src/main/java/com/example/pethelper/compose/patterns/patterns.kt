@@ -526,7 +526,9 @@ fun ScreenTitle(text: String, onBackClick: () -> Unit) {
 
 @Composable
 fun <T> PagerCard(
-    label: String, onAddItem: (() -> Unit)? = null, content: List<T>,
+    label: String,
+    onAddItem: (() -> Unit)? = null,
+    content: List<T>,
     itemContent: @Composable (item: T, hasLine: Boolean) -> Unit
 ) {
     Card(
@@ -548,7 +550,7 @@ fun <T> PagerCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextMaker(label, 12.sp, fontWeight = FontWeight.SemiBold)
-                if (onAddItem != null){
+                if (onAddItem != null) {
                     Icon(
                         painterResource(R.drawable.prime_plus),
                         contentDescription = "Add item",
