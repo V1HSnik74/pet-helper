@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,10 +39,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.pethelper.R
 import com.example.pethelper.compose.health.PetCardHealth
 import com.example.pethelper.compose.patterns.HealthTip
 import com.example.pethelper.compose.patterns.PagerCard
+import com.example.pethelper.compose.patterns.PagerCardItem
 import com.example.pethelper.compose.patterns.ScreenTitle
 import com.example.pethelper.compose.patterns.TextMaker
 import com.example.pethelper.compose.patterns.backgroundColor
@@ -77,6 +82,7 @@ fun ActivityScreen(
     val neutered = pet?.neutered ?: "None"
     val weight = pet?.weight.toString().ifEmpty { "None" }
     var isAddActivityInfoOpened by remember { mutableStateOf(false) }
+    var isPlanOpened by remember { mutableStateOf(false) }
     val activityInfo by
     remember(petId) { activityInfoViewModel.getActivityInfo(petId) }.collectAsState(null)
     val activityLevel = remember(activityInfo) {
@@ -115,11 +121,12 @@ fun ActivityScreen(
         Modifier
             .fillMaxSize()
             .background(backgroundColor)
-            .padding(22.dp, 50.dp)
+            .padding(horizontal = 22.dp),
+        verticalArrangement = Arrangement.Top
     ) {
         ScreenTitle("Activity") { onBackClick() }
         Spacer(Modifier.height(20.dp))
-        PetCardHealth(pet!!)
+        pet?.let { PetCardHealth(it) }
         Spacer(Modifier.height(16.dp))
         Column(
             Modifier
@@ -131,67 +138,75 @@ fun ActivityScreen(
             PagerCard("Activity Information", { isAddActivityInfoOpened = true }, info) { item, _ ->
                 ActivityInformation(item.name, item.value, item.icon)
             }
-            Button(
-                onClick = {},
+            Column(
                 Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(16.dp, 8.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(Color.Transparent),
-                border = BorderStroke
-                    (1.dp, Color(0xFFAF8268)),
-                interactionSource = null
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    Modifier.wrapContentWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                Button(
+                    onClick = {
+                        isPlanOpened = true
+                    },
+                    Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(16.dp, 8.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(Color.Transparent),
+                    border = BorderStroke
+                        (1.dp, Color(0xFFAF8268)),
+                    interactionSource = null
                 ) {
-                    TextMaker("Activity Plan", 12.sp, fontWeight = FontWeight.SemiBold)
-                    Icon(
-                        painterResource(R.drawable.back),
-                        null,
-                        modifier = Modifier
-                            .size(22.dp)
-                            .rotate(180f)
-                    )
+                    Row(
+                        Modifier.wrapContentWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        TextMaker("Activity Plan", 12.sp, fontWeight = FontWeight.SemiBold)
+                        Icon(
+                            painterResource(R.drawable.back),
+                            null,
+                            modifier = Modifier
+                                .size(22.dp)
+                                .rotate(180f),
+                            tint = Color.Black
+                        )
+                    }
                 }
-            }
-            Button(
-                onClick = {
-                    activityViewModel.getActivitiesRecommendation(
-                        breed,
-                        weight,
-                        birthday,
-                        neutered,
-                        activityLevel.value ?: "",
-                        favActivities.value ?: "",
-                        limitations.value ?: "None",
-                        goals.value ?: "",
-                        petId
-                    )
-                },
-                Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(16.dp, 10.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(buttonColor),
-                interactionSource = null
-            ) {
-                Row(
-                    Modifier.wrapContentWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                Button(
+                    onClick = {
+                        activityViewModel.getActivitiesRecommendation(
+                            breed,
+                            weight,
+                            birthday,
+                            neutered,
+                            activityLevel.value ?: "",
+                            favActivities.value ?: "",
+                            limitations.value ?: "None",
+                            goals.value ?: "",
+                            petId
+                        )
+                    },
+                    Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(16.dp, 10.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(buttonColor),
+                    interactionSource = null
                 ) {
-                    Icon(
-                        painterResource(R.drawable.ai_icon),
-                        null,
-                        tint = Color.White
-                    )
-                    TextMaker(
-                        if (!activityViewModel.isGenerating) "Generate Activity Plan" else "Generating...",
-                        12.sp,
-                        Color.White,
-                        FontWeight.SemiBold
-                    )
+                    Row(
+                        Modifier.wrapContentWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ai_icon),
+                            null,
+                            tint = Color.White
+                        )
+                        TextMaker(
+                            if (!activityViewModel.isGenerating) "Generate Activity Plan" else "Generating...",
+                            12.sp,
+                            Color.White,
+                            FontWeight.SemiBold
+                        )
+                    }
                 }
             }
             HealthTip(
@@ -202,6 +217,7 @@ fun ActivityScreen(
                 tipText,
                 R.drawable.bulb
             )
+            Spacer(Modifier.height(50.dp))
         }
     }
     if (isAddActivityInfoOpened) {
@@ -219,6 +235,23 @@ fun ActivityScreen(
             },
             petId
         )
+    }
+    if (isPlanOpened) {
+        Dialog(
+            { isPlanOpened = false },
+            DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(Modifier.fillMaxWidth(0.9f)) {
+                PagerCard(
+                    "Activity Plan",
+                    null,
+                    activityPlan,
+                ) { item, _ ->
+                    GeneratedActivity(item)
+                    HorizontalDivider(Modifier.fillMaxWidth(), 1.dp, Color(0xFFF2F2F2))
+                }
+            }
+        }
     }
 
     activityViewModel.generatedActivities?.let { activities ->
@@ -269,7 +302,9 @@ private fun ActivityProfile() {
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
-            Modifier.fillMaxWidth(),
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.Top
         ) {
             Image(
@@ -283,7 +318,7 @@ private fun ActivityProfile() {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TextMaker("Activity Profile", 12.sp, fontWeight = FontWeight.SemiBold)
-                TextMaker(APtext, 10.sp, smallTextColor, FontWeight.Medium)
+                TextMaker(APtext, 10.sp, Color(0xFF8C8C8C), FontWeight.Medium)
             }
         }
     }

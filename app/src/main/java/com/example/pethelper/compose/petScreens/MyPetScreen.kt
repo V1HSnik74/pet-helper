@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -70,7 +71,7 @@ fun MyPetScreen(
     onNutritionClick: (Int) -> Unit, onHealthClick: (Int) -> Unit, onRemindersClick: (Int) -> Unit,
     medicineViewModel: MedicineViewModel, vaccineViewModel: VaccineViewModel,
     checkUpViewModel: CheckUpViewModel, preventionViewModel: PreventionViewModel,
-    reminderViewModel: ReminderViewModel
+    reminderViewModel: ReminderViewModel, onActivityClick: (Int) -> Unit
 ) {
     val pet by petsViewModel.getPetById(id).collectAsState(initial = null)
     val upcomingMedicines by medicineViewModel.getAllMedicinesByPet(id)
@@ -87,7 +88,10 @@ fun MyPetScreen(
         allReminders.filter {
             val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
             val time =
-                if (!it.time.isNullOrEmpty()) LocalTime.parse(it.time, timeParser) else LocalTime.parse(
+                if (!it.time.isNullOrEmpty()) LocalTime.parse(
+                    it.time,
+                    timeParser
+                ) else LocalTime.parse(
                     "23:59",
                     timeParser
                 )
@@ -198,32 +202,39 @@ fun MyPetScreen(
                 }
                 item { Spacer(Modifier.height(20.dp)) }
                 item {
-                    Row(
+                    FlowRow(
                         Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         SectionButton(
                             painterResource(R.drawable.heart_icon),
                             "Health",
-                            14.sp,
+                            12.sp,
                             Modifier.weight(1f),
                         ) { onHealthClick(id) }
                         SectionButton(
+                            painterResource(R.drawable.activity_icon),
+                            "Activity",
+                            12.sp,
+                            Modifier.weight(1f)
+                        ) { onActivityClick(id) }
+                        SectionButton(
                             painterResource(R.drawable.bone_icon),
                             "Nutrition",
-                            14.sp,
+                            12.sp,
                             Modifier.weight(1f)
                         ) { onNutritionClick(id) }
                         SectionButton(
                             painterResource(R.drawable.bell_icon),
                             "Reminders",
-                            12.sp,
+                            11.sp,
                             Modifier.weight(1f)
                         ) { onRemindersClick(id) }
                         SectionButton(
                             painterResource(R.drawable.notes_icon),
                             "Notes",
-                            14.sp,
+                            12.sp,
                             Modifier.weight(1f),
                         ) { onButtonClick(id) }
                     }
@@ -425,7 +436,7 @@ fun SectionButton(
 ) {
     Card(
         modifier
-            .height(92.dp)
+            .height(72.dp)
             .clickable(interactionSource = null, indication = null) { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(Color.White),
@@ -436,8 +447,8 @@ fun SectionButton(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(painter = painter, contentDescription = "Button icon")
-            Spacer(Modifier.height(8.dp))
+            Image(painter = painter, contentDescription = "$text button", Modifier.size(24.dp))
+            Spacer(Modifier.height(6.dp))
             TextMaker(text, fontSize, fontWeight = FontWeight.SemiBold)
         }
     }

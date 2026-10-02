@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ActivityInfoDao {
     @Query("SELECT * FROM activity_info WHERE petId=:petId")
-    fun getActivityInfo(petId: Int): Flow<ActivityInfo>
+    fun getActivityInfo(petId: Int): Flow<ActivityInfo?>
 
     @Upsert
     suspend fun addActivityInfo(activityInfo: ActivityInfo)

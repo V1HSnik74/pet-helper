@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.pethelper.compose.activity.ActivityScreen
 import com.example.pethelper.compose.health.HealthScreen
 import com.example.pethelper.compose.petScreens.MyPetScreen
 import com.example.pethelper.compose.notes.NotesScreen
@@ -13,6 +14,8 @@ import com.example.pethelper.compose.nutrition.NutritionScreen
 import com.example.pethelper.compose.petScreens.PetProfileScreen
 import com.example.pethelper.compose.petScreens.PetSelectionScreen
 import com.example.pethelper.compose.reminder.RemindersScreen
+import com.example.pethelper.db.viewModel.ActivityInfoViewModel
+import com.example.pethelper.db.viewModel.ActivityViewModel
 import com.example.pethelper.db.viewModel.AllergyViewModel
 import com.example.pethelper.db.viewModel.CheckUpViewModel
 import com.example.pethelper.db.viewModel.FoodItemViewModel
@@ -52,6 +55,10 @@ sealed class Screen(val route: String) {
     object Reminders : Screen("RemindersScreen/{petId}") {
         fun createRoute(petId: Int) = "RemindersScreen/$petId"
     }
+
+    object Activity : Screen("ActivityScreen/{petId}") {
+        fun createRoute(petId: Int) = "ActivityScreen/$petId"
+    }
 }
 
 @Composable
@@ -68,7 +75,9 @@ fun AppNavigation(
     checkUpViewModel: CheckUpViewModel,
     noteHealthViewModel: NoteHealthViewModel,
     medicineViewModel: MedicineViewModel,
-    reminderViewModel: ReminderViewModel
+    reminderViewModel: ReminderViewModel,
+    activityViewModel: ActivityViewModel,
+    activityInfoViewModel: ActivityInfoViewModel
 ) {
     val navController = rememberNavController()
     NavHost(
@@ -100,7 +109,8 @@ fun AppNavigation(
                 vaccineViewModel,
                 checkUpViewModel,
                 preventionViewModel,
-                reminderViewModel
+                reminderViewModel,
+                {navController.navigate(Screen.Activity.createRoute(it))}
             )
         }
 
@@ -160,6 +170,20 @@ fun AppNavigation(
                 petId,
                 { navController.popBackStack() },
                 viewModel
+            )
+        }
+
+        composable(
+            Screen.Activity.route,
+            arguments = listOf(navArgument("petId") { type = NavType.IntType })
+        ) {
+            val petId = it.arguments?.getInt("petId") ?: -1
+            ActivityScreen(
+                petId,
+                viewModel,
+                activityInfoViewModel,
+                {navController.popBackStack()},
+                activityViewModel
             )
         }
     }

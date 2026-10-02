@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class ActivityInfoViewModel(app: Application) : AndroidViewModel(app) {
     val activityInfoDao = AppDatabase.getInstance(app).ActivityInfoDao()
-    fun getActivityInfo(petId: Int): Flow<ActivityInfo> {
+    fun getActivityInfo(petId: Int): Flow<ActivityInfo?> {
         return activityInfoDao.getActivityInfo(petId)
     }
 

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.pethelper.db.viewModel.ActivityInfoViewModel
+import com.example.pethelper.db.viewModel.ActivityViewModel
 import com.example.pethelper.db.viewModel.AllergyViewModel
 import com.example.pethelper.db.viewModel.CheckUpViewModel
 import com.example.pethelper.db.viewModel.FoodItemViewModel
@@ -37,6 +39,8 @@ class MainActivity : ComponentActivity() {
     private val medicineViewModel: MedicineViewModel by viewModels()
     private val healthNoteViewModel: NoteHealthViewModel by viewModels()
     private val remindersViewModel: ReminderViewModel by viewModels()
+    private val activityInfoViewModel: ActivityInfoViewModel by viewModels()
+    private val activityViewModel: ActivityViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -59,7 +63,9 @@ class MainActivity : ComponentActivity() {
                         checkUpViewModel,
                         healthNoteViewModel,
                         medicineViewModel,
-                        remindersViewModel
+                        remindersViewModel,
+                        activityViewModel,
+                        activityInfoViewModel
                     )
                 }
             }
