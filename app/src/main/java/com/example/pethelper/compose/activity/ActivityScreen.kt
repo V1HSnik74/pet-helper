@@ -49,6 +49,7 @@ import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.compose.patterns.selectedColor
 import com.example.pethelper.compose.patterns.smallTextColor
 import com.example.pethelper.db.viewModel.ActivityInfoViewModel
+import com.example.pethelper.db.viewModel.ActivityViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
 
 const val APtext =
@@ -67,9 +68,14 @@ fun ActivityScreen(
     petId: Int,
     petsViewModel: PetsViewModel,
     activityInfoViewModel: ActivityInfoViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    activityViewModel: ActivityViewModel
 ) {
     val pet by petsViewModel.getPetById(petId).collectAsState(null)
+    val breed = pet?.breed ?: "None"
+    val birthday = pet?.birthday ?: "None"
+    val neutered = pet?.neutered ?: "None"
+    val weight = pet?.weight.toString().ifEmpty { "None" }
     var isAddActivityInfoOpened by remember { mutableStateOf(false) }
     val activityInfo by
     remember(petId) { activityInfoViewModel.getActivityInfo(petId) }.collectAsState(null)
@@ -102,6 +108,9 @@ fun ActivityScreen(
         )
     }
     val info = listOf(activityLevel, favActivities, limitations, goals)
+    val activityPlan by remember(petId) {
+        activityViewModel.getAllActivities(petId)
+    }.collectAsState(emptyList())
     Column(
         Modifier
             .fillMaxSize()
@@ -148,7 +157,19 @@ fun ActivityScreen(
                 }
             }
             Button(
-                onClick = {},
+                onClick = {
+                    activityViewModel.getActivitiesRecommendation(
+                        breed,
+                        weight,
+                        birthday,
+                        neutered,
+                        activityLevel.value ?: "",
+                        favActivities.value ?: "",
+                        limitations.value ?: "None",
+                        goals.value ?: "",
+                        petId
+                    )
+                },
                 Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(16.dp, 10.dp),
                 shape = RoundedCornerShape(10.dp),
@@ -165,17 +186,22 @@ fun ActivityScreen(
                         null,
                         tint = Color.White
                     )
-                    TextMaker("Generate Activity Plan", 12.sp, Color.White, FontWeight.SemiBold)
-                    HealthTip(
-                        selectedColor,
-                        buttonColor,
-                        Color(0xFFFFE3E7),
-                        "Why it matters",
-                        tipText,
-                        R.drawable.bulb
+                    TextMaker(
+                        if (!activityViewModel.isGenerating) "Generate Activity Plan" else "Generating...",
+                        12.sp,
+                        Color.White,
+                        FontWeight.SemiBold
                     )
                 }
             }
+            HealthTip(
+                selectedColor,
+                buttonColor,
+                Color(0xFFFFE3E7),
+                "Why it matters",
+                tipText,
+                R.drawable.bulb
+            )
         }
     }
     if (isAddActivityInfoOpened) {
@@ -193,6 +219,18 @@ fun ActivityScreen(
             },
             petId
         )
+    }
+
+    activityViewModel.generatedActivities?.let { activities ->
+        GeneratedActivityPlan(
+            { activityViewModel.clearGeneratedActivities() },
+            activities
+        ) {
+            activities.forEach {
+                activityViewModel.addActivity(it.name, it.note, it.duration, petId)
+            }
+            activityViewModel.clearGeneratedActivities()
+        }
     }
 }
 

@@ -32,7 +32,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +41,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pethelper.R
-import com.example.pethelper.ai.RationRecommendation
 import com.example.pethelper.db.viewModel.AllergyViewModel
 import com.example.pethelper.db.entity.FoodItem
 import com.example.pethelper.db.viewModel.FoodItemViewModel
@@ -51,8 +49,6 @@ import com.example.pethelper.db.viewModel.NoteNutritionViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
 import com.example.pethelper.db.viewModel.SupplementViewModel
 import com.example.pethelper.db.viewModel.TreatViewModel
-import kotlinx.coroutines.launch
-import com.example.pethelper.BuildConfig
 import com.example.pethelper.compose.patterns.ButtonMaker
 import com.example.pethelper.compose.patterns.TextMaker
 import com.example.pethelper.compose.patterns.backgroundColor
@@ -86,15 +82,6 @@ fun NutritionScreen(
         noteNutritionViewModel.getAllNoteNutritionByPet(petId)
     }.collectAsState(emptyList())
     var activeDialog by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
-    var generatedRation by remember { mutableStateOf<List<FoodItem>?>(null) }
-    var isGenerating by remember { mutableStateOf(false) }
-    val rationRecommendation = remember(petId) {
-        RationRecommendation(
-            apiKey = BuildConfig.GEMINI_API_KEY,
-            petId
-        )
-    }
     val currentPet by petViewModel.getPetById(petId).collectAsState(initial = null)
     val breed = currentPet?.breed ?: "None"
     val birthday = currentPet?.birthday ?: "None"
@@ -198,24 +185,17 @@ fun NutritionScreen(
                     }
                     Spacer(Modifier.height(8.dp))
                     ButtonMaker(
-                        if (isGenerating) "Generating ration..." else "Generate Ration",
+                        if (foodItemViewModel.isGenerating) "Generating ration..." else "Generate Ration",
                         {
-                            if (isGenerating) return@ButtonMaker
-                            isGenerating = true
-                            scope.launch {
-                                try {
-                                    rationRecommendation.getNutritionRecommendation(
-                                        breed,
-                                        weight, allAllergies, birthday, allSupplements, neutered
-                                    ).collect {
-                                        generatedRation = it
-                                    }
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                } finally {
-                                    isGenerating = false
-                                }
-                            }
+                            foodItemViewModel.generateRation(
+                                breed,
+                                weight,
+                                allAllergies,
+                                birthday,
+                                allSupplements,
+                                neutered,
+                                petId
+                            )
                         }
                     )
                 }
@@ -295,8 +275,8 @@ fun NutritionScreen(
             petId
         )
     }
-    generatedRation?.let { ration ->
-        ShowGeneratedRationDialog({ generatedRation = null }, {
+    foodItemViewModel.generatedRation?.let { ration ->
+        ShowGeneratedRationDialog({ foodItemViewModel.clearGeneratedRation() }, {
             ration.forEach {
                 foodItemViewModel.addFoodItem(
                     it.name,
@@ -307,7 +287,7 @@ fun NutritionScreen(
                     petId
                 )
             }
-            generatedRation = null
+            foodItemViewModel.clearGeneratedRation()
         }, ration)
     }
 }

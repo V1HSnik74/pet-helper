@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import org.json.JSONObject
 
-class RationRecommendation(apiKey: String, val petId: Int) {
+class RationRecommendation(apiKey: String) {
     private val model = GenerativeModel(
-        "gemini-3.6-flash",
+        "gemini-3.5-flash",
         apiKey, generationConfig {
             responseMimeType = "application/json"
         }
@@ -22,7 +22,8 @@ class RationRecommendation(apiKey: String, val petId: Int) {
 
     fun getNutritionRecommendation(
         breed: String, weight: String, allergies: List<Allergy>,
-        birthday: String, supplements: List<Supplement>, neutered: String
+        birthday: String, supplements: List<Supplement>, neutered: String,
+        petId: Int
     ): Flow<List<FoodItem>> = flow {
         val allergiesName =
             if (allergies.isEmpty()) "No allergies" else allergies.joinToString { it.toString() }

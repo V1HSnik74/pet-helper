@@ -115,12 +115,6 @@ private fun FoodItemCard(foodItem: FoodItem, isLine: Boolean = true) {
             ) {
                 PortionSizeCard(foodItem.portionSize, foodItem.unit)
                 Spacer(Modifier.width(10.dp))
-                Icon(
-                    painterResource(R.drawable.pen_notes),
-                    tint = Color(0xFFAF8268),
-                    modifier = Modifier.size(18.dp),
-                    contentDescription = "edit food item"
-                )
             }
         }
         if (isLine) {
