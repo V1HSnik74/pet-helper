@@ -21,11 +21,11 @@ class ActivityRecommendation(apiKey: String) {
         breed: String, weight: String,
         birthday: String, neutered: String,
         activityLevel: String, favoriteActivities: String, limitations: String,
-        goals: String, petId: Int
+        goals: String, petId: Int, animal: String
     ): Flow<List<Activity>> = flow {
         val prompt = """
             You're a vet rehabilitation specialist and expert pet trainer. 
-            Provide a list of activities suitable for the following pet:
+            Provide a list of activities suitable for the following $animal:
             Breed: $breed, Weight: $weight, Birthday date: $birthday, neutered: $neutered, activity level: $activityLevel,
             favorite activities: $favoriteActivities, physical limitations: $limitations, goals to achieve: $goals
             Requirements for the activity plan:

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -38,6 +39,7 @@ import com.example.pethelper.R
 import com.example.pethelper.db.viewModel.NoteViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
+import com.example.pethelper.compose.patterns.PastelleColors
 import com.example.pethelper.compose.patterns.TextMaker
 import com.example.pethelper.compose.patterns.backgroundColor
 import java.time.LocalDateTime
@@ -47,49 +49,60 @@ import java.util.Locale
 val categoryButtons: List<String> =
     listOf("All", "Behavior", "Habits", "Health", "Nutrition", "Other")
 
+val pink = PastelleColors.PINK
+val purple = PastelleColors.PURPLE
+val green = PastelleColors.GREEN
+val yellow = PastelleColors.YELLOW
+val blue = PastelleColors.BLUE
+
 private enum class NoteCardContent(
     val color: Color, val category: String, val icon: Int, val categoryCardColor: Color,
-    val textColor: Color
+    val textColor: Color, val borderColor: Color
 ) {
     BEHAVIOR(
-        Color(0xFFFFDEE6),
+        pink.color,
         "Behavior",
         R.drawable.star_notes,
-        Color(0xFFFFC7D5),
-        Color(0xFFE27380)
+        pink.buttonColor,
+        pink.iconColor,
+        pink.borderColor
     ),
     HABITS(
-        Color(0xFFF9EDFF),
+        purple.color,
         "Habits",
         R.drawable.pen_notes,
-        Color(0xFFEAD6FF),
-        Color(0xFFC042FF)
+        purple.buttonColor,
+        purple.iconColor,
+        purple.borderColor
     ),
     HEALTH(
-        Color(0xFFD2FFCD),
+        green.color,
         "Health",
         R.drawable.heart_notes,
-        Color(0xFFABFEA2),
-        Color(0xFF2AAE1E)
+        green.buttonColor,
+        green.iconColor,
+        green.borderColor
     ),
     NUTRITION(
-        Color(0xFFFFF6D3),
+        yellow.color,
         "Nutrition",
         R.drawable.bone_notes,
-        Color(0xFFFFEA98),
-        Color(0xFFFF9A0C)
+        yellow.buttonColor,
+        yellow.iconColor,
+        yellow.borderColor
     ),
     OTHER(
-        Color(0xFFE2FFFF),
+        blue.color,
         "Other",
         R.drawable.note_notes,
-        Color(0xFFC0FAFA),
-        Color(0xFF3D86E4)
+        blue.buttonColor,
+        blue.iconColor,
+        blue.borderColor
     )
 }
 
 @Composable
-fun NotesScreen(petId: Int, noteViewModel: NoteViewModel) {
+fun NotesScreen(petId: Int, noteViewModel: NoteViewModel, onBackClick: (Int) -> Unit) {
     var selectedCategory by remember { mutableStateOf("All") }
     val allNotes by remember(selectedCategory, petId) {
         if (selectedCategory == "All") noteViewModel.allNotes(petId)
@@ -110,34 +123,39 @@ fun NotesScreen(petId: Int, noteViewModel: NoteViewModel) {
         Modifier
             .fillMaxSize()
             .background(backgroundColor)
+            .padding(horizontal = 22.dp)
     ) {
+        Spacer(Modifier.height(64.dp))
         Row(
             Modifier
-                .fillMaxWidth()
-                .padding(top = 68.dp, start = 16.dp, end = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(R.drawable.back),
-                contentDescription = "back"
+                contentDescription = "back",
+                Modifier
+                    .size(12.dp, 24.dp)
+                    .clickable(indication = null, interactionSource = null) { onBackClick(petId) }
             )
             TextMaker("Notes", 18.sp, fontWeight = FontWeight.SemiBold)
-
             Icon(
-                painter = painterResource(R.drawable.plus),
+                painter = painterResource(R.drawable.prime_plus),
                 contentDescription = "add note",
-                modifier = Modifier.clickable(
-                    interactionSource = null,
-                    indication = null
-                ) { isDialogActive = true }
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable(
+                        interactionSource = null,
+                        indication = null
+                    ) { isDialogActive = true }
             )
 
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 28.dp)
         ) {
             FlowRow(
                 Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -163,7 +181,7 @@ fun NotesScreen(petId: Int, noteViewModel: NoteViewModel) {
                         )
                     }
                 }
-            } else TextMaker("You haven't added any notes yet!", 18.sp)
+            }
             Spacer(Modifier.height(40.dp))
         }
     }
@@ -202,7 +220,7 @@ private fun NoteCard(category: NoteCardContent, date: String, description: Strin
             .wrapContentHeight(),
         colors = CardDefaults.cardColors(category.color),
         shape = RoundedCornerShape(15.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
+        border = BorderStroke(1.dp, category.borderColor)
     ) {
         Column(
             Modifier
@@ -213,14 +231,15 @@ private fun NoteCard(category: NoteCardContent, date: String, description: Strin
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painterResource(category.icon),
-                    contentDescription = "${category.category} icon"
+                    null,
+                    Modifier.size(22.dp)
                 )
-                Spacer(Modifier.width(16.dp))
-                TextMaker(date, 14.sp, fontWeight = FontWeight.Normal)
+                Spacer(Modifier.width(10.dp))
+                TextMaker(date, 12.sp, fontWeight = FontWeight.Medium)
             }
-            Spacer(Modifier.height(20.dp))
-            TextMaker(description, 18.sp, fontWeight = FontWeight.Normal)
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
+            TextMaker(description, 14.sp, fontWeight = FontWeight.Normal)
+            Spacer(Modifier.height(16.dp))
             NoteCardCategoryCard(category.category, category.categoryCardColor, category.textColor)
         }
     }
@@ -236,9 +255,10 @@ private fun NoteCardCategoryCard(category: String, color: Color, textColor: Colo
     {
         TextMaker(
             category,
-            14.sp,
+            12.sp,
             textColor,
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+            FontWeight.SemiBold,
+            Modifier.padding(12.dp, 6.dp)
         )
     }
 }

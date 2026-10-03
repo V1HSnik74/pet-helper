@@ -244,7 +244,8 @@ fun DialogPattern(
                 ) {
                     Image(
                         contentDescription = "$label icon",
-                        painter = painterResource(icon)
+                        painter = painterResource(icon),
+                        modifier = Modifier.size(40.dp)
                     )
                     Spacer(Modifier.height(8.dp))
                     TextMaker(label, 16.sp)
@@ -252,7 +253,7 @@ fun DialogPattern(
                     content()
                     Spacer(Modifier.height(16.dp))
                     ButtonMaker(
-                        "Save $label",
+                        label,
                         onSaveInfo,
                         enabled = isEnabled
                     )
@@ -276,14 +277,14 @@ fun DialogPattern(
 fun LabelAndTextField(
     label: String, value: String, onValueChange: (String) -> Unit,
     placeholder: String, singleLine: Boolean = true,
-    contentAlignment: Alignment = Alignment.CenterStart
+    contentAlignment: Alignment = Alignment.CenterStart, height: Dp  = 40.dp
 ) {
     Column(horizontalAlignment = Alignment.Start) {
         TextMaker(label, 12.sp)
         Spacer(Modifier.height(8.dp))
         BasicTextFieldMaker(
             value, { onValueChange(it) }, placeholder, Modifier
-                .height(40.dp)
+                .height(height)
                 .fillMaxWidth(),
             singleLine,
             contentAlignment = contentAlignment

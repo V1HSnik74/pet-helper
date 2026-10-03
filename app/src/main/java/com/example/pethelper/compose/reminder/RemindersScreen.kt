@@ -66,7 +66,7 @@ fun RemindersScreen(
         Modifier
             .fillMaxSize()
             .background(backgroundColor)
-            .padding(22.dp, 50.dp)
+            .padding(22.dp, 64.dp)
     ) {
         Row(
             Modifier.fillMaxWidth(),
@@ -83,7 +83,7 @@ fun RemindersScreen(
             Icon(
                 painterResource(R.drawable.prime_plus), "add reminder",
                 Modifier
-                    .size(22.dp)
+                    .size(24.dp)
                     .clickable(indication = null, interactionSource = null) {
                         isAddReminderOpened = true
                     }

@@ -1,12 +1,8 @@
 package com.example.pethelper.compose.petScreens
 
-
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,10 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,9 +38,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.pethelper.R
+import com.example.pethelper.compose.patterns.ButtonMaker
 import com.example.pethelper.compose.patterns.TextMaker
 import com.example.pethelper.compose.patterns.backgroundScreenColor
-import com.example.pethelper.compose.patterns.buttonColor
+import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.compose.patterns.smallTextColor
 import com.example.pethelper.db.viewModel.PetsViewModel
 
@@ -56,119 +52,113 @@ fun PetSelectionScreen(
 ) {
     val petList by viewModel.allPets.collectAsState(initial = emptyList())
     var showDialog by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
+    Column(
+        Modifier
             .fillMaxSize()
             .background(backgroundScreenColor)
-            .padding(top = 76.dp, start = 26.dp, end = 26.dp, bottom = 160.dp)
+            .padding(22.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextMaker("Select Your Pet", 24.sp, fontWeight = FontWeight.SemiBold)
-                Spacer(modifier = Modifier.width(16.dp))
-                Image(
-                    painter = painterResource(R.drawable.paw),
-                    contentDescription = "paw icon",
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-            Spacer(Modifier.height(24.dp))
-            TextMaker(
-                "Choose a pet to view their information", 14.sp,
-                Color(0xFFB0A8A3), modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Spacer(Modifier.height(24.dp))
-            if (petList.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 20.dp)
-                ) {
-                    items(petList) { pet ->
-                        PetCard(
-                            { onPetClick(pet.id) }, pet.name, pet.breed, pet.photo
-                        )
-                    }
-                }
-            } else {
-                TextMaker(
-                    "No pets added yet", 24.sp,
-                    modifier = Modifier
-                        .weight(1f)
-                        .align(Alignment.CenterHorizontally)
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = { showDialog = true },
+        Spacer(Modifier.height(64.dp))
+        TextMaker("Select Your Pet", 20.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(20.dp))
+        TextMaker(
+            "Choose a pet to view their information", 14.sp,
+            Color(0xFFB0A8A3)
+        )
+        Spacer(Modifier.height(16.dp))
+        if (petList.isNotEmpty()) {
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+                    .weight(1f)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 20.dp, top = 1.dp)
+            ) {
+                items(petList) { pet ->
+                    PetCard(
+                        { onPetClick(pet.id) }, pet.name, pet.breed, pet.photo, pet.sex, pet.animal
+                    )
+                }
+            }
+        } else {
+            TextMaker(
+                "No pets added yet", 24.sp,
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterHorizontally)
             )
-            {
-                TextMaker("+ Add New Pet", 16.sp, Color.White)
-            }
-            if (showDialog) {
-                AddPetDialog(
-                    { showDialog = false },
-                    { name, breed, gender, photo ->
-                        viewModel.addPet(name, breed, gender, photo)
-                        showDialog = false
-                    })
-            }
         }
-
+        Spacer(modifier = Modifier.height(16.dp))
+        ButtonMaker("Add New Pet", {
+            showDialog = true
+        })
+        Spacer(Modifier.height(50.dp))
+        if (showDialog) {
+            AddPetDialog(
+                { showDialog = false },
+                { name, breed, gender, photo, animal ->
+                    viewModel.addPet(name, breed, gender, photo, animal)
+                    showDialog = false
+                })
+        }
     }
 }
 
 @Composable
-private fun PetCard(onClick: () -> Unit, name: String, breed: String, photo: String?) {
-    val interactionSource = remember { MutableInteractionSource() }
+private fun PetCard(
+    onClick: () -> Unit,
+    name: String,
+    breed: String,
+    photo: String?,
+    gender: String,
+    animal: String
+) {
     Card(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
-            .height(108.dp)
+            .height(96.dp)
             .clickable(
-                interactionSource = interactionSource,
+                interactionSource = null,
                 indication = null
             ) { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(Color.White),
+        colors = CardDefaults.cardColors(cardColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(20.dp, 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Start
         ) {
             AsyncImage(
                 modifier = Modifier
-                    .size(76.dp)
+                    .size(70.dp)
                     .clip(CircleShape),
                 model = photo ?: R.drawable.no_pet_photo,
                 contentDescription = "Pet photo",
-                contentScale = if (photo == null) {
+                contentScale = if (photo == null)
                     ContentScale.Fit
-                } else {
-                    ContentScale.Crop
-                }
+                else ContentScale.Crop
             )
             Spacer(Modifier.width(24.dp))
             Column(Modifier.weight(1f)) {
-                TextMaker(name, 18.sp)
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painterResource(if (animal == "dog") R.drawable.dog else R.drawable.cat),
+                        null,
+                        tint = if (gender == "Male") Color(0xFF0EA2ED) else Color(0xFFFF409C)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    TextMaker(name, 16.sp)
+                }
                 Spacer(Modifier.height(8.dp))
-                TextMaker(breed, 14.sp, smallTextColor)
+                TextMaker(breed, 12.sp, smallTextColor)
             }
         }
     }

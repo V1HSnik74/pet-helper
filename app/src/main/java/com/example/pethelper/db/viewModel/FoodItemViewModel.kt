@@ -49,7 +49,7 @@ class FoodItemViewModel(application: Application) : AndroidViewModel(application
     private set
 
     fun generateRation(breed: String, weight: String, allAllergies: List<Allergy>, birthday: String,
-                       allSupplements: List<Supplement>, neutered: String, petId: Int){
+                       allSupplements: List<Supplement>, neutered: String, petId: Int, animal: String){
         if (isGenerating) return
         isGenerating = true
         viewModelScope.launch {
@@ -57,7 +57,7 @@ class FoodItemViewModel(application: Application) : AndroidViewModel(application
                 rationRecommendation.getNutritionRecommendation(
                     breed,
                     weight, allAllergies, birthday, allSupplements, neutered,
-                    petId
+                    petId, animal
                 ).collect {
                     generatedRation = it
                 }

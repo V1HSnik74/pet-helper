@@ -42,10 +42,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.pethelper.R
-import com.example.pethelper.compose.health.PetCardHealth
 import com.example.pethelper.compose.patterns.HealthTip
 import com.example.pethelper.compose.patterns.PagerCard
-import com.example.pethelper.compose.patterns.PagerCardItem
 import com.example.pethelper.compose.patterns.ScreenTitle
 import com.example.pethelper.compose.patterns.TextMaker
 import com.example.pethelper.compose.patterns.backgroundColor
@@ -53,6 +51,7 @@ import com.example.pethelper.compose.patterns.buttonColor
 import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.compose.patterns.selectedColor
 import com.example.pethelper.compose.patterns.smallTextColor
+import com.example.pethelper.compose.petScreens.PetInfoCard
 import com.example.pethelper.db.viewModel.ActivityInfoViewModel
 import com.example.pethelper.db.viewModel.ActivityViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
@@ -81,6 +80,7 @@ fun ActivityScreen(
     val birthday = pet?.birthday ?: "None"
     val neutered = pet?.neutered ?: "None"
     val weight = pet?.weight.toString().ifEmpty { "None" }
+    val animal = pet?.animal ?: "None"
     var isAddActivityInfoOpened by remember { mutableStateOf(false) }
     var isPlanOpened by remember { mutableStateOf(false) }
     val activityInfo by
@@ -126,7 +126,19 @@ fun ActivityScreen(
     ) {
         ScreenTitle("Activity") { onBackClick() }
         Spacer(Modifier.height(20.dp))
-        pet?.let { PetCardHealth(it) }
+        pet?.let {
+            PetInfoCard(
+                it.photo,
+                it.name,
+                it.sex,
+                breed,
+                birthday,
+                it.weight,
+                it.height,
+                {},
+                it.animal
+            )
+        }
         Spacer(Modifier.height(16.dp))
         Column(
             Modifier
@@ -181,7 +193,8 @@ fun ActivityScreen(
                             favActivities.value ?: "",
                             limitations.value ?: "None",
                             goals.value ?: "",
-                            petId
+                            petId,
+                            animal
                         )
                     },
                     Modifier.fillMaxWidth(),

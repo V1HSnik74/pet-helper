@@ -8,6 +8,7 @@ data class Pet(
     val name: String,
     val breed: String,
     val sex: String,
+    val animal: String,
     val photo: String? = null,
     val weight: Float? = null,
     val height: Float? = null,

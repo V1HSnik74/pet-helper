@@ -47,7 +47,8 @@ class ActivityViewModel(app: Application) : AndroidViewModel(app) {
         favoriteActivities: String,
         limitations: String,
         goals: String,
-        petId: Int
+        petId: Int,
+        animal: String
     ) {
         if (isGenerating) return
         isGenerating = true
@@ -62,7 +63,8 @@ class ActivityViewModel(app: Application) : AndroidViewModel(app) {
                     favoriteActivities,
                     limitations,
                     goals,
-                    petId
+                    petId,
+                    animal
                 ).collect { generatedActivities = it }
             } catch (e: Exception) {
                 e.printStackTrace()

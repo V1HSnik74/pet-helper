@@ -110,7 +110,7 @@ fun AppNavigation(
                 checkUpViewModel,
                 preventionViewModel,
                 reminderViewModel,
-                {navController.navigate(Screen.Activity.createRoute(it))}
+                { navController.navigate(Screen.Activity.createRoute(it)) }
             )
         }
 
@@ -127,7 +127,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("petId") { type = NavType.IntType })
         ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getInt("petId") ?: -1
-            NotesScreen(petId, noteViewModel)
+            NotesScreen(petId, noteViewModel) { navController.popBackStack() }
         }
 
         composable(
@@ -182,7 +182,7 @@ fun AppNavigation(
                 petId,
                 viewModel,
                 activityInfoViewModel,
-                {navController.popBackStack()},
+                { navController.popBackStack() },
                 activityViewModel
             )
         }

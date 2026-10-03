@@ -13,9 +13,9 @@ class PetsViewModel(application: Application) : AndroidViewModel(application) {
     val petsDao = AppDatabase.getInstance(application).petsDao()
     val allPets: Flow<List<Pet>> = petsDao.getAllPets()
 
-    fun addPet(name: String, breed: String, sex: String, photo: String?) {
+    fun addPet(name: String, breed: String, sex: String, photo: String?, animal: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            petsDao.upsertPet(Pet(name, breed, sex, photo))
+            petsDao.upsertPet(Pet(name, breed, sex, animal, photo))
         }
     }
 

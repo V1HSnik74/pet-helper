@@ -23,14 +23,14 @@ class RationRecommendation(apiKey: String) {
     fun getNutritionRecommendation(
         breed: String, weight: String, allergies: List<Allergy>,
         birthday: String, supplements: List<Supplement>, neutered: String,
-        petId: Int
+        petId: Int, animal: String
     ): Flow<List<FoodItem>> = flow {
         val allergiesName =
             if (allergies.isEmpty()) "No allergies" else allergies.joinToString { it.toString() }
         val supplementsName =
             if (supplements.isEmpty()) "No supplements" else supplements.joinToString { it.toString() }
         val prompt = """
-            You're a vet nutritionist. Provide a list of food items suitable for the following pet (only natural food, no dry pet food etc):
+            You're a vet nutritionist. Provide a list of food items suitable for the following $animal (only natural food, no dry pet food etc):
             Breed: $breed, Weight: $weight, Birthday date: $birthday, neutered: $neutered, Allergies: $allergiesName, Supplements which the pet takes: $supplementsName
             For the unit use grams, cups, oz, lb, kg (choose the most suitable unit from this list), 
             you can also add short notes for the product (1-5 words) if you want so.

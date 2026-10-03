@@ -87,6 +87,7 @@ fun NutritionScreen(
     val birthday = currentPet?.birthday ?: "None"
     val neutered = currentPet?.neutered ?: "None"
     val weight = currentPet?.weight.toString().ifEmpty { "None" }
+    val animal = currentPet?.animal ?: "None"
 
     Column(
         Modifier
@@ -194,7 +195,8 @@ fun NutritionScreen(
                                 birthday,
                                 allSupplements,
                                 neutered,
-                                petId
+                                petId,
+                                animal
                             )
                         }
                     )
