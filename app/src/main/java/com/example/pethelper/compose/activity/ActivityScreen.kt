@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,7 +23,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +39,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.pethelper.R
+import com.example.pethelper.compose.patterns.GenerateButton
+import com.example.pethelper.compose.patterns.GeneratedActivityNutritionPlan
+import com.example.pethelper.compose.patterns.GeneratedItem
 import com.example.pethelper.compose.patterns.HealthTip
 import com.example.pethelper.compose.patterns.PagerCard
 import com.example.pethelper.compose.patterns.ScreenTitle
@@ -57,7 +57,7 @@ import com.example.pethelper.db.viewModel.ActivityViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
 
 const val APtext =
-    "Tell us about your pet’s activity level, preferences and  any special needs. This helps us create the best plan for your pet"
+    "Tell us about your pet’s activity level, preferences and any special needs. This helps us create the best plan for your pet"
 const val tipText =
     "Regular activity keeps your pet physically healthy, mentally stimulated and helps prevent behavioral issues like boredom or anxiety"
 
@@ -149,6 +149,8 @@ fun ActivityScreen(
             ActivityProfile()
             PagerCard("Activity Information", { isAddActivityInfoOpened = true }, info) { item, _ ->
                 ActivityInformation(item.name, item.value, item.icon)
+                if (item != info.last())
+                    HorizontalDivider(Modifier.fillMaxWidth(), 1.dp, Color(0xFFF2F2F2))
             }
             Column(
                 Modifier.fillMaxWidth(),
@@ -166,24 +168,10 @@ fun ActivityScreen(
                         (1.dp, Color(0xFFAF8268)),
                     interactionSource = null
                 ) {
-                    Row(
-                        Modifier.wrapContentWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        TextMaker("Activity Plan", 12.sp, fontWeight = FontWeight.SemiBold)
-                        Icon(
-                            painterResource(R.drawable.back),
-                            null,
-                            modifier = Modifier
-                                .size(22.dp)
-                                .rotate(180f),
-                            tint = Color.Black
-                        )
-                    }
+                    TextMaker("Activity Plan", 12.sp, fontWeight = FontWeight.SemiBold)
                 }
-                Button(
-                    onClick = {
+                GenerateButton(
+                    {
                         activityViewModel.getActivitiesRecommendation(
                             breed,
                             weight,
@@ -197,30 +185,9 @@ fun ActivityScreen(
                             animal
                         )
                     },
-                    Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(16.dp, 10.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(buttonColor),
-                    interactionSource = null
-                ) {
-                    Row(
-                        Modifier.wrapContentWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.ai_icon),
-                            null,
-                            tint = Color.White
-                        )
-                        TextMaker(
-                            if (!activityViewModel.isGenerating) "Generate Activity Plan" else "Generating...",
-                            12.sp,
-                            Color.White,
-                            FontWeight.SemiBold
-                        )
-                    }
-                }
+                    "Activity",
+                    activityViewModel.isGenerating
+                )
             }
             HealthTip(
                 selectedColor,
@@ -259,24 +226,31 @@ fun ActivityScreen(
                     "Activity Plan",
                     null,
                     activityPlan,
-                ) { item, _ ->
-                    GeneratedActivity(item)
-                    HorizontalDivider(Modifier.fillMaxWidth(), 1.dp, Color(0xFFF2F2F2))
+                ) { item, hasLine ->
+                    GeneratedItem(item.name, item.note, R.drawable.addactivityicon, item.duration)
+                    if (hasLine)
+                        HorizontalDivider(Modifier.fillMaxWidth(), 1.dp, Color(0xFFF2F2F2))
                 }
             }
         }
     }
 
     activityViewModel.generatedActivities?.let { activities ->
-        GeneratedActivityPlan(
+        GeneratedActivityNutritionPlan(
             { activityViewModel.clearGeneratedActivities() },
-            activities
-        ) {
-            activities.forEach {
-                activityViewModel.addActivity(it.name, it.note, it.duration, petId)
+            activities,
+            {
+                activities.forEach {
+                    activityViewModel.addActivity(it.name, it.note, it.duration, petId)
+                }
+                activityViewModel.clearGeneratedActivities()
+            },
+            "Activity",
+            { item ->
+                GeneratedItem(item.name, item.note, R.drawable.addactivityicon, item.duration)
             }
-            activityViewModel.clearGeneratedActivities()
-        }
+        )
+
     }
 }
 

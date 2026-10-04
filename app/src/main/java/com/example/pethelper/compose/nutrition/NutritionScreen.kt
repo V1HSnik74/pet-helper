@@ -1,7 +1,6 @@
 package com.example.pethelper.compose.nutrition
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,18 +41,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pethelper.R
 import com.example.pethelper.db.viewModel.AllergyViewModel
-import com.example.pethelper.db.entity.FoodItem
 import com.example.pethelper.db.viewModel.FoodItemViewModel
 import com.example.pethelper.db.entity.NoteNutrition
 import com.example.pethelper.db.viewModel.NoteNutritionViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
 import com.example.pethelper.db.viewModel.SupplementViewModel
 import com.example.pethelper.db.viewModel.TreatViewModel
-import com.example.pethelper.compose.patterns.ButtonMaker
+import com.example.pethelper.compose.patterns.GenerateButton
+import com.example.pethelper.compose.patterns.GeneratedActivityNutritionPlan
+import com.example.pethelper.compose.patterns.GeneratedItem
+import com.example.pethelper.compose.patterns.PagerCard
 import com.example.pethelper.compose.patterns.TextMaker
 import com.example.pethelper.compose.patterns.backgroundColor
+import com.example.pethelper.compose.patterns.brownColor
 import com.example.pethelper.compose.patterns.cardColor
-import com.example.pethelper.compose.patterns.selectedColor
 
 @Composable
 fun NutritionScreen(
@@ -93,12 +94,12 @@ fun NutritionScreen(
         Modifier
             .fillMaxSize()
             .background(backgroundColor)
+            .padding(22.dp, 64.dp)
     ) {
         Box(
             Modifier
                 .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(top = 64.dp, start = 16.dp, end = 16.dp),
+                .wrapContentHeight(),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -115,116 +116,85 @@ fun NutritionScreen(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-
+        Spacer(Modifier.height(20.dp))
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(24.dp)
                 .weight(1f)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             TextMaker(
                 "Monitor your pet's diet including allergies, supplements and treats!",
                 14.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Normal
             )
-            Spacer(Modifier.height(20.dp))
-            Card(
-                Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(cardColor),
-                shape = RoundedCornerShape(15.dp),
-                elevation = CardDefaults.cardElevation(2.dp)
-            ) {
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                ) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp, 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TextMaker("Food & Portion", 12.sp, fontWeight = FontWeight.SemiBold)
-                        Icon(
-                            painterResource(R.drawable.prime_plus),
-                            contentDescription = "Add Food Item",
-                            modifier = Modifier.clickable(
-                                indication = null,
-                                interactionSource = null
-                            ) {
-                                activeDialog = "foodItem"
-                            }
-                        )
-                    }
+            PagerCard(
+                "Food & Portion",
+                { activeDialog = "foodItem" },
+                allFoodItems
+            ) { item, hasNote ->
+                GeneratedItem(
+                    item.name,
+                    item.description,
+                    item.icon,
+                    item.portionSize + " " + item.unit
+                )
+                if (hasNote)
                     HorizontalDivider(
                         Modifier.fillMaxWidth(),
                         1.dp,
                         Color(0xFFF2F2F2)
                     )
-                    if (allFoodItems.isNotEmpty()) {
-                        val pages = remember(allFoodItems) { allFoodItems.chunked(4) }
-                        val pagerState = rememberPagerState(pageCount = { pages.size })
-                        HorizontalPager(
-                            pagerState,
-                            Modifier
-                                .fillMaxWidth()
-                                .height(272.dp),
-                            verticalAlignment = Alignment.Top
-                        ) { currentPage ->
-                            val pageItems = pages[currentPage]
-                            Column(Modifier.fillMaxWidth()) {
-                                pageItems.forEachIndexed { index, foodItem ->
-                                    FoodItemCard(foodItem, !(pageItems.size == 4 && index == 3))
-                                }
-
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    ButtonMaker(
-                        if (foodItemViewModel.isGenerating) "Generating ration..." else "Generate Ration",
-                        {
-                            foodItemViewModel.generateRation(
-                                breed,
-                                weight,
-                                allAllergies,
-                                birthday,
-                                allSupplements,
-                                neutered,
-                                petId,
-                                animal
-                            )
-                        }
-                    )
-                }
             }
-            Spacer(Modifier.height(20.dp))
+            GenerateButton(
+                {
+                    foodItemViewModel.generateRation(
+                        breed,
+                        weight,
+                        allAllergies,
+                        birthday,
+                        allSupplements,
+                        neutered,
+                        petId,
+                        animal
+                    )
+                },
+                "Nutrition",
+                foodItemViewModel.isGenerating
+            )
             OtherNutritionCard(
-                "Allergies & Sensitives", onAddClick = { activeDialog = "allergyDialog" },
-                cardFunc = {
+                "Allergies & Sensitives",
+                {
                     allAllergies.forEach {
                         OtherNutritionCardItem(it.name) { allergyViewModel.deleteAllergy(it.id) }
                     }
-                })
-            Spacer(Modifier.height(20.dp))
-            OtherNutritionCard("Supplements", cardFunc = {
-                allSupplements.forEach {
-                    OtherNutritionCardItem(it.name) { supplementViewModel.deleteSupplement(it.id) }
-                }
-            }, onAddClick = { activeDialog = "supplementDialog" })
-            Spacer(Modifier.height(20.dp))
-            OtherNutritionCard("Treats", cardFunc = {
-                allTreats.forEach {
-                    OtherNutritionCardItem(it.name) { treatViewModel.deleteTreat(it.id) }
-                }
-            }, onAddClick = { activeDialog = "treatDialog" })
-            Spacer(Modifier.height(20.dp))
-            NotesCard(allNotes) { activeDialog = "notesDialog" }
-            Spacer(Modifier.height(30.dp))
+                },
+                { activeDialog = "allergyDialog" },
+                allAllergies.isNotEmpty()
+            )
+            OtherNutritionCard(
+                "Supplements", {
+                    allSupplements.forEach {
+                        OtherNutritionCardItem(it.name) { supplementViewModel.deleteSupplement(it.id) }
+                    }
+                }, { activeDialog = "supplementDialog" },
+                allSupplements.isNotEmpty()
+            )
+            OtherNutritionCard(
+                "Treats", {
+                    allTreats.forEach {
+                        OtherNutritionCardItem(it.name) { treatViewModel.deleteTreat(it.id) }
+                    }
+                }, { activeDialog = "treatDialog" },
+                allTreats.isNotEmpty()
+            )
+            PagerCard("Notes", { activeDialog = "notesDialog" }, allNotes, true) {
+                item, hasLine ->
+                NoteItemCard(item, hasLine)
+            }
+            Spacer(Modifier.height(2.dp))
         }
     }
     when (activeDialog) {
@@ -278,85 +248,31 @@ fun NutritionScreen(
         )
     }
     foodItemViewModel.generatedRation?.let { ration ->
-        ShowGeneratedRationDialog({ foodItemViewModel.clearGeneratedRation() }, {
-            ration.forEach {
-                foodItemViewModel.addFoodItem(
-                    it.name,
-                    it.description,
-                    it.portionSize,
-                    it.unit,
-                    it.icon,
-                    petId
-                )
-            }
-            foodItemViewModel.clearGeneratedRation()
-        }, ration)
-    }
-}
-
-@Composable
-private fun FoodItemCard(foodItem: FoodItem, isLine: Boolean = true) {
-    Column(Modifier.fillMaxWidth()) {
-        Row(
-            Modifier
-                .padding(12.dp, 8.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                Modifier.wrapContentSize(), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Image(painterResource(foodItem.icon), contentDescription = "food item icon")
-                Spacer(Modifier.width(10.dp))
-                Column(
-                    Modifier.wrapContentSize(),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    TextMaker(foodItem.name, 12.sp, fontWeight = FontWeight.SemiBold)
-                    if (foodItem.description.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
-                        TextMaker(foodItem.description, 10.sp, fontWeight = FontWeight.Normal)
-                    }
+        GeneratedActivityNutritionPlan(
+            { foodItemViewModel.clearGeneratedRation() },
+            ration,
+            {
+                ration.forEach {
+                    foodItemViewModel.addFoodItem(
+                        it.name,
+                        it.description,
+                        it.portionSize,
+                        it.unit,
+                        it.icon,
+                        petId
+                    )
                 }
-            }
-            Row(
-                Modifier.wrapContentSize(), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                PortionSizeCard(foodItem.portionSize, foodItem.unit)
-                Spacer(Modifier.width(10.dp))
-                Icon(
-                    painterResource(R.drawable.pen_notes),
-                    tint = Color(0xFFAF8268),
-                    modifier = Modifier.size(18.dp),
-                    contentDescription = "edit food item"
-                )
-            }
-        }
-        if (isLine) {
-            HorizontalDivider(
-                Modifier.fillMaxWidth(),
-                1.dp,
-                Color(0xFFF2F2F2)
+                foodItemViewModel.clearGeneratedRation()
+            },
+            "Nutrition"
+        ) { item ->
+            GeneratedItem(
+                item.name,
+                item.description,
+                item.icon,
+                item.portionSize + " " + item.unit
             )
         }
-    }
-}
-
-@Composable
-private fun PortionSizeCard(portionSize: String, unit: String) {
-    Card(
-        Modifier.wrapContentSize(),
-        colors = CardDefaults.cardColors(cardColor),
-        border = BorderStroke(1.dp, Color(0xFFAF8268)),
-        shape = RoundedCornerShape(5.dp)
-    ) {
-        TextMaker(
-            "$portionSize $unit", 10.sp, fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(8.dp, 2.dp)
-        )
     }
 }
 
@@ -364,7 +280,8 @@ private fun PortionSizeCard(portionSize: String, unit: String) {
 private fun OtherNutritionCard(
     label: String,
     cardFunc: @Composable () -> Unit,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
+    notEmpty: Boolean
 ) {
     Card(
         Modifier.fillMaxWidth(),
@@ -394,21 +311,21 @@ private fun OtherNutritionCard(
                     ) { onAddClick() }
                 )
             }
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(Color(0xFFF2F2F2))
-            )
-            FlowRow(
-                Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(12.dp, 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                cardFunc()
+            if (notEmpty) {
+                HorizontalDivider(
+                    Modifier.fillMaxWidth(),
+                    1.dp,
+                    Color(0xFFF2F2F2)
+                )
+                FlowRow(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp, 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    cardFunc()
+                }
             }
         }
 
@@ -419,16 +336,17 @@ private fun OtherNutritionCard(
 private fun OtherNutritionCardItem(name: String, onDeleteItem: () -> Unit) {
     Card(
         Modifier.wrapContentSize(),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(selectedColor)
+        shape = RoundedCornerShape(5.dp),
+        colors = CardDefaults.cardColors(Color.Transparent),
+        border = BorderStroke(1.dp, brownColor)
     ) {
         Row(
             Modifier
                 .wrapContentSize()
-                .padding(10.dp, 2.dp),
+                .padding(10.dp, 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextMaker(name, 12.sp, fontWeight = FontWeight.Normal)
+            TextMaker(name, 12.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.width(4.dp))
             Icon(
                 painterResource(R.drawable.cancel_small), contentDescription = "delete item",

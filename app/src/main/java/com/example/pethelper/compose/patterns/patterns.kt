@@ -530,6 +530,7 @@ fun <T> PagerCard(
     label: String,
     onAddItem: (() -> Unit)? = null,
     content: List<T>,
+    isNote: Boolean = false,
     itemContent: @Composable (item: T, hasLine: Boolean) -> Unit
 ) {
     Card(
@@ -579,7 +580,7 @@ fun <T> PagerCard(
                     Column(
                         Modifier
                             .fillMaxWidth()
-                            .heightIn(min = 215.dp)
+                            .heightIn(min = if (isNote) 142.dp else 215.dp)
                     ) {
                         pageItems.forEachIndexed { index, item ->
                             val hasLine = !(pageItems.size == 4 && index == 3)

@@ -1,7 +1,6 @@
 package com.example.pethelper.compose.notes
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,7 +54,7 @@ val green = PastelleColors.GREEN
 val yellow = PastelleColors.YELLOW
 val blue = PastelleColors.BLUE
 
-private enum class NoteCardContent(
+enum class NoteCardContent(
     val color: Color, val category: String, val icon: Int, val categoryCardColor: Color,
     val textColor: Color, val borderColor: Color
 ) {
@@ -177,7 +176,9 @@ fun NotesScreen(petId: Int, noteViewModel: NoteViewModel, onBackClick: (Int) -> 
                     items(allNotes) {
                         NoteCard(
                             NoteCardContent.valueOf(it.category.uppercase()),
-                            it.date, it.description
+                            it.date,
+                            it.description,
+                            NoteCardContent.valueOf(it.category.uppercase()).textColor
                         )
                     }
                 }
@@ -213,7 +214,12 @@ private fun NoteCategoryButton(text: String, isSelected: Boolean, onClick: (Stri
 }
 
 @Composable
-private fun NoteCard(category: NoteCardContent, date: String, description: String) {
+private fun NoteCard(
+    category: NoteCardContent,
+    date: String,
+    description: String,
+    iconColor: Color
+) {
     Card(
         Modifier
             .fillMaxWidth()
@@ -229,10 +235,11 @@ private fun NoteCard(category: NoteCardContent, date: String, description: Strin
                 .padding(20.dp)
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Image(
+                Icon(
                     painterResource(category.icon),
                     null,
-                    Modifier.size(22.dp)
+                    Modifier.size(22.dp),
+                    tint = iconColor
                 )
                 Spacer(Modifier.width(10.dp))
                 TextMaker(date, 12.sp, fontWeight = FontWeight.Medium)
