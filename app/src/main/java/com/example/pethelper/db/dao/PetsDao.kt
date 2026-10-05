@@ -49,4 +49,7 @@ interface PetsDao {
 
     @Query("UPDATE pets SET about = :about WHERE id=:petId")
     suspend fun updateAbout(about: String, petId: Int)
+
+    @Query("UPDATE pets SET animal=:animal WHERE id=:petId")
+    suspend fun updateAnimal(animal: String, petId: Int)
 }

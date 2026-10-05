@@ -32,7 +32,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: String) {
+fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: String, animal: String) {
     val allUpcomingVaccines by
     vaccineViewModel.allUpcomingVaccines(petId)
         .collectAsState(emptyList())
@@ -151,7 +151,7 @@ fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: Str
                     false
                 )
                 isAddUpcomingDialogOpened = false
-            }, petId
+            }, petId, animal
         )
     }
     if (isAddHistoryVaccineOpened) {
@@ -171,7 +171,7 @@ fun VaccinationsTab(vaccineViewModel: VaccineViewModel, petId: Int, petName: Str
                 )
                 isAddHistoryVaccineOpened = false
             },
-            petId
+            petId, animal
         )
     }
 }

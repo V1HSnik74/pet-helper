@@ -322,16 +322,26 @@ fun PetInfoCard(
                 .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                modifier = Modifier
+            val photoModifier = remember {
+                Modifier
                     .size(120.dp)
-                    .clip(CircleShape),
-                contentDescription = "Pet photo",
-                model = photo,
-                contentScale = if (photo == null)
-                    ContentScale.Fit
-                else ContentScale.Crop
-            )
+                    .clip(CircleShape)
+            }
+            if (photo == null) {
+                Image(
+                    painterResource(R.drawable.no_photo_profile),
+                    modifier = photoModifier,
+                    contentDescription = "Pet photo",
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                AsyncImage(
+                    model = photo,
+                    modifier = photoModifier,
+                    contentDescription = "Pet photo",
+                    contentScale = ContentScale.Crop
+                )
+            }
             Spacer(Modifier.width(30.dp))
             Column(
                 Modifier.height(120.dp),
@@ -341,7 +351,7 @@ fun PetInfoCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painterResource(if (animal == "dog") R.drawable.dog else R.drawable.cat),
+                        painterResource(if (animal == "Dog") R.drawable.dog else R.drawable.cat),
                         null,
                         tint = if (gender == "Male") Color(0xFF0EA2ED) else Color(0xFFFF409C)
                     )

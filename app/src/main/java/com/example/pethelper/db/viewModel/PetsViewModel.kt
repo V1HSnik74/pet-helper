@@ -85,5 +85,11 @@ class PetsViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateAnimal(animal: String, petId: Int){
+        viewModelScope.launch(Dispatchers.IO) {
+            petsDao.updateAnimal(animal, petId)
+        }
+    }
+
     fun getPetById(petId: Int): Flow<Pet?> = petsDao.getPetById(petId)
 }

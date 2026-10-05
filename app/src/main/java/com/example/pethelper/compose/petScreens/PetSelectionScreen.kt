@@ -150,7 +150,7 @@ private fun PetCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painterResource(if (animal == "dog") R.drawable.dog else R.drawable.cat),
+                        painterResource(if (animal == "Dog") R.drawable.dog else R.drawable.cat),
                         null,
                         tint = if (gender == "Male") Color(0xFF0EA2ED) else Color(0xFFFF409C)
                     )

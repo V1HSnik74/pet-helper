@@ -46,7 +46,8 @@ fun AddCoreVaccineDialog(
         isDone: Boolean,
         petId: Int
     ) -> Unit,
-    petId: Int
+    petId: Int,
+    animal: String
 ) {
     val curTime = remember { LocalTime.now().format(timeParser) }
     val curDay = remember { LocalDate.now() }
@@ -105,8 +106,14 @@ fun AddCoreVaccineDialog(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            catVaccines.forEach {
-                DialogChip(vaccine == it, it) { vaccine = it }
+            if (animal == "Cat") {
+                catVaccines.forEach {
+                    DialogChip(vaccine == it, it) { vaccine = it }
+                }
+            } else {
+                dogVaccines.forEach {
+                    DialogChip(vaccine == it, it) { vaccine = it }
+                }
             }
         }
         Spacer(Modifier.height(16.dp))

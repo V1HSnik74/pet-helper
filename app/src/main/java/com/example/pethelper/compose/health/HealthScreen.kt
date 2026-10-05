@@ -113,13 +113,15 @@ fun HealthScreen(
                         preventionViewModel,
                         checkUpViewModel,
                         noteHealthViewModel,
-                        petId
+                        petId,
+                        it.animal
                     )
 
                     TabButtonsHealth.VACCINATIONS -> VaccinationsTab(
                         vaccineViewModel,
                         petId,
-                        petName
+                        petName,
+                        it.animal
                     )
 
                     TabButtonsHealth.MEDICATIONS -> MedicineTab(

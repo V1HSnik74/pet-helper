@@ -51,7 +51,9 @@ fun AddNoteNutritionDialog(
                 "Write down your note here",
                 false,
                 Alignment.TopStart,
-                100.dp
+                100.dp,
+                16.dp,
+                16.dp
             )
             Column(Modifier.fillMaxWidth()) {
                 TextMaker("Category", 12.sp)

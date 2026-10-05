@@ -53,7 +53,10 @@ fun AddHealthNoteDialog(
             { note = it },
             "Write your note here",
             false,
-            Alignment.TopStart
+            Alignment.TopStart,
+            100.dp,
+            16.dp,
+            16.dp
         )
         Spacer(Modifier.height(16.dp))
         Box {

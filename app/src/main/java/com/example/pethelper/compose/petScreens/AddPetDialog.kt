@@ -154,17 +154,17 @@ fun AddPetDialog(
                 Spacer(Modifier.height(8.dp))
                 Row(Modifier.fillMaxWidth()) {
                     GenderAnimalButton(
-                        animal == "cat",
+                        animal == "Cat",
                         "Cat",
-                        { animal = "cat" },
+                        { animal = "Cat" },
                         R.drawable.cat,
                         Modifier.weight(1f)
                     )
                     Spacer(Modifier.width(10.dp))
                     GenderAnimalButton(
-                        animal == "dog",
+                        animal == "Dog",
                         "Dog",
-                        { animal = "dog" },
+                        { animal = "Dog" },
                         R.drawable.dog,
                         Modifier.weight(1f)
                     )

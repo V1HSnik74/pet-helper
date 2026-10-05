@@ -32,6 +32,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 val catVaccines = listOf("Rabies Vaccine", "FVRCP", "FeLV")
+val dogVaccines = listOf("Rabies Vaccine", "DHPPi", "Bordetella")
 
 @Composable
 fun AddUpcomingVaccine(
@@ -39,7 +40,8 @@ fun AddUpcomingVaccine(
         vaccine: String, date: String, time: String,
         isNotification: Boolean, notifDate: String, notifTime: String, petId: Int
     ) -> Unit,
-    petId: Int
+    petId: Int,
+    animal: String
 ) {
     var vaccine by remember { mutableStateOf("") }
     var date by remember { mutableStateOf(LocalDate.now()) }
@@ -80,9 +82,17 @@ fun AddUpcomingVaccine(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            catVaccines.forEach {
-                DialogChip(vaccine == it, it) {
-                    vaccine = it
+            if (animal == "Cat") {
+                catVaccines.forEach {
+                    DialogChip(vaccine == it, it) {
+                        vaccine = it
+                    }
+                }
+            } else {
+                dogVaccines.forEach {
+                    DialogChip(vaccine == it, it) {
+                        vaccine = it
+                    }
                 }
             }
         }

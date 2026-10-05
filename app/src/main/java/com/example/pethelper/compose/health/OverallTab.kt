@@ -57,7 +57,8 @@ fun OverallTab(
     preventionViewModel: PreventionViewModel,
     checkUpViewModel: CheckUpViewModel,
     noteHealthViewModel: NoteHealthViewModel,
-    petId: Int
+    petId: Int,
+    animal: String
 ) {
     val notes by noteHealthViewModel.getAllOverallNotesByPet(petId).collectAsState(emptyList())
     var isAddNotesOpened by remember { mutableStateOf(false) }
@@ -121,7 +122,8 @@ fun OverallTab(
             preventionsUpc,
             historyVaccine,
             vaccinesUpc,
-            checkUpHistory
+            checkUpHistory,
+            animal
         )
         PagerCard(
             "Next Up",
@@ -212,11 +214,12 @@ private fun HealthOverviewTab(
     upcomingPreventions: List<Prevention>,
     vaccines: List<Vaccine>,
     vaccinesUpc: List<Vaccine>,
-    checkUps: List<CheckUp>
+    checkUps: List<CheckUp>,
+    animal: String
 ) {
     val medicationsSize = remember(medications) { medications.size }
     val isParasitesDone = getPreventionPercentage(preventions, upcomingPreventions).percentage == 1f
-    val isVaccinesDone = countVaccinePercentage(vaccines, catVaccines, vaccinesUpc) == 1f
+    val isVaccinesDone = countVaccinePercentage(vaccines, if (animal == "Cat") catVaccines else dogVaccines, vaccinesUpc) == 1f
     val isCheckUpsDone = isCheckUpDone(checkUps)
     Card(
         Modifier.fillMaxWidth(),

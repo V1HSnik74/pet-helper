@@ -119,7 +119,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("petId") { type = NavType.IntType })
         ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getInt("petId") ?: -1
-            PetProfileScreen(viewModel, petId)
+            PetProfileScreen(viewModel, petId) { navController.popBackStack() }
         }
 
         composable(

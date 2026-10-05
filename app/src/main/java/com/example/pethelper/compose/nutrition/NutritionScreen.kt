@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -357,66 +355,6 @@ private fun OtherNutritionCardItem(name: String, onDeleteItem: () -> Unit) {
                         interactionSource = null
                     ) { onDeleteItem() })
         }
-    }
-}
-
-@Composable
-private fun NotesCard(allNotes: List<NoteNutrition>, onAddNote: () -> Unit) {
-    Card(
-        Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(cardColor),
-        shape = RoundedCornerShape(15.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-        ) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp, 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextMaker("Notes", 12.sp, fontWeight = FontWeight.SemiBold)
-                Icon(
-                    painterResource(R.drawable.prime_plus),
-                    contentDescription = "Add note item",
-                    modifier = Modifier.clickable(
-                        indication = null,
-                        interactionSource = null
-                    ) { onAddNote() }
-                )
-            }
-            HorizontalDivider(
-                Modifier.fillMaxWidth(),
-                1.dp,
-                Color(0xFFF2F2F2)
-            )
-            if (allNotes.isNotEmpty()) {
-                val pages = remember(allNotes) { allNotes.chunked(5) }
-                val pagerState = rememberPagerState(pageCount = { pages.size })
-                HorizontalPager(
-                    pagerState,
-                    Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Top
-                ) { currentPage ->
-                    val pageItems = pages[currentPage]
-                    Column(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(225.dp)
-                    ) {
-                        pageItems.forEachIndexed { index, note ->
-                            NoteItemCard(note, !(pageItems.size == 5 && index == 4))
-                        }
-                    }
-                }
-            }
-        }
-
     }
 }
 

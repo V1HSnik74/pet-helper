@@ -277,7 +277,9 @@ fun DialogPattern(
 fun LabelAndTextField(
     label: String, value: String, onValueChange: (String) -> Unit,
     placeholder: String, singleLine: Boolean = true,
-    contentAlignment: Alignment = Alignment.CenterStart, height: Dp  = 40.dp
+    contentAlignment: Alignment = Alignment.CenterStart, height: Dp = 40.dp,
+    paddingHor: Dp = 16.dp,
+    paddingVert: Dp = 8.dp
 ) {
     Column(horizontalAlignment = Alignment.Start) {
         TextMaker(label, 12.sp)
@@ -287,7 +289,9 @@ fun LabelAndTextField(
                 .height(height)
                 .fillMaxWidth(),
             singleLine,
-            contentAlignment = contentAlignment
+            contentAlignment = contentAlignment,
+            paddingHor = paddingHor,
+            paddingVert = paddingVert
         )
     }
 }
