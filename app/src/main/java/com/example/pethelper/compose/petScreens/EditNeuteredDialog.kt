@@ -28,9 +28,10 @@ import androidx.compose.ui.unit.sp
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.DialogPattern
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.buttonColor
-import com.example.pethelper.compose.patterns.cardColor
-import com.example.pethelper.compose.patterns.selectedColor
+import com.example.pethelper.ui.theme.buttonColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.lightBrown
+import com.example.pethelper.ui.theme.selectedColor
 
 val options = listOf("Yes", "No", "Not sure")
 
@@ -72,7 +73,7 @@ private fun NeuteredCard(isSelected: Boolean, onClick: () -> Unit, text: String)
         colors = CardDefaults.cardColors(if (isSelected) selectedColor else cardColor),
         shape = RoundedCornerShape(10.dp),
         border = BorderStroke(
-            color = if (isSelected) buttonColor else textFieldCursorColor,
+            color = if (isSelected) buttonColor else lightBrown,
             width = 1.dp
         )
     ) {
@@ -91,7 +92,7 @@ private fun NeuteredCard(isSelected: Boolean, onClick: () -> Unit, text: String)
                 Icon(
                     painterResource(R.drawable.neutered_not_selected),
                     "Not selected",
-                    tint = textFieldCursorColor
+                    tint = lightBrown
                 )
             }
             Spacer(Modifier.width(10.dp))

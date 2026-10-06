@@ -26,7 +26,7 @@ import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.DialogPattern
 import com.example.pethelper.compose.patterns.LabelAndTextField
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.buttonColor
+import com.example.pethelper.ui.theme.buttonColor
 
 @Composable
 fun UpdateColorDialog(color: String, onDismiss: () -> Unit, onUpdateColor: (String) -> Unit) {

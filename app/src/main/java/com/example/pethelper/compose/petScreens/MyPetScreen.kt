@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -44,8 +43,6 @@ import com.example.pethelper.compose.health.PetCardChip
 import com.example.pethelper.compose.patterns.PagerCard
 import com.example.pethelper.compose.patterns.PagerCardItem
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.backgroundColor
-import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.compose.patterns.dateParser
 import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.db.entity.CheckUp
@@ -59,12 +56,14 @@ import com.example.pethelper.db.viewModel.PetsViewModel
 import com.example.pethelper.db.viewModel.PreventionViewModel
 import com.example.pethelper.db.viewModel.ReminderViewModel
 import com.example.pethelper.db.viewModel.VaccineViewModel
+import com.example.pethelper.ui.theme.backgroundColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.femaleColor
+import com.example.pethelper.ui.theme.maleColor
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.Period
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun MyPetScreen(
@@ -74,7 +73,8 @@ fun MyPetScreen(
     checkUpViewModel: CheckUpViewModel, preventionViewModel: PreventionViewModel,
     reminderViewModel: ReminderViewModel, onActivityClick: (Int) -> Unit
 ) {
-    val pet by petsViewModel.getPetById(id).collectAsState(initial = null)
+    petsViewModel.setCurPet(id)
+    val curPet = petsViewModel.currPet
     val upcomingMedicines by medicineViewModel.getAllMedicinesByPet(id)
         .collectAsState(emptyList())
     val upcomingVaccines by vaccineViewModel.allUpcomingVaccines(id)
@@ -174,14 +174,10 @@ fun MyPetScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            pet?.let { pet ->
-                val birthday = pet.birthday ?: ""
+            curPet?.let {
                 PetInfoCard(
-                    pet.photo, pet.name, pet.sex, pet.breed,
-                    birthday, pet.weight, pet.height,
-                    onCardClick = { onCardClick(pet.id) },
-                    pet.animal
-                )
+                    curPet
+                ) { onCardClick(curPet.id) }
             }
             FlowRow(
                 Modifier.fillMaxWidth(),
@@ -279,9 +275,9 @@ fun MyPetScreen(
                     note.isNotEmpty()
                 )
             }
-            pet?.let { pet ->
+            curPet?.let {
                 AboutSection(
-                    pet.name, pet.about,
+                    curPet,
                     painterResource(R.drawable.paw_notes_icon)
                 )
             }
@@ -293,20 +289,9 @@ fun MyPetScreen(
 
 @Composable
 fun PetInfoCard(
-    photo: String?, name: String, gender: String,
-    breed: String, birthday: String, weight: Float?, height: Float?, onCardClick: () -> Unit,
-    animal: String
+    pet: PetsViewModel.PetFields,
+    onCardClick: () -> Unit
 ) {
-    val formatter =
-        remember { DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH) }
-
-    val age = if (birthday.isNotEmpty()) {
-        val period = Period.between(
-            LocalDate.parse(birthday, formatter),
-            LocalDate.now()
-        )
-        period.years.toString()
-    } else "N/A"
     Card(
         Modifier
             .fillMaxWidth()
@@ -327,7 +312,7 @@ fun PetInfoCard(
                     .size(120.dp)
                     .clip(CircleShape)
             }
-            if (photo == null) {
+            if (pet.photo == null) {
                 Image(
                     painterResource(R.drawable.no_photo_profile),
                     modifier = photoModifier,
@@ -336,7 +321,7 @@ fun PetInfoCard(
                 )
             } else {
                 AsyncImage(
-                    model = photo,
+                    model = pet.photo,
                     modifier = photoModifier,
                     contentDescription = "Pet photo",
                     contentScale = ContentScale.Crop
@@ -351,23 +336,23 @@ fun PetInfoCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painterResource(if (animal == "Dog") R.drawable.dog else R.drawable.cat),
+                        painterResource(if (pet.animal == "Dog") R.drawable.dog else R.drawable.cat),
                         null,
-                        tint = if (gender == "Male") Color(0xFF0EA2ED) else Color(0xFFFF409C)
+                        tint = if (pet.gender == "Male") maleColor else femaleColor
                     )
                     Spacer(Modifier.width(4.dp))
-                    TextMaker(name, 16.sp, modifier = Modifier.weight(1f, fill = false))
+                    TextMaker(pet.name, 16.sp, modifier = Modifier.weight(1f, fill = false))
                 }
                 TextMaker(
-                    breed,
+                    pet.breed,
                     16.sp,
                     fontWeight = FontWeight.Normal
                 )
-                PetCardChip(if (age == "1") "1 year old" else "$age years old")
+                PetCardChip(pet.age)
                 Row(Modifier.fillMaxWidth()) {
-                    PetCardChip(if (weight != null) "$weight kg" else "N/A kg")
+                    PetCardChip(pet.weight)
                     Spacer(Modifier.width(8.dp))
-                    PetCardChip(if (height != null) "$height cm" else "N/A cm")
+                    PetCardChip(pet.height)
                 }
             }
         }
@@ -404,8 +389,7 @@ fun SectionButton(
 
 @Composable
 fun AboutSection(
-    name: String,
-    about: String?,
+    pet: PetsViewModel.PetFields,
     painter: Painter? = null,
     hasAbout: Boolean = false,
     onOpenDialog: () -> Unit = {}
@@ -427,10 +411,10 @@ fun AboutSection(
                     .fillMaxHeight()
                     .weight(1f, fill = false)
             ) {
-                TextMaker("About $name", 14.sp, fontWeight = FontWeight.SemiBold)
+                TextMaker("About ${pet.name}", 14.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(8.dp))
                 TextMaker(
-                    about ?: "No description added yet",
+                    pet.about,
                     12.sp, fontWeight = FontWeight.Normal
                 )
             }

@@ -39,6 +39,7 @@ import com.example.pethelper.compose.patterns.daySelector
 import com.example.pethelper.compose.patterns.getAvailableTimes
 import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.compose.patterns.times
+import com.example.pethelper.ui.theme.PastelleColors
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -202,8 +203,8 @@ fun AddReminderDialog(
 }
 
 enum class Icons(val icon: Int, val color: Color) {
-    OTHER(R.drawable.reminder, Color(0xFF554184)),
-    NUTRITION(R.drawable.nutrition_reminder, Color(0xFF008400)),
-    SHOPPING(R.drawable.shopping_reminder, Color(0xFFD27918)),
-    GROOMING(R.drawable.grooming_reminder, Color(0xFF265896))
+    OTHER(R.drawable.reminder, PastelleColors.PURPLE.iconColor),
+    NUTRITION(R.drawable.nutrition_reminder, PastelleColors.GREEN.iconColor),
+    SHOPPING(R.drawable.shopping_reminder, PastelleColors.YELLOW.iconColor),
+    GROOMING(R.drawable.grooming_reminder, PastelleColors.BLUE.iconColor)
 }

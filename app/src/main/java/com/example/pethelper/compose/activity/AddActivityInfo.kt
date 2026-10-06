@@ -27,12 +27,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.room.util.TableInfo
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.DialogPattern
 import com.example.pethelper.compose.patterns.LabelAndTextField
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.buttonColor
+import com.example.pethelper.ui.theme.buttonColor
 
 val activityLevels = mapOf(
     "Low" to R.drawable.low_battery,

@@ -38,9 +38,10 @@ import com.example.pethelper.R
 import com.example.pethelper.db.viewModel.NoteViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
-import com.example.pethelper.compose.patterns.PastelleColors
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.backgroundColor
+import com.example.pethelper.ui.theme.PastelleColors
+import com.example.pethelper.ui.theme.backgroundColor
+import com.example.pethelper.ui.theme.brownColor
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -198,11 +199,11 @@ private fun NoteCategoryButton(text: String, isSelected: Boolean, onClick: (Stri
             { onClick(text) },
         shape = RoundedCornerShape(5.dp),
         colors = CardDefaults.cardColors(
-            if (isSelected) Color(0xFFAF8268)
+            if (isSelected) brownColor
             else backgroundColor
         ),
         border = BorderStroke(
-            color = if (isSelected) Color.Transparent else Color(0xFFAF8268),
+            color = if (isSelected) Color.Transparent else brownColor,
             width = 1.dp
         )
     ) {

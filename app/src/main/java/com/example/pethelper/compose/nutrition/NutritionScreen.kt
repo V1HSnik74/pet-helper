@@ -50,9 +50,10 @@ import com.example.pethelper.compose.patterns.GeneratedActivityNutritionPlan
 import com.example.pethelper.compose.patterns.GeneratedItem
 import com.example.pethelper.compose.patterns.PagerCard
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.backgroundColor
-import com.example.pethelper.compose.patterns.brownColor
-import com.example.pethelper.compose.patterns.cardColor
+import com.example.pethelper.ui.theme.backgroundColor
+import com.example.pethelper.ui.theme.brownColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.dividerColor
 
 @Composable
 fun NutritionScreen(
@@ -81,12 +82,7 @@ fun NutritionScreen(
         noteNutritionViewModel.getAllNoteNutritionByPet(petId)
     }.collectAsState(emptyList())
     var activeDialog by remember { mutableStateOf("") }
-    val currentPet by petViewModel.getPetById(petId).collectAsState(initial = null)
-    val breed = currentPet?.breed ?: "None"
-    val birthday = currentPet?.birthday ?: "None"
-    val neutered = currentPet?.neutered ?: "None"
-    val weight = currentPet?.weight.toString().ifEmpty { "None" }
-    val animal = currentPet?.animal ?: "None"
+    val curPet = petViewModel.currPet
 
     Column(
         Modifier
@@ -143,25 +139,25 @@ fun NutritionScreen(
                     HorizontalDivider(
                         Modifier.fillMaxWidth(),
                         1.dp,
-                        Color(0xFFF2F2F2)
+                        dividerColor
                     )
             }
-            GenerateButton(
+            curPet?.let{GenerateButton(
                 {
                     foodItemViewModel.generateRation(
-                        breed,
-                        weight,
+                        it.breed,
+                        it.weight,
                         allAllergies,
-                        birthday,
+                        it.birthday,
                         allSupplements,
-                        neutered,
+                        it.neutered,
                         petId,
-                        animal
+                        it.animal
                     )
                 },
                 "Nutrition",
                 foodItemViewModel.isGenerating
-            )
+            )}
             OtherNutritionCard(
                 "Allergies & Sensitives",
                 {
@@ -313,7 +309,7 @@ private fun OtherNutritionCard(
                 HorizontalDivider(
                     Modifier.fillMaxWidth(),
                     1.dp,
-                    Color(0xFFF2F2F2)
+                    dividerColor
                 )
                 FlowRow(
                     Modifier
@@ -382,7 +378,7 @@ private fun NoteItemCard(note: NoteNutrition, isLine: Boolean) {
                 Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(Color(0xFFF2F2F2))
+                    .background(dividerColor)
             )
         }
     }

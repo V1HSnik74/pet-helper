@@ -22,6 +22,7 @@ import com.example.pethelper.compose.patterns.PagerCardItem
 import com.example.pethelper.compose.patterns.dateParser
 import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.db.viewModel.MedicineViewModel
+import com.example.pethelper.ui.theme.PastelleColors
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -71,9 +72,9 @@ fun MedicineTab(medicineViewModel: MedicineViewModel, petId: Int, petName: Strin
             )
         }
         HealthTip(
-            Color(0xFFFFF6E8),
-            Color(0xFFD27918),
-            Color(0xFFFDF1ED),
+            PastelleColors.YELLOW.color,
+            PastelleColors.YELLOW.iconColor,
+            PastelleColors.YELLOW.borderColor,
             "Medication Tip",
             "Give medications with food when recommended to avoid upset stomach",
             R.drawable.bulb

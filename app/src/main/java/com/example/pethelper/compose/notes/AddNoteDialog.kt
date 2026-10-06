@@ -29,7 +29,7 @@ import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.DialogPattern
 import com.example.pethelper.compose.patterns.LabelAndTextField
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.backgroundColor
+import com.example.pethelper.ui.theme.backgroundColor
 
 @Composable
 fun AddNoteDialog(

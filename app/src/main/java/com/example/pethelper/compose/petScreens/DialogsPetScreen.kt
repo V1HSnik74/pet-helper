@@ -32,10 +32,11 @@ import androidx.compose.ui.unit.sp
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.DialogPattern
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.backgroundColor
-import com.example.pethelper.compose.patterns.buttonColor
-import com.example.pethelper.compose.patterns.selectedColor
-import com.example.pethelper.compose.patterns.smallTextColor
+import com.example.pethelper.ui.theme.backgroundColor
+import com.example.pethelper.ui.theme.buttonColor
+import com.example.pethelper.ui.theme.lightBrown
+import com.example.pethelper.ui.theme.selectedColor
+import com.example.pethelper.ui.theme.smallTextColor
 import com.sd.lib.compose.wheel_picker.FVerticalWheelPicker
 import com.sd.lib.compose.wheel_picker.rememberFWheelPickerState
 
@@ -122,7 +123,7 @@ private fun WheelPickerCard(
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(
             width = 1.dp,
-            color = Color(0xFFFFD8C1)
+            color = lightBrown
         ),
         colors = CardDefaults.cardColors(backgroundColor),
         modifier = Modifier.width(72.dp)

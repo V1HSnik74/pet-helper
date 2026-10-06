@@ -34,6 +34,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.pethelper.R
+import com.example.pethelper.ui.theme.buttonColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.dividerColor
+import com.example.pethelper.ui.theme.smallTextColor
 
 @Composable
 fun <T> GeneratedActivityNutritionPlan(
@@ -73,7 +77,7 @@ fun <T> GeneratedActivityNutritionPlan(
                             HorizontalDivider(
                                 Modifier.fillMaxWidth(),
                                 1.dp,
-                                Color(0xFFF2F2F2)
+                                dividerColor
                             )
                         }
                     }

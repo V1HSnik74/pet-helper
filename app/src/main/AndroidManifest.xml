@@ -10,7 +10,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PetHelper">
+        android:enableOnBackInvokedCallback="false"
+        android:theme="@style/Theme.PetHelper"
+        tools:targetApi="33">
         <activity
             android:name=".MainActivity"
             android:exported="true"

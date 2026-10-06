@@ -28,10 +28,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pethelper.compose.patterns.DialogPattern
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.brownColor
-import com.example.pethelper.compose.patterns.buttonColor
-import com.example.pethelper.compose.patterns.cardColor
-import com.example.pethelper.compose.patterns.selectedColor
+import com.example.pethelper.ui.theme.brownColor
+import com.example.pethelper.ui.theme.buttonColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.lightBrown
+import com.example.pethelper.ui.theme.selectedColor
 
 @Composable
 fun UpdateGenderAnimalDialog(
@@ -80,7 +81,7 @@ private fun GenderAnimalCard(
                 onClick()
             },
         colors = CardDefaults.cardColors(if (isSelected) selectedColor else cardColor),
-        border = BorderStroke(1.dp, if (isSelected) buttonColor else textFieldCursorColor),
+        border = BorderStroke(1.dp, if (isSelected) buttonColor else lightBrown),
         shape = RoundedCornerShape(10.dp)
     ) {
         Column(

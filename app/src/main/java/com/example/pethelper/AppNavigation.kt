@@ -1,5 +1,10 @@
 package com.example.pethelper
 
+import android.R
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -80,9 +85,34 @@ fun AppNavigation(
     activityInfoViewModel: ActivityInfoViewModel
 ) {
     val navController = rememberNavController()
+    val animDur = 250
     NavHost(
         navController = navController,
-        startDestination = Screen.Selection.route
+        startDestination = Screen.Selection.route,
+        enterTransition = {
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.Start,
+                tween(animDur)
+            ) + fadeIn(tween(animDur))
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.Start,
+                tween(animDur)
+            ) + fadeOut(tween(animDur))
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.End,
+                tween(animDur)
+            ) + fadeIn(tween(animDur))
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.End,
+                tween(animDur)
+            ) + fadeOut(tween(animDur))
+        }
     ) {
         composable(Screen.Selection.route) {
             PetSelectionScreen(viewModel = viewModel, onPetClick = {

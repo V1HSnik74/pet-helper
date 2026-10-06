@@ -46,15 +46,16 @@ import com.example.pethelper.compose.patterns.HealthTip
 import com.example.pethelper.compose.patterns.PagerCard
 import com.example.pethelper.compose.patterns.ScreenTitle
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.backgroundColor
-import com.example.pethelper.compose.patterns.buttonColor
-import com.example.pethelper.compose.patterns.cardColor
-import com.example.pethelper.compose.patterns.selectedColor
-import com.example.pethelper.compose.patterns.smallTextColor
 import com.example.pethelper.compose.petScreens.PetInfoCard
 import com.example.pethelper.db.viewModel.ActivityInfoViewModel
 import com.example.pethelper.db.viewModel.ActivityViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
+import com.example.pethelper.ui.theme.PastelleColors
+import com.example.pethelper.ui.theme.backgroundColor
+import com.example.pethelper.ui.theme.brownColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.dividerColor
+import com.example.pethelper.ui.theme.smallTextColor
 
 const val APtext =
     "Tell us about your pet’s activity level, preferences and any special needs. This helps us create the best plan for your pet"
@@ -75,12 +76,7 @@ fun ActivityScreen(
     onBackClick: () -> Unit,
     activityViewModel: ActivityViewModel
 ) {
-    val pet by petsViewModel.getPetById(petId).collectAsState(null)
-    val breed = pet?.breed ?: "None"
-    val birthday = pet?.birthday ?: "None"
-    val neutered = pet?.neutered ?: "None"
-    val weight = pet?.weight.toString().ifEmpty { "None" }
-    val animal = pet?.animal ?: "None"
+    val pet = petsViewModel.currPet
     var isAddActivityInfoOpened by remember { mutableStateOf(false) }
     var isPlanOpened by remember { mutableStateOf(false) }
     val activityInfo by
@@ -127,17 +123,7 @@ fun ActivityScreen(
         ScreenTitle("Activity") { onBackClick() }
         Spacer(Modifier.height(20.dp))
         pet?.let {
-            PetInfoCard(
-                it.photo,
-                it.name,
-                it.sex,
-                breed,
-                birthday,
-                it.weight,
-                it.height,
-                {},
-                it.animal
-            )
+            PetInfoCard(it) {}
         }
         Spacer(Modifier.height(16.dp))
         Column(
@@ -150,7 +136,7 @@ fun ActivityScreen(
             PagerCard("Activity Information", { isAddActivityInfoOpened = true }, info) { item, _ ->
                 ActivityInformation(item.name, item.value, item.icon)
                 if (item != info.last())
-                    HorizontalDivider(Modifier.fillMaxWidth(), 1.dp, Color(0xFFF2F2F2))
+                    HorizontalDivider(Modifier.fillMaxWidth(), 1.dp, dividerColor)
             }
             Column(
                 Modifier.fillMaxWidth(),
@@ -165,34 +151,36 @@ fun ActivityScreen(
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(Color.Transparent),
                     border = BorderStroke
-                        (1.dp, Color(0xFFAF8268)),
+                        (1.dp, brownColor),
                     interactionSource = null
                 ) {
                     TextMaker("Activity Plan", 12.sp, fontWeight = FontWeight.SemiBold)
                 }
-                GenerateButton(
-                    {
-                        activityViewModel.getActivitiesRecommendation(
-                            breed,
-                            weight,
-                            birthday,
-                            neutered,
-                            activityLevel.value ?: "",
-                            favActivities.value ?: "",
-                            limitations.value ?: "None",
-                            goals.value ?: "",
-                            petId,
-                            animal
-                        )
-                    },
-                    "Activity",
-                    activityViewModel.isGenerating
-                )
+                pet?.let {
+                    GenerateButton(
+                        {
+                            activityViewModel.getActivitiesRecommendation(
+                                it.breed,
+                                it.weight,
+                                it.birthday,
+                                it.neutered,
+                                activityLevel.value ?: "",
+                                favActivities.value ?: "",
+                                limitations.value ?: "None",
+                                goals.value ?: "",
+                                petId,
+                                it.animal
+                            )
+                        },
+                        "Activity",
+                        activityViewModel.isGenerating
+                    )
+                }
             }
             HealthTip(
-                selectedColor,
-                buttonColor,
-                Color(0xFFFFE3E7),
+                PastelleColors.PINK.color,
+                PastelleColors.PINK.iconColor,
+                PastelleColors.PINK.borderColor,
                 "Why it matters",
                 tipText,
                 R.drawable.bulb
@@ -229,7 +217,7 @@ fun ActivityScreen(
                 ) { item, hasLine ->
                     GeneratedItem(item.name, item.note, R.drawable.addactivityicon, item.duration)
                     if (hasLine)
-                        HorizontalDivider(Modifier.fillMaxWidth(), 1.dp, Color(0xFFF2F2F2))
+                        HorizontalDivider(Modifier.fillMaxWidth(), 1.dp, dividerColor)
                 }
             }
         }

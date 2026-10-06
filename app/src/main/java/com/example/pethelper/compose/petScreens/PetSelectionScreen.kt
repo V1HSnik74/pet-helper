@@ -21,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,33 +30,36 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.ButtonMaker
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.backgroundScreenColor
-import com.example.pethelper.compose.patterns.cardColor
-import com.example.pethelper.compose.patterns.smallTextColor
 import com.example.pethelper.db.viewModel.PetsViewModel
+import com.example.pethelper.ui.theme.backgroundColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.femaleColor
+import com.example.pethelper.ui.theme.maleColor
+import com.example.pethelper.ui.theme.smallTextColor
 
 @Composable
 fun PetSelectionScreen(
-    viewModel: PetsViewModel = viewModel(),
+    viewModel: PetsViewModel,
     onPetClick: (Int) -> Unit
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.clearCurPet()
+    }
     val petList by viewModel.allPets.collectAsState(initial = emptyList())
     var showDialog by remember { mutableStateOf(false) }
     Column(
         Modifier
             .fillMaxSize()
-            .background(backgroundScreenColor)
+            .background(backgroundColor)
             .padding(22.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -64,7 +68,7 @@ fun PetSelectionScreen(
         Spacer(Modifier.height(20.dp))
         TextMaker(
             "Choose a pet to view their information", 14.sp,
-            Color(0xFFB0A8A3)
+            smallTextColor
         )
         Spacer(Modifier.height(16.dp))
         if (petList.isNotEmpty()) {
@@ -77,7 +81,9 @@ fun PetSelectionScreen(
             ) {
                 items(petList) { pet ->
                     PetCard(
-                        { onPetClick(pet.id) }, pet.name, pet.breed, pet.photo, pet.sex, pet.animal
+                        {
+                            onPetClick(pet.id)
+                        }, pet.name, pet.breed, pet.photo, pet.sex, pet.animal
                     )
                 }
             }
@@ -152,7 +158,7 @@ private fun PetCard(
                     Icon(
                         painterResource(if (animal == "Dog") R.drawable.dog else R.drawable.cat),
                         null,
-                        tint = if (gender == "Male") Color(0xFF0EA2ED) else Color(0xFFFF409C)
+                        tint = if (gender == "Male") maleColor else femaleColor
                     )
                     Spacer(Modifier.width(4.dp))
                     TextMaker(name, 16.sp)

@@ -21,9 +21,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,8 +32,6 @@ import androidx.compose.ui.unit.sp
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.ScreenTitle
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.backgroundColor
-import com.example.pethelper.compose.patterns.buttonColor
 import com.example.pethelper.compose.petScreens.PetInfoCard
 import com.example.pethelper.db.viewModel.CheckUpViewModel
 import com.example.pethelper.db.viewModel.MedicineViewModel
@@ -44,6 +39,11 @@ import com.example.pethelper.db.viewModel.NoteHealthViewModel
 import com.example.pethelper.db.viewModel.PetsViewModel
 import com.example.pethelper.db.viewModel.PreventionViewModel
 import com.example.pethelper.db.viewModel.VaccineViewModel
+import com.example.pethelper.ui.theme.backgroundColor
+import com.example.pethelper.ui.theme.brownColor
+import com.example.pethelper.ui.theme.buttonColor
+import com.example.pethelper.ui.theme.dividerColor
+import com.example.pethelper.ui.theme.healthTabsColor
 import kotlinx.coroutines.launch
 
 enum class TabButtonsHealth(val icon: Int, val title: String) {
@@ -65,9 +65,8 @@ fun HealthScreen(
     noteHealthViewModel: NoteHealthViewModel,
     medicineViewModel: MedicineViewModel
 ) {
-    val pet by petsViewModel.getPetById(petId).collectAsState(null)
+    val pet = petsViewModel.currPet
     pet?.let {
-        val petName = remember(petId) { it.name }
         val tabs = TabButtonsHealth.entries
         val pagerState = rememberPagerState(0) { tabs.size }
         val scope = rememberCoroutineScope()
@@ -80,19 +79,7 @@ fun HealthScreen(
         ) {
             ScreenTitle("Health") { onBackClick() }
             Spacer(Modifier.height(20.dp))
-            pet?.let { pet ->
-                PetInfoCard(
-                    pet.photo,
-                    pet.name,
-                    pet.sex,
-                    pet.breed,
-                    pet.birthday ?: "",
-                    pet.weight,
-                    pet.height,
-                    {},
-                    pet.animal
-                )
-            }
+            PetInfoCard(it) {}
             Spacer(Modifier.height(16.dp))
             TabButtonsRow(
                 { index -> scope.launch { pagerState.animateScrollToPage(index) } },
@@ -120,27 +107,27 @@ fun HealthScreen(
                     TabButtonsHealth.VACCINATIONS -> VaccinationsTab(
                         vaccineViewModel,
                         petId,
-                        petName,
+                        it.name,
                         it.animal
                     )
 
                     TabButtonsHealth.MEDICATIONS -> MedicineTab(
                         medicineViewModel,
                         petId,
-                        petName
+                        it.name
                     )
 
                     TabButtonsHealth.PARASITES -> PreventionTab(
                         preventionViewModel,
                         petId,
-                        petName
+                        it.name
                     )
 
                     TabButtonsHealth.CHECKUPS -> CheckUpTab(
                         checkUpViewModel,
                         petId,
                         noteHealthViewModel,
-                        petName
+                        it.name
                     )
                 }
             }
@@ -155,7 +142,7 @@ fun PetCardChip(text: String) {
         Modifier.wrapContentSize(),
         shape = RoundedCornerShape(5.dp),
         colors = CardDefaults.cardColors(Color.Transparent),
-        border = BorderStroke(1.dp, Color(0xFFAF8268))
+        border = BorderStroke(1.dp, brownColor)
     ) {
         TextMaker(
             text,
@@ -179,10 +166,10 @@ private fun TabButton(
     ) {
         Icon(
             painterResource(icon), "Tab Icon",
-            tint = if (isSelected) buttonColor else Color(0xFF4B332E)
+            tint = if (isSelected) buttonColor else healthTabsColor
         )
         Spacer(Modifier.height(2.dp))
-        TextMaker(label, 10.sp, if (isSelected) buttonColor else Color(0xFF4B332E))
+        TextMaker(label, 10.sp, if (isSelected) buttonColor else healthTabsColor)
         Spacer(Modifier.height(8.dp))
         Box(
             Modifier
@@ -200,7 +187,7 @@ private fun TabButtonsRow(onSwipe: (Int) -> Unit, selectedTabIndex: Int) {
             Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomStart),
-            color = Color(0xFFE8E8E8), thickness = 1.dp
+            color = dividerColor, thickness = 1.dp
         )
         Row(
             Modifier.fillMaxWidth(),

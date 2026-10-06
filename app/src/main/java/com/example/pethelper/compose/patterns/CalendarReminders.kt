@@ -33,6 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pethelper.R
+import com.example.pethelper.ui.theme.buttonColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.smallTextColor
 import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import kotlinx.coroutines.launch

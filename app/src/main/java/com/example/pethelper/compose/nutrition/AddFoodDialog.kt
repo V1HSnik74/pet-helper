@@ -44,11 +44,11 @@ import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.DialogPattern
 import com.example.pethelper.compose.patterns.LabelAndTextField
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.buttonColor
-import com.example.pethelper.compose.patterns.cardColor
-import com.example.pethelper.compose.patterns.smallTextColor
-import com.example.pethelper.compose.petScreens.textFieldCursorColor
 import com.example.pethelper.ui.theme.InterFamily
+import com.example.pethelper.ui.theme.buttonColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.lightBrown
+import com.example.pethelper.ui.theme.smallTextColor
 
 private val measures = listOf("g", "cup", "oz", "kg", "lb")
 
@@ -169,7 +169,7 @@ fun PortionSizeValue(
     Card(
         Modifier.wrapContentSize(),
         shape = RoundedCornerShape(10.dp),
-        border = BorderStroke(1.dp, textFieldCursorColor),
+        border = BorderStroke(1.dp, lightBrown),
         colors = CardDefaults.cardColors(cardColor)
     ) {
         Row(
@@ -188,7 +188,7 @@ fun PortionSizeValue(
                 textStyle = TextStyle(
                     fontSize = 12.sp, fontFamily = InterFamily, textAlign = TextAlign.Center
                 ),
-                cursorBrush = SolidColor(textFieldCursorColor),
+                cursorBrush = SolidColor(lightBrown),
                 decorationBox = {
                     Box(
                         modifier = Modifier

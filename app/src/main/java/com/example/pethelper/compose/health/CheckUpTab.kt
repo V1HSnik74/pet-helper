@@ -37,11 +37,13 @@ import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.PagerCard
 import com.example.pethelper.compose.patterns.PagerCardItem
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.compose.patterns.dateParser
 import com.example.pethelper.db.entity.CheckUp
 import com.example.pethelper.db.viewModel.CheckUpViewModel
 import com.example.pethelper.db.viewModel.NoteHealthViewModel
+import com.example.pethelper.ui.theme.PastelleColors
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.red
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -178,9 +180,9 @@ fun NextCheckUpFrame(name: String, date: String, time: String) {
     val inDate = remember(localDate) { ChronoUnit.DAYS.between(currDay, localDate) }
     Card(
         Modifier.wrapContentSize(),
-        colors = CardDefaults.cardColors(Color(0xFFF8F2F9)),
+        colors = CardDefaults.cardColors(PastelleColors.PURPLE.color),
         shape = RoundedCornerShape(15.dp),
-        border = BorderStroke(1.dp, Color(0xFFD3C7F1))
+        border = BorderStroke(1.dp, PastelleColors.PURPLE.borderColor)
     ) {
         Row(
             Modifier
@@ -197,21 +199,21 @@ fun NextCheckUpFrame(name: String, date: String, time: String) {
                 ) {
                     TextMaker(name, 12.sp, fontWeight = FontWeight.SemiBold)
                     TextMaker("$dateFormatted $time", 12.sp, fontWeight = FontWeight.Normal)
-                    TextMaker("in $inDate days", 12.sp, Color(0xFFCF4143))
+                    TextMaker("in $inDate days", 12.sp, red)
                 }
                 Spacer(Modifier.height(16.dp))
                 Button(
                     {},
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(Color.Transparent),
-                    border = BorderStroke(1.dp, Color(0xFFD3C7F1)),
+                    border = BorderStroke(1.dp, PastelleColors.PURPLE.borderColor),
                     contentPadding = PaddingValues(16.dp, 8.dp),
                     modifier = Modifier.fillMaxWidth(1f)
                 ) {
                     TextMaker(
                         "Add to Calendar",
                         12.sp,
-                        Color(0xFF554184),
+                        PastelleColors.PURPLE.iconColor,
                         fontWeight = FontWeight.SemiBold
                     )
                 }

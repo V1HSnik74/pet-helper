@@ -68,9 +68,16 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import com.example.pethelper.R
-import com.example.pethelper.compose.petScreens.textFieldContainerColor
-import com.example.pethelper.compose.petScreens.textFieldCursorColor
 import com.example.pethelper.ui.theme.InterFamily
+import com.example.pethelper.ui.theme.PastelleColors
+import com.example.pethelper.ui.theme.backgroundColor
+import com.example.pethelper.ui.theme.brownColor
+import com.example.pethelper.ui.theme.buttonColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.dividerColor
+import com.example.pethelper.ui.theme.lightBrown
+import com.example.pethelper.ui.theme.smallTextColor
+import com.example.pethelper.ui.theme.textFieldContainerColor
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -81,14 +88,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.collections.chunked
 import kotlin.collections.forEachIndexed
-
-val buttonColor = Color(0xFFE27380)
-val backgroundColor = Color(0xFFFFF8F2)
-val backgroundScreenColor = Color(0xFFFFF9F2)
-val smallTextColor = Color(0xFFB0A8A3)
-val selectedColor = Color(0xFFFDF1ED)
-val cardColor = Color(0xFFFFFCF9)
-val brownColor = Color(0xFFAF8268)
 
 val timeParser: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH)
 val daySelector =
@@ -170,7 +169,7 @@ fun BasicTextFieldMaker(
         singleLine = singleLine,
         modifier = modifier,
         textStyle = TextStyle(fontSize = 12.sp, fontFamily = InterFamily),
-        cursorBrush = SolidColor(textFieldCursorColor),
+        cursorBrush = SolidColor(lightBrown),
         decorationBox = {
             Box(
                 modifier = Modifier
@@ -178,7 +177,7 @@ fun BasicTextFieldMaker(
                         textFieldContainerColor,
                         RoundedCornerShape(10.dp)
                     )
-                    .border(1.dp, textFieldCursorColor, RoundedCornerShape(10.dp))
+                    .border(1.dp, lightBrown, RoundedCornerShape(10.dp))
                     .padding(paddingHor, paddingVert),
                 contentAlignment = contentAlignment
             ) {
@@ -201,8 +200,8 @@ fun DialogChip(isSelected: Boolean, text: String, onClick: () -> Unit) {
             .wrapContentSize()
             .clickable(interactionSource = null, indication = null) { onClick() },
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(if (isSelected) Color(0xFFAF8268) else cardColor),
-        border = BorderStroke(1.dp, if (isSelected) Color.Transparent else textFieldCursorColor)
+        colors = CardDefaults.cardColors(if (isSelected) brownColor else cardColor),
+        border = BorderStroke(1.dp, if (isSelected) Color.Transparent else lightBrown)
     ) {
         TextMaker(
             text,
@@ -394,7 +393,7 @@ fun ReminderBlock(
                         checkedTrackColor = buttonColor,
                         checkedThumbColor = cardColor,
                         uncheckedThumbColor = backgroundColor,
-                        uncheckedTrackColor = Color(0xFFAF8268)
+                        uncheckedTrackColor = brownColor
                     ),
                     modifier = Modifier
                         .scale(0.75f)
@@ -407,7 +406,7 @@ fun ReminderBlock(
                         checkedTrackColor = buttonColor,
                         checkedThumbColor = cardColor,
                         uncheckedThumbColor = backgroundColor,
-                        uncheckedTrackColor = Color(0xFFAF8268)
+                        uncheckedTrackColor = brownColor
                     ),
                     modifier = Modifier
                         .scale(0.75f)
@@ -477,7 +476,7 @@ fun CardWithDropdown(modifier: Modifier = Modifier, value: String, onClick: () -
             .wrapContentHeight(),
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(cardColor),
-        border = BorderStroke(1.dp, textFieldCursorColor)
+        border = BorderStroke(1.dp, lightBrown)
     ) {
         Row(
             Modifier
@@ -570,7 +569,7 @@ fun <T> PagerCard(
             HorizontalDivider(
                 Modifier.fillMaxWidth(),
                 1.dp,
-                Color(0xFFF2F2F2)
+                dividerColor
             )
             if (content.isNotEmpty()) {
                 val pages = remember(content) { content.chunked(4) }
@@ -660,7 +659,7 @@ fun PagerCardItem(
             }
         }
         if (hasLine) {
-            HorizontalDivider(thickness = 1.dp, color = Color(0xFFF2F2F2))
+            HorizontalDivider(thickness = 1.dp, color = dividerColor)
         }
     }
 }
@@ -741,7 +740,7 @@ private fun ProgressBar(
         CircularProgressIndicator(
             progress = { percentage.coerceIn(0f, 1f) },
             modifier = Modifier.fillMaxSize(),
-            color = if (percentage == 1f) Color(0xFF008400) else Color(0xFFD27918),
+            color = if (percentage == 1f) PastelleColors.GREEN.iconColor else PastelleColors.YELLOW.iconColor,
             trackColor = Color(0xFFD9D9D9),
             strokeWidth = 5.dp,
             strokeCap = StrokeCap.Round
@@ -861,9 +860,12 @@ private fun ProtectionStatusProtected(
     label: String
 ) {
     Card(
-        colors = CardDefaults.cardColors(if (isProtected) Color(0xFFEFF6E9) else Color(0xFFFFF6E8)),
+        colors = CardDefaults.cardColors(if (isProtected) PastelleColors.GREEN.color else PastelleColors.YELLOW.color),
         shape = RoundedCornerShape(15.dp),
-        border = BorderStroke(1.dp, if (isProtected) Color(0xFFDFEEDF) else Color(0xFFFDF1ED)),
+        border = BorderStroke(
+            1.dp,
+            if (isProtected) PastelleColors.GREEN.borderColor else PastelleColors.YELLOW.borderColor
+        ),
         modifier = modifier
     ) {
         Column(
@@ -878,7 +880,7 @@ private fun ProtectionStatusProtected(
             Spacer(Modifier.height(2.dp))
             TextMaker(
                 if (isProtected) "Protected" else "Not Protected", 10.sp,
-                if (isProtected) Color(0xFF008400) else Color(0xFFD27918),
+                if (isProtected) PastelleColors.GREEN.color else PastelleColors.YELLOW.color,
                 FontWeight.SemiBold
             )
 

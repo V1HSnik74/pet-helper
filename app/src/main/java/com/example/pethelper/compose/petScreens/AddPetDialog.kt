@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
@@ -43,17 +42,16 @@ import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.DialogPattern
 import com.example.pethelper.compose.patterns.LabelAndTextField
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.brownColor
-import com.example.pethelper.compose.patterns.buttonColor
-import com.example.pethelper.compose.patterns.cardColor
-import com.example.pethelper.compose.patterns.selectedColor
+import com.example.pethelper.ui.theme.brownColor
+import com.example.pethelper.ui.theme.buttonColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.grayColor
+import com.example.pethelper.ui.theme.lightBrown
+import com.example.pethelper.ui.theme.selectedColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-
-val textFieldContainerColor = Color(0xFFFFFCF9)
-val textFieldCursorColor = Color(0xFFD9BDAD)
 
 @Composable
 fun AddPetDialog(
@@ -186,7 +184,7 @@ private fun GenderAnimalButton(
             },
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(if (isSelected) selectedColor else cardColor),
-        border = BorderStroke(1.dp, if (isSelected) buttonColor else textFieldCursorColor)
+        border = BorderStroke(1.dp, if (isSelected) buttonColor else lightBrown)
     ) {
         Row(
             Modifier
@@ -202,7 +200,7 @@ private fun GenderAnimalButton(
                 if (isSelected) buttonColor else brownColor
             )
             Spacer(Modifier.width(6.dp))
-            TextMaker(text, 12.sp, Color(0xFF5C5C5C))
+            TextMaker(text, 12.sp, grayColor)
         }
     }
 }

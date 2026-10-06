@@ -18,15 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.db.viewModel.CheckUpViewModel
 import com.example.pethelper.db.viewModel.MedicineViewModel
 import com.example.pethelper.db.viewModel.PreventionViewModel
 import com.example.pethelper.db.viewModel.VaccineViewModel
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -35,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.PagerCard
 import com.example.pethelper.compose.patterns.PagerCardItem
@@ -49,6 +44,9 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.db.viewModel.NoteHealthViewModel
+import com.example.pethelper.ui.theme.PastelleColors
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.healthTabsColor
 
 @Composable
 fun OverallTab(
@@ -219,7 +217,11 @@ private fun HealthOverviewTab(
 ) {
     val medicationsSize = remember(medications) { medications.size }
     val isParasitesDone = getPreventionPercentage(preventions, upcomingPreventions).percentage == 1f
-    val isVaccinesDone = countVaccinePercentage(vaccines, if (animal == "Cat") catVaccines else dogVaccines, vaccinesUpc) == 1f
+    val isVaccinesDone = countVaccinePercentage(
+        vaccines,
+        if (animal == "Cat") catVaccines else dogVaccines,
+        vaccinesUpc
+    ) == 1f
     val isCheckUpsDone = isCheckUpDone(checkUps)
     Card(
         Modifier.fillMaxWidth(),
@@ -246,11 +248,6 @@ private fun HealthOverviewTab(
                     "Medications",
                     if (medicationsSize == 0) "No medications" else "$medicationsSize upcoming"
                 )
-                Box(
-                    Modifier
-                        .width(1.dp)
-                        .background(Color(0xFFE8E8E8))
-                )
                 HealthOverviewItem(
                     R.drawable.parasites_yellow,
                     R.drawable.parasites_green,
@@ -258,22 +255,12 @@ private fun HealthOverviewTab(
                     "Parasites",
                     if (isParasitesDone) "Protected" else "Needs action"
                 )
-                Box(
-                    Modifier
-                        .width(1.dp)
-                        .background(Color(0xFFE8E8E8))
-                )
                 HealthOverviewItem(
                     R.drawable.shield_yellow,
                     R.drawable.shield_good,
                     isVaccinesDone,
                     "Vaccination",
                     if (isVaccinesDone) "Up to date" else "Needs action"
-                )
-                Box(
-                    Modifier
-                        .width(1.dp)
-                        .background(Color(0xFFE8E8E8))
                 )
                 HealthOverviewItem(
                     R.drawable.checkups_yellow,
@@ -304,11 +291,11 @@ private fun HealthOverviewItem(
             if (isDone) painterResource(iconIsDone) else painterResource(icon),
             "$label icon health overview"
         )
-        TextMaker(label, 10.sp, Color(0xFF4B332E), FontWeight.SemiBold)
+        TextMaker(label, 10.sp, healthTabsColor, FontWeight.SemiBold)
         TextMaker(
             text,
             10.sp,
-            if (isDone) Color(0xFF008400) else Color(0xFFD27918),
+            if (isDone) PastelleColors.GREEN.iconColor else PastelleColors.YELLOW.iconColor,
             FontWeight.SemiBold
         )
     }

@@ -36,12 +36,12 @@ import androidx.compose.ui.unit.sp
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.RemindersCalendar
 import com.example.pethelper.compose.patterns.TextMaker
-import com.example.pethelper.compose.patterns.backgroundColor
-import com.example.pethelper.compose.patterns.cardColor
 import com.example.pethelper.compose.patterns.dateParser
-import com.example.pethelper.compose.patterns.smallTextColor
 import com.example.pethelper.db.viewModel.PetsViewModel
 import com.example.pethelper.db.viewModel.ReminderViewModel
+import com.example.pethelper.ui.theme.backgroundColor
+import com.example.pethelper.ui.theme.cardColor
+import com.example.pethelper.ui.theme.smallTextColor
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

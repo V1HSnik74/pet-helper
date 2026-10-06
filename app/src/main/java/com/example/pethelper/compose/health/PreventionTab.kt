@@ -14,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.HealthTip
@@ -23,6 +22,7 @@ import com.example.pethelper.compose.patterns.PagerCardItem
 import com.example.pethelper.compose.patterns.StatusProgBar
 import com.example.pethelper.db.entity.Prevention
 import com.example.pethelper.db.viewModel.PreventionViewModel
+import com.example.pethelper.ui.theme.PastelleColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -110,9 +110,9 @@ fun PreventionTab(preventionViewModel: PreventionViewModel, petId: Int, petName:
             )
         }
         HealthTip(
-            Color(0xFFF3F6FA),
-            Color(0xFF265896),
-            Color(0xFFD2E2F6),
+            PastelleColors.BLUE.color,
+            PastelleColors.BLUE.iconColor,
+            PastelleColors.BLUE.borderColor,
             "Parasites Prevention Tips",
             "Year-round prevention is the best way to keep $petName healthy and comfortable",
             R.drawable.bulb

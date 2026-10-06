@@ -18,6 +18,7 @@ import com.example.pethelper.R
 import com.example.pethelper.compose.patterns.BasicTextFieldMaker
 import com.example.pethelper.compose.patterns.DialogPattern
 import com.example.pethelper.compose.patterns.TextMaker
+import com.example.pethelper.ui.theme.red
 
 private fun isError(value: String): Boolean {
     return value.isNotEmpty() && value.length != 15
@@ -48,7 +49,7 @@ fun EditMicrochipIdDialog(
             )
             if (isError(chip)) {
                 Spacer(Modifier.height(4.dp))
-                TextMaker("Enter 15 digits", 10.sp, Color.Red, fontWeight = FontWeight.SemiBold)
+                TextMaker("Enter 15 digits", 10.sp, red, fontWeight = FontWeight.SemiBold)
             }
         }
     }
