@@ -1,19 +1,10 @@
 package com.example.pethelper.workers
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.app.*
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.Worker
-import androidx.work.WorkerParameters
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
+import androidx.work.*
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -92,4 +83,15 @@ fun scheduleNotif(
         ExistingWorkPolicy.REPLACE,
         workRequest
     )
+}
+
+fun deleteNotifHealthObject(context: Context, id: Long, title: String){
+    val workManager = WorkManager.getInstance(context)
+    workManager.cancelUniqueWork("${title}_work_$id")
+    workManager.cancelUniqueWork("${title}_mark_as_done_work_$id")
+}
+
+fun deleteNotifReminder(context: Context, id: Long) {
+    val workManager = WorkManager.getInstance(context)
+    workManager.cancelUniqueWork("Event_work_$id")
 }

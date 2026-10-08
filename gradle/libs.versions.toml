@@ -22,6 +22,8 @@ composeWheelPicker = "1.0.0-rc02"
 kizitonwoseCalendar = "2.10.1"
 generativeai = "0.9.0"
 workRuntimeKtxVersion = "2.11.2"
+hilt = "2.60.1"
+hiltNavigationCompose = "1.2.0"
 
 [libraries]
 accompanist-permissions-v0373 = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -53,10 +55,14 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 compose-wheel-picker = {group = "com.github.zj565061763", name = "compose-wheel-picker", version.ref = "composeWheelPicker"}
 kizitonwose-calendar-compose = {group = "com.kizitonwose.calendar", name = "compose", version.ref = "kizitonwoseCalendar"}
 google-generativeai = {group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai"}
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 

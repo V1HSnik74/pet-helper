@@ -1,24 +1,13 @@
 package com.example.pethelper.workers
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
+import android.app.*
+import android.content.*
 import androidx.core.app.NotificationCompat
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.Worker
-import androidx.work.WorkerParameters
+import androidx.work.*
 import com.example.pethelper.R
-import com.example.pethelper.compose.patterns.timeParser
 import com.example.pethelper.receivers.MarkAsDoneReceiver
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
+import com.example.pethelper.ui.compose.patterns.timeParser
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -28,7 +17,6 @@ class IsDoneNotifWorker(context: Context, params: WorkerParameters) : Worker(con
         val title = inputData.getString("TITLE_KEY")
         val icon = inputData.getInt("ICON_KEY", 0)
         val contentText = inputData.getString("CONTENT_TEXT_KEY")
-        val markAsFun = inputData.getString("FUN_KEY")
         val id = inputData.getLong("ID_KEY", 0)
         val notifManager =
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -42,7 +30,6 @@ class IsDoneNotifWorker(context: Context, params: WorkerParameters) : Worker(con
         val requestCode = "${title}_${id}_done".hashCode()
         val intent = Intent(applicationContext, MarkAsDoneReceiver::class.java)
             .apply {
-                action = markAsFun
                 putExtra("ID_KEY", id)
                 putExtra("NOTIF_ID_KEY", requestCode)
             }
@@ -75,8 +62,7 @@ fun scheduleMarkAsDoneNotif(
     title: String,
     icon: Int,
     time: String? = "12:00",
-    contentText: String,
-    markAsFun: String
+    contentText: String
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
     val parsedDate = LocalDate.parse(date, dateFormatter)
@@ -91,7 +77,6 @@ fun scheduleMarkAsDoneNotif(
         .putString("TITLE_KEY", title)
         .putInt("ICON_KEY", icon)
         .putString("CONTENT_TEXT_KEY", contentText)
-        .putString("FUN_KEY", markAsFun)
         .build()
     val workRequest = OneTimeWorkRequestBuilder<IsDoneNotifWorker>()
         .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)

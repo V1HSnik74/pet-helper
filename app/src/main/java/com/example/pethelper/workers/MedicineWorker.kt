@@ -1,23 +1,17 @@
 package com.example.pethelper.workers
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.app.*
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import androidx.work.CoroutineWorker
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkerParameters
+import androidx.work.*
 import com.example.pethelper.R
-import com.example.pethelper.compose.patterns.timeParser
-import com.example.pethelper.db.AppDatabase
+import com.example.pethelper.data.repository.interfaces.HealthObjectRepository
+import com.example.pethelper.ui.compose.patterns.*
+import dagger.hilt.*
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.firstOrNull
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
@@ -26,52 +20,64 @@ class MedicineWorker(
     params: WorkerParameters
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
+        val entryPoint = EntryPointAccessors.fromApplication(
+            applicationContext,
+            MedicineWorkerEntryPoint::class.java
+        )
+        val healthObjectRepository = entryPoint.healthObjectRepository()
         val name = inputData.getString("NAME_KEY")
         val id = inputData.getLong("ID_KEY", 0)
         val notifTime = inputData.getLong("NOTIF_TIME_KEY", 0L)
         val petName = inputData.getString("PET_NAME_KEY")
+        val animal = inputData.getString("ANIMAL_KEY")
+        val isNotif = inputData.getBoolean("IS_NOTIF_KEY", true)
         val intervalPeriod = inputData.getString("PERIOD_KEY")
-        val intervalValue = inputData.getString("INTERVAL_VALUE_KEY")
+        val intervalValue = inputData.getString("INTERVAL_VALUE_KEY").orEmpty()
         val startTime = inputData.getString("START_TIME_KEY")
-        val intervalTimes = inputData.getString("INTERVAL_TIMES_KEY")
-        val curRemaining = inputData.getInt("REMAINING_KEY", intervalTimes!!.toInt())
-        val dao = AppDatabase.getInstance(applicationContext).MedicineDao()
-        val medicine = dao.getMedicineById(id).firstOrNull() ?: return Result.success()
-        val notifManager =
-            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "medicine_channel"
-        val channel =
-            NotificationChannel(
-                channelId,
-                "Medicine Reminders",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-        notifManager.createNotificationChannel(channel)
-        val notif = NotificationCompat.Builder(applicationContext, channelId)
-            .setSmallIcon(R.drawable.medicine_button)
-            .setContentTitle("Upcoming Medicine")
-            .setContentText("$name is soon for $petName")
-            .setAutoCancel(true)
-            .build()
-        val requestCode = "medicine_${id}_$petName".hashCode()
-        notifManager.notify(requestCode, notif)
+        val intervalTimes = inputData.getString("INTERVAL_TIMES_KEY").orEmpty()
+        val curRemaining = inputData.getInt("REMAINING_KEY", intervalTimes.toInt())
+        val medicine =
+            healthObjectRepository.getHealthObjectById(id).firstOrNull() ?: return Result.success()
+        if (isNotif) {
+            val notifManager =
+                applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channelId = "medicine_channel"
+            val channel =
+                NotificationChannel(
+                    channelId,
+                    "Medicine Reminders",
+                    NotificationManager.IMPORTANCE_HIGH
+                )
+            notifManager.createNotificationChannel(channel)
+            val notif = NotificationCompat.Builder(applicationContext, channelId)
+                .setSmallIcon(if (animal == "Dog") R.drawable.dog else R.drawable.cat)
+                .setContentTitle("Upcoming Medicine")
+                .setContentText("$name is soon for $petName")
+                .setAutoCancel(true)
+                .build()
+            val requestCode = "medicine_${id}_$petName".hashCode()
+            notifManager.notify(requestCode, notif)
+        }
 
         val startTimeLT = LocalTime.parse(startTime, timeParser)
         val lastGivingDT = LocalDateTime.parse(medicine.nextTaking)
         val (nextGivingDT, updatedRemTimes) = when (intervalPeriod) {
-            "week" -> Pair(getNextGivingDT(intervalValue!!, lastGivingDT, startTimeLT), 0)
-            "month" -> Pair(getNextGivingDTForMonth(intervalValue!!, lastGivingDT, startTimeLT), 0)
+            "week" -> Pair(getNextGivingDT(intervalValue, lastGivingDT, startTimeLT), 0)
+            "month" -> Pair(getNextGivingDTForMonth(intervalValue, lastGivingDT, startTimeLT), 0)
             else -> getNextGivingDTForDay(
                 lastGivingDT,
                 startTimeLT,
-                intervalValue!!.toLong(),
+                intervalValue.toLong(),
                 intervalTimes.toInt(),
                 curRemaining
             )
         }
-        dao.updateNextTaking(nextGivingDT.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), id)
+        healthObjectRepository.updateNextTaking(
+            nextGivingDT.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            id
+        )
         val nextNotifTargetTime = nextGivingDT.minusMinutes(notifTime)
-        val delay = java.time.Duration.between(LocalDateTime.now(), nextNotifTargetTime).toMillis()
+        val delay = Duration.between(LocalDateTime.now(), nextNotifTargetTime).toMillis()
         val nextInputData = Data.Builder()
             .putAll(inputData)
             .putInt("REMAINING_KEY", updatedRemTimes)
@@ -101,7 +107,8 @@ fun scheduleMedicineNotif(
     intervalValue: String,
     petName: String,
     isNotif: Boolean,
-    intervalTimes: String
+    intervalTimes: String,
+    animal: String
 ): LocalDateTime {
     val timeLT = LocalTime.parse(startTime, timeParser)
     var givingDateTime = LocalDateTime.of(LocalDate.now(), timeLT)
@@ -126,37 +133,37 @@ fun scheduleMedicineNotif(
             getNextGivingDTForMonth(intervalValue, LocalDateTime.now(), timeLT)
 
     }
-    if (isNotif) {
-        val minutesBefore = when (timeNotif) {
-            "5 minutes before" -> 5L
-            "10 minutes before" -> 10L
-            "1 minute before" -> 1L
-            else -> 0L
-        }
-        val firstNotifDT = givingDateTime.minusMinutes(minutesBefore)
-        val rawDelay = java.time.Duration.between(LocalDateTime.now(), firstNotifDT).toMillis()
-        val initDelay = maxOf(0L, rawDelay)
-        val inputData = Data.Builder()
-            .putLong("ID_KEY", id)
-            .putString("NAME_KEY", name)
-            .putLong("NOTIF_TIME_KEY", minutesBefore)
-            .putString("PERIOD_KEY", intervalPeriod)
-            .putString("INTERVAL_VALUE_KEY", intervalValue)
-            .putString("START_TIME_KEY", startTime)
-            .putString("PET_NAME_KEY", petName)
-            .putString("INTERVAL_TIMES_KEY", intervalTimes)
-            .putInt("REMAINING_KEY", initRemaining)
-            .build()
-        val workRequest = OneTimeWorkRequestBuilder<MedicineWorker>()
-            .setInitialDelay(initDelay, TimeUnit.MILLISECONDS)
-            .setInputData(inputData)
-            .build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            "medicine_${id}_$petName",
-            ExistingWorkPolicy.REPLACE,
-            workRequest
-        )
+    val minutesBefore = when (timeNotif) {
+        "5 minutes before" -> 5L
+        "10 minutes before" -> 10L
+        "1 minute before" -> 1L
+        else -> 0L
     }
+    val firstNotifDT = givingDateTime.minusMinutes(minutesBefore)
+    val rawDelay = Duration.between(LocalDateTime.now(), firstNotifDT).toMillis()
+    val initDelay = maxOf(0L, rawDelay)
+    val inputData = Data.Builder()
+        .putLong("ID_KEY", id)
+        .putString("NAME_KEY", name)
+        .putLong("NOTIF_TIME_KEY", minutesBefore)
+        .putString("PERIOD_KEY", intervalPeriod)
+        .putString("INTERVAL_VALUE_KEY", intervalValue)
+        .putString("START_TIME_KEY", startTime)
+        .putString("PET_NAME_KEY", petName)
+        .putString("INTERVAL_TIMES_KEY", intervalTimes)
+        .putInt("REMAINING_KEY", initRemaining)
+        .putString("ANIMAL_KEY", animal)
+        .putBoolean("IS_NOTIF_KEY", isNotif)
+        .build()
+    val workRequest = OneTimeWorkRequestBuilder<MedicineWorker>()
+        .setInitialDelay(initDelay, TimeUnit.MILLISECONDS)
+        .setInputData(inputData)
+        .build()
+    WorkManager.getInstance(context).enqueueUniqueWork(
+        "medicine_${id}_$petName",
+        ExistingWorkPolicy.REPLACE,
+        workRequest
+    )
     return givingDateTime
 }
 
@@ -217,4 +224,14 @@ private fun getNextGivingDTForDay(
         val nextDay = lastGivingDT.toLocalDate().plusDays(1)
         Pair(LocalDateTime.of(nextDay, startTime), totalTimes)
     }
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface MedicineWorkerEntryPoint {
+    fun healthObjectRepository(): HealthObjectRepository
+}
+
+fun cancelMedicineNotif(context: Context, id: Long, petName: String) {
+    WorkManager.getInstance(context).cancelUniqueWork("medicine_${id}_$petName")
 }
