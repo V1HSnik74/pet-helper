@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 val localProperties = Properties().apply {
@@ -13,7 +14,7 @@ val localProperties = Properties().apply {
 val apiKey: String = localProperties.getProperty("GEMINI_API_KEY")
 
 android {
-    namespace = "com.example.pethelper"
+    namespace = "com.vhsnik.pethelper"
     compileSdk {
         version = release(37) {
             minorApiLevel = 1
@@ -21,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.pethelper"
+        applicationId = "com.vhsnik.pethelper"
         minSdk = 29
         targetSdk = 37
         versionCode = 1
@@ -83,4 +84,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation("androidx.compose.material:material-icons-extended")
 }

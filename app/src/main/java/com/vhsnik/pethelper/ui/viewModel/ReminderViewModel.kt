@@ -1,0 +1,180 @@
+package com.vhsnik.pethelper.ui.viewModel
+
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.vhsnik.pethelper.R
+import com.vhsnik.pethelper.data.entity.*
+import com.vhsnik.pethelper.data.repository.interfaces.*
+import com.vhsnik.pethelper.ui.compose.utils.timeParser
+import com.vhsnik.pethelper.workers.deleteNotifReminder
+import com.vhsnik.pethelper.workers.scheduleNotif
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.time.*
+import java.time.format.DateTimeFormatter
+import javax.inject.Inject
+
+@HiltViewModel
+class ReminderViewModel @Inject constructor(
+    private val reminderRepository: ReminderRepository,
+    private val healthObjectRepository: HealthObjectRepository,
+    @ApplicationContext private val context: Context
+) : ViewModel() {
+
+    fun addReminder(
+        name: String,
+        note: String?,
+        date: String,
+        time: String?,
+        icon: Int,
+        isNotif: Boolean,
+        notifDate: String,
+        notifTime: String,
+        petId: Int,
+        petName: String,
+        animal: String
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val id = reminderRepository.addReminder(
+                Reminder(
+                    name,
+                    note,
+                    date,
+                    time,
+                    icon,
+                    isNotif,
+                    notifDate,
+                    notifTime,
+                    petId
+                )
+            )
+            if (isNotif) {
+                scheduleNotifReminder(
+                    id, name, date, notifDate, notifTime, animal, petName, false
+                )
+            }
+        }
+    }
+
+    fun updateReminder(r: Reminder, animal: String, petName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val id = reminderRepository.updateReminder(r)
+            if (r.isNotif) {
+                scheduleNotifReminder(
+                    id,
+                    r.name,
+                    r.date,
+                    r.notifDate,
+                    r.notifTime,
+                    animal,
+                    petName,
+                    true
+                )
+            }
+        }
+    }
+
+    fun deleteReminder(id: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteNotifReminder(context, id)
+            reminderRepository.deleteReminder(id)
+        }
+    }
+
+    fun scheduleNotifReminder(
+        id: Long,
+        name: String,
+        date: String,
+        notifDate: String,
+        notifTime: String,
+        animal: String,
+        petName: String,
+        isUpdating: Boolean
+    ) {
+        if (isUpdating)
+            deleteNotifReminder(context, id)
+        scheduleNotif(
+            context,
+            id,
+            name,
+            date,
+            notifDate,
+            notifTime,
+            "Event",
+            if (animal == "Dog") R.drawable.dog else R.drawable.cat,
+            petName
+        )
+    }
+
+    fun getAllRemindersByPetSelectedDay(date: String, petId: Int): Flow<List<Any>> {
+        val reminders = reminderRepository.getAllRemindersByDate(petId, date)
+        val healthObjects = healthObjectRepository.getAllHealthObject(petId).map {
+            it.filter { ho ->
+                if (ho.category == HealthCategory.MEDICINE) {
+                    LocalDateTime.parse(ho.nextTaking).toLocalDate()
+                        .format(DateTimeFormatter.ISO_LOCAL_DATE) == date
+                } else ho.date == date
+            }
+        }
+        return combine(reminders, healthObjects) { r, ho ->
+            val combined = mutableListOf<Any>()
+            combined.addAll(r)
+            combined.addAll(ho)
+            combined
+        }
+    }
+
+    fun getAllRemindersSorted(petId: Int): Flow<List<Any>> {
+        val reminders = reminderRepository.getAllReminders(petId).map {
+            val now = LocalDateTime.now()
+            it.filter { r ->
+                val date = LocalDate.parse(r.date, DateTimeFormatter.ISO_LOCAL_DATE)
+                val time = if (!r.time.isNullOrEmpty())
+                    LocalTime.parse(r.time, timeParser)
+                else LocalTime.parse("23:59", timeParser)
+                LocalDateTime.of(date, time) >= now
+            }
+        }
+        val healthObjects = healthObjectRepository.getAllHealthObjectIsDone(petId, false)
+        return combine(reminders, healthObjects) { r, ho ->
+            val allReminders = mutableListOf<Any>()
+            allReminders.addAll(r)
+            allReminders.addAll(ho)
+            allReminders.sortedBy {
+                when (it) {
+                    is Reminder -> {
+                        val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
+                        val time = if (!it.time.isNullOrEmpty())
+                            LocalTime.parse(it.time, timeParser)
+                        else LocalTime.parse("23:59", timeParser)
+                        LocalDateTime.of(date, time)
+                    }
+
+                    is HealthObject -> {
+                        if (it.category == HealthCategory.MEDICINE) {
+                            LocalDateTime.parse(
+                                it.nextTaking,
+                                DateTimeFormatter.ISO_LOCAL_DATE_TIME
+                            )
+                        } else {
+                            val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
+                            val time = if (!it.time.isNullOrEmpty()) LocalTime.parse(
+                                it.time,
+                                timeParser
+                            )
+                            else LocalTime.parse("23:59", timeParser)
+                            LocalDateTime.of(date, time)
+                        }
+                    }
+
+                    else -> null
+                }
+            }
+
+        }
+    }
+}
