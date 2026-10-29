@@ -28,25 +28,26 @@ fun NutritionScreen(
     petsViewModel: PetsViewModel = hiltViewModel()
 ) {
     LaunchedEffect(petId) {
+        nutritionViewModel.setCurPetId(petId)
         petsViewModel.setCurPet(petId)
     }
-    val allFoodItems by remember(petId) {
-        nutritionViewModel.getAllFoodItems(petId)
-    }.collectAsStateWithLifecycle(emptyList())
-    val allAllergies by remember(petId) {
-        nutritionViewModel.getAllAllergies(petId)
-    }.collectAsStateWithLifecycle(emptyList())
-    val allSupplements by remember(petId) {
-        nutritionViewModel.getAllSupplements(petId)
-    }.collectAsStateWithLifecycle(emptyList())
-    val allTreats by remember(petId) {
-        nutritionViewModel.getAllTreats(petId)
-    }.collectAsStateWithLifecycle(emptyList())
-    val allNotes by remember(petId) {
-        nutritionViewModel.getAllNotesNutrition(petId)
-    }.collectAsStateWithLifecycle(emptyList())
+    val allFoodItems by
+    nutritionViewModel.allFoodItems
+        .collectAsStateWithLifecycle()
+    val allAllergies by
+    nutritionViewModel.allAllergies
+        .collectAsStateWithLifecycle()
+    val allSupplements by
+    nutritionViewModel.allSupplements
+        .collectAsStateWithLifecycle()
+    val allTreats by
+    nutritionViewModel.allTreats
+        .collectAsStateWithLifecycle()
+    val allNotes by
+        nutritionViewModel.allNotesNutrition
+    .collectAsStateWithLifecycle()
     var activeDialog by remember { mutableStateOf("") }
-    val curPet = petsViewModel.currPet
+    val curPet by petsViewModel.currPet.collectAsStateWithLifecycle()
     val isGenerating by nutritionViewModel.isGenerating.collectAsStateWithLifecycle()
     val generatedRation by nutritionViewModel.generatedRation.collectAsStateWithLifecycle()
     var idForDelete by remember { mutableStateOf<Long?>(null) }
@@ -124,7 +125,7 @@ fun NutritionScreen(
                 GenerateButton(
                     {
                         nutritionViewModel.generateRation(
-                            curPet, allAllergies, allSupplements
+                            it, allAllergies, allSupplements
                         )
                     },
                     "Nutrition",
@@ -184,7 +185,7 @@ fun NutritionScreen(
                 activeDialog = ""
                 foodItemToEdit = null
             },
-            { name, description, portionSize, icon, unit, petId ->
+            { name, description, portionSize, icon, unit, _ ->
                 if (foodItemToEdit != null) {
                     nutritionViewModel.updateFoodItem(
                         foodItemToEdit!!.copy(
@@ -202,8 +203,7 @@ fun NutritionScreen(
                         description,
                         portionSize,
                         unit,
-                        icon,
-                        petId
+                        icon
                     )
                 }
                 activeDialog = ""
@@ -218,8 +218,8 @@ fun NutritionScreen(
 
         "allergyDialog" -> AddOtherNutritionDialog(
             { activeDialog = "" },
-            { name, petId ->
-                nutritionViewModel.addOtherNutrition(name, "Allergy", petId)
+            { name, _ ->
+                nutritionViewModel.addOtherNutrition(name, "Allergy")
                 activeDialog = ""
             },
             petId,
@@ -231,8 +231,8 @@ fun NutritionScreen(
 
         "supplementDialog" -> AddOtherNutritionDialog(
             { activeDialog = "" },
-            { name, petId ->
-                nutritionViewModel.addOtherNutrition(name, "Supplement", petId)
+            { name, _ ->
+                nutritionViewModel.addOtherNutrition(name, "Supplement")
                 activeDialog = ""
             },
             petId,
@@ -243,8 +243,8 @@ fun NutritionScreen(
 
         "treatDialog" -> AddOtherNutritionDialog(
             { activeDialog = "" },
-            { name, petId ->
-                nutritionViewModel.addOtherNutrition(name, "Treat", petId)
+            { name, _ ->
+                nutritionViewModel.addOtherNutrition(name, "Treat")
                 activeDialog = ""
             },
             petId,
@@ -258,7 +258,7 @@ fun NutritionScreen(
                 activeDialog = ""
                 noteToEdit = null
             },
-            { note, category, petId ->
+            { note, category, _ ->
                 if (noteToEdit != null) {
                     nutritionViewModel.updateNoteNutrition(
                         noteToEdit!!.copy(
@@ -267,7 +267,7 @@ fun NutritionScreen(
                         )
                     )
                 } else {
-                    nutritionViewModel.addNoteNutrition(note, category, petId)
+                    nutritionViewModel.addNoteNutrition(note, category)
                 }
                 activeDialog = ""
                 noteToEdit = null
@@ -301,13 +301,12 @@ fun NutritionScreen(
                         it.description,
                         it.portionSize,
                         it.unit,
-                        it.icon,
-                        petId
+                        it.icon
                     )
                 }
                 nutritionViewModel.clearGeneratedRation()
             },
-            {nutritionViewModel.deleteAllFoodItems(petId)},
+            { nutritionViewModel.deleteAllFoodItems() },
             "Nutrition"
         ) { item ->
             GeneratedItem(

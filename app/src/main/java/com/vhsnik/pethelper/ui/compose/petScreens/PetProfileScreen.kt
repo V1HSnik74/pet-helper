@@ -48,7 +48,7 @@ fun PetProfileScreen(
     LaunchedEffect(id) {
         petsViewModel.setCurPet(id)
     }
-    val curPet = petsViewModel.currPet
+    val curPet by petsViewModel.currPet.collectAsStateWithLifecycle()
     var activeDialog by remember { mutableStateOf<PetProfileDialog?>(null) }
     val context = LocalContext.current
     val isPhotoLoading by petsViewModel.isPhotoLoading.collectAsStateWithLifecycle()

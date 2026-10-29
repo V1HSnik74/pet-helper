@@ -12,9 +12,14 @@ import com.vhsnik.pethelper.data.repository.interfaces.NotesRepository
 import com.vhsnik.pethelper.data.repository.interfaces.OtherNutritionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,27 +30,51 @@ class NutritionViewModel @Inject constructor(
     private val otherNutritionRepository: OtherNutritionRepository,
     private val generatedRecommendation: GeneratedRecommendation
 ) : ViewModel() {
-    fun getAllFoodItems(petId: Int) = foodItemRepository.getAllFoodItems(petId)
-    fun getAllAllergies(petId: Int) =
-        otherNutritionRepository.getAllOtherNutritionCategory(petId, "Allergy")
+    private val curPetId = MutableStateFlow<Int?>(null)
+    fun setCurPetId(petId: Int) {
+        curPetId.value = petId
+    }
 
-    fun getAllSupplements(petId: Int) =
-        otherNutritionRepository.getAllOtherNutritionCategory(petId, "Supplement")
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allFoodItems: StateFlow<List<FoodItem>> =
+        curPetId.filterNotNull().flatMapLatest {
+            foodItemRepository.getAllFoodItems(it)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun getAllTreats(petId: Int) =
-        otherNutritionRepository.getAllOtherNutritionCategory(petId, "Treat")
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allAllergies: StateFlow<List<OtherNutrition>> =
+        curPetId.filterNotNull().flatMapLatest {
+            otherNutritionRepository.getAllOtherNutritionCategory(it, "Allergy")
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun getAllNotesNutrition(petId: Int) =
-        noteRepository.getAllNotesBySection(petId, NoteSection.NUTRITION)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allSupplements: StateFlow<List<OtherNutrition>> =
+        curPetId.filterNotNull().flatMapLatest {
+            otherNutritionRepository.getAllOtherNutritionCategory(it, "Supplement")
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allTreats: StateFlow<List<OtherNutrition>> =
+        curPetId.filterNotNull().flatMapLatest {
+            otherNutritionRepository.getAllOtherNutritionCategory(it, "Treat")
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allNotesNutrition: StateFlow<List<Note>> =
+        curPetId.filterNotNull().flatMapLatest {
+            noteRepository.getAllNotesBySection(it, NoteSection.NUTRITION)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun addFoodItem(
         name: String,
         description: String,
         portionSize: String,
         unit: String,
-        icon: Int,
-        petId: Int
+        icon: Int
     ) {
+        val petId = curPetId.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             foodItemRepository.addFoodItem(
                 FoodItem(
@@ -60,7 +89,8 @@ class NutritionViewModel @Inject constructor(
         }
     }
 
-    fun addNoteNutrition(note: String, category: String, petId: Int) {
+    fun addNoteNutrition(note: String, category: String) {
+        val petId = curPetId.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             noteRepository.addNote(
                 Note(
@@ -73,7 +103,8 @@ class NutritionViewModel @Inject constructor(
         }
     }
 
-    fun addOtherNutrition(name: String, category: String, petId: Int) {
+    fun addOtherNutrition(name: String, category: String) {
+        val petId = curPetId.value ?: return
         viewModelScope.launch {
             otherNutritionRepository.addOtherNutrition(OtherNutrition(name, petId, category))
         }
@@ -98,7 +129,8 @@ class NutritionViewModel @Inject constructor(
         }
     }
 
-    fun deleteAllFoodItems(petId: Int) {
+    fun deleteAllFoodItems() {
+        val petId = curPetId.value ?: return
         viewModelScope.launch {
             foodItemRepository.deleteAllFoodItems(petId)
         }
@@ -115,6 +147,7 @@ class NutritionViewModel @Inject constructor(
             otherNutritionRepository.deleteOtherNutrition(id)
         }
     }
+
     private val _isGenerating = MutableStateFlow(false)
     val isGenerating: StateFlow<Boolean> = _isGenerating.asStateFlow()
 
@@ -133,11 +166,8 @@ class NutritionViewModel @Inject constructor(
         _isGenerating.value = true
         viewModelScope.launch {
             try {
-                generatedRecommendation.getNutritionRecommendation(
-                    pet, allergies, supplements
-                ).collect {
-                    _generatedRation.value = it
-                }
+                _generatedRation.value =
+                    generatedRecommendation.getNutritionRecommendation(pet, allergies, supplements)
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

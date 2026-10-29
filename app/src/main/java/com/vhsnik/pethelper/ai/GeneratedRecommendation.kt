@@ -6,7 +6,6 @@ import com.vhsnik.pethelper.ui.viewModel.PetFields
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 import org.json.JSONArray
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -38,9 +37,9 @@ class GeneratedRecommendation(apiKey: String) {
         }
     }
 
-    fun getActivityRecommendation(
+    suspend fun getActivityRecommendation(
         pet: PetFields
-    ): Flow<List<Activity>> = flow {
+    ): List<Activity> = withContext(Dispatchers.IO) {
         val prompt = """
             You're a vet rehabilitation specialist and expert pet trainer. 
             Provide a list of activities suitable for the following ${pet.animal}:
@@ -78,13 +77,12 @@ class GeneratedRecommendation(apiKey: String) {
                 )
             )
         }
-        emit(activityItems)
+        activityItems
+    }
 
-    }.flowOn(Dispatchers.IO)
-
-    fun getNutritionRecommendation(
+    suspend fun getNutritionRecommendation(
         pet: PetFields, allergies: List<OtherNutrition>, supplements: List<OtherNutrition>
-    ): Flow<List<FoodItem>> = flow {
+    ): List<FoodItem> = withContext(Dispatchers.IO) {
         val allergiesName =
             if (allergies.isEmpty()) "No allergies" else allergies.joinToString { it.toString() }
         val supplementsName =
@@ -120,9 +118,8 @@ class GeneratedRecommendation(apiKey: String) {
                 )
             )
         }
-        emit(foodItems)
-
-    }.flowOn(Dispatchers.IO)
+        foodItems
+    }
 
     private fun getDrawableNutrition(category: String): Int {
         return when (category) {

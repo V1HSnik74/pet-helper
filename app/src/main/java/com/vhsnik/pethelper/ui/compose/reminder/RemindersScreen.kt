@@ -34,17 +34,18 @@ fun RemindersScreen(
 ) {
     LaunchedEffect(petId) {
         petsViewModel.setCurPet(petId)
+        reminderViewModel.setCurPet(petId)
     }
     var date by remember { mutableStateOf(LocalDate.now()) }
     var isAddReminderOpened by remember { mutableStateOf(false) }
-    val allEventsThisDate by remember(date, petId) {
+    val allEventsThisDate by remember(date) {
         reminderViewModel.getAllRemindersByPetSelectedDay(
             date.format(
                 DateTimeFormatter.ISO_LOCAL_DATE
-            ), petId
+            )
         )
-    }.collectAsStateWithLifecycle(emptyList())
-    val pet = petsViewModel.currPet
+    }.collectAsStateWithLifecycle()
+    val pet by petsViewModel.currPet.collectAsStateWithLifecycle()
     var isDeleteOpened by remember { mutableStateOf(false) }
     var actionToDelete by remember { mutableStateOf<(() -> Unit)?>(null) }
     var reminderToEdit by remember { mutableStateOf<Reminder?>(null) }
@@ -144,7 +145,7 @@ fun RemindersScreen(
                 isAddReminderOpened = false
                 reminderToEdit = null
             },
-            { name, note, date, time, icon, isNotif, notifDate, notifTime, petId ->
+            { name, note, date, time, icon, isNotif, notifDate, notifTime, _ ->
                 if (reminderToEdit == null)
                     reminderViewModel.addReminder(
                         name,
@@ -155,7 +156,6 @@ fun RemindersScreen(
                         isNotif,
                         notifDate,
                         notifTime,
-                        petId,
                         pet?.name.orEmpty(),
                         pet?.animal.orEmpty()
                     )

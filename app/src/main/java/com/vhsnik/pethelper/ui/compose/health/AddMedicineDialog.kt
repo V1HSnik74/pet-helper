@@ -104,7 +104,6 @@ fun AddMedicineDialog(
         Column(
             Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
         ) {
             LabelAndTextField(
                 "Medicine", medicine, { medicine = it }, "e.g. Probiotic"

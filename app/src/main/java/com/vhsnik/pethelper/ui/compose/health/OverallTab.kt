@@ -26,35 +26,25 @@ fun OverallTab(
     petId: Int,
     animal: String
 ) {
-    val notes by remember(petId) { noteViewModel.getAllOverallNotes(petId) }
-        .collectAsStateWithLifecycle(
-            emptyList()
-        )
-    val allHealthObjectsSorted by remember(petId) {
-        healthViewModel.getAllUpcomingHealthObjects(petId)
-    }.collectAsStateWithLifecycle(emptyList())
-    val medicines by remember(petId) {
+    val notes by noteViewModel.allOverallNotes
+        .collectAsStateWithLifecycle()
+    val allHealthObjectsSorted by
+    healthViewModel.allUpcomingHealthObjects
+        .collectAsStateWithLifecycle()
+    val medicines by remember {
         healthViewModel.getCategoryHealthObjects(
-            petId,
             HealthCategory.MEDICINE
         )
-    }.collectAsStateWithLifecycle(emptyList())
-    val preventionStatus by remember(petId) {
-        healthViewModel.getPreventionPercentage(petId)
-    }.collectAsStateWithLifecycle(
-        PreventionStatus(
-            0f,
-            isProtectedFleas = false,
-            isProtectedWorms = false,
-            isProtectedTicks = false
-        )
-    )
-    val vaccinePercentage by remember(petId, animal) {
-        healthViewModel.getVaccinationPercentage(petId, animal)
-    }.collectAsStateWithLifecycle(0f)
-    val isCheckUpDone by remember(petId) {
-        healthViewModel.getCheckUpStatus(petId)
-    }.collectAsStateWithLifecycle(false)
+    }.collectAsStateWithLifecycle()
+    val preventionStatus by
+    healthViewModel.preventionPercentage
+        .collectAsStateWithLifecycle()
+    val vaccinePercentage by remember {
+        healthViewModel.getVaccinationPercentage(animal)
+    }.collectAsStateWithLifecycle()
+    val isCheckUpDone by
+    healthViewModel.checkUpStatus
+        .collectAsStateWithLifecycle()
     var isAddNotesOpened by remember { mutableStateOf(false) }
     var isDeleteOpened by remember { mutableStateOf(false) }
     var noteToEdit by remember { mutableStateOf<Note?>(null) }
@@ -100,7 +90,7 @@ fun OverallTab(
                 date,
                 time,
                 (!it.note.isNullOrEmpty()),
-                true,
+                !it.time.isNullOrEmpty(),
                 hasLine,
                 (!it.note.isNullOrEmpty()), {}, {}, hasMenu = false
             )
@@ -135,9 +125,9 @@ fun OverallTab(
                 isAddNotesOpened = false
                 noteToEdit = null
             },
-            { note, date, petId ->
+            { note, date, _ ->
                 if (noteToEdit == null)
-                    noteViewModel.addNote(note, null, petId, NoteSection.OVERALL_HEALTH, date)
+                    noteViewModel.addNote(note, null, NoteSection.OVERALL_HEALTH, date)
                 else
                     noteViewModel.updateNote(noteToEdit!!.copy(description = note, date = date))
                 isAddNotesOpened = false

@@ -63,7 +63,7 @@ fun AddTreatmentHistoryDialog(
         },
         action.isNotEmpty()
     ) {
-        Column(Modifier.verticalScroll(rememberScrollState())) {
+        Column(Modifier.fillMaxWidth()) {
             LabelAndTextField(
                 "Action",
                 action,

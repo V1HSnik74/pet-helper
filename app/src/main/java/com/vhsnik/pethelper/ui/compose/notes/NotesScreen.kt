@@ -87,11 +87,12 @@ fun NotesScreen(
 ) {
     LaunchedEffect(petId) {
         petsViewModel.setCurPet(petId)
+        noteViewModel.setCurPetId(petId)
     }
     val selectedCategory by noteViewModel.selectedCategory.collectAsStateWithLifecycle()
-    val allNotes by remember(petId) {
-        noteViewModel.allNotes(petId)
-    }.collectAsStateWithLifecycle(emptyList())
+    val allNotes by
+    noteViewModel.allNotes
+        .collectAsStateWithLifecycle()
     var note by remember { mutableStateOf<Note?>(null) }
     var idForDelete by remember { mutableStateOf<Long?>(null) }
     var isDialogActive by remember { mutableStateOf(false) }
@@ -114,7 +115,6 @@ fun NotesScreen(
                     noteViewModel.addNote(
                         description,
                         category,
-                        petId,
                         NoteSection.COMMON,
                         LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
                     )

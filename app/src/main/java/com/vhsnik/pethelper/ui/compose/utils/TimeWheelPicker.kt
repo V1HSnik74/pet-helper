@@ -79,20 +79,21 @@ fun WheelPickerTime(
     onValueChange: (String) -> Unit,
     selectedDate: LocalDate,
     isTimeUpc: Boolean,
-    maxHourLimit: Int = 23
+    maxHourLimit: Int = 23,
+    maxMinuteLimit: Int = 59
 ) {
-    val availableHours = remember(selectedDate, isTimeUpc) {
+    val availableHours = remember(selectedDate, isTimeUpc, maxHourLimit) {
         getAvailableHours(isTimeUpc, selectedDate, maxHourLimit)
     }
     if (availableHours.isNotEmpty()) {
         var selectedHour by remember(availableHours) {
             mutableIntStateOf(availableHours.first())
         }
-        val availableMinutes = remember(selectedDate, isTimeUpc, selectedHour) {
-            getAvailableMinutes(isTimeUpc, selectedDate, selectedHour)
+        val availableMinutes = remember(selectedDate, isTimeUpc, selectedHour, maxHourLimit, maxMinuteLimit) {
+            getAvailableMinutes(isTimeUpc, selectedDate, selectedHour, maxHourLimit, maxMinuteLimit)
         }
         var selectedMinute by remember {
-            mutableIntStateOf(availableMinutes.first())
+            mutableIntStateOf(availableMinutes.firstOrNull() ?: 0)
         }
         LaunchedEffect(selectedHour, selectedMinute, availableHours, availableMinutes) {
             val timeStr = String.format(Locale.ENGLISH, "%02d:%02d", selectedHour, selectedMinute)

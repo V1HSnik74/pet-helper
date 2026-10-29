@@ -8,11 +8,13 @@ import com.vhsnik.pethelper.data.repository.interfaces.NotesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,6 +22,11 @@ import javax.inject.Inject
 class NoteViewModel @Inject constructor(
     private val noteRepository: NotesRepository
 ) : ViewModel() {
+    private val curPetId = MutableStateFlow<Int?>(null)
+    fun setCurPetId(petId: Int) {
+        curPetId.value = petId
+    }
+
     private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
     fun selectCategory(category: String) {
@@ -27,23 +34,24 @@ class NoteViewModel @Inject constructor(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun allNotes(petId: Int): Flow<List<Note>> {
-        return _selectedCategory.flatMapLatest {
-            if (it == "All") {
-                noteRepository.getAllNotesBySection(petId, NoteSection.COMMON)
-            } else {
-                noteRepository.getAllCommonNotesByCategory(petId, it)
+    val allNotes: StateFlow<List<Note>> =
+        curPetId.filterNotNull().flatMapLatest { id ->
+            _selectedCategory.flatMapLatest {
+                if (it == "All") {
+                    noteRepository.getAllNotesBySection(id, NoteSection.COMMON)
+                } else {
+                    noteRepository.getAllCommonNotesByCategory(id, it)
+                }
             }
-        }
-    }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun addNote(
         description: String,
         category: String? = null,
-        petId: Int,
         section: NoteSection,
         date: String? = null
     ) {
+        val petId = curPetId.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             noteRepository.addNote(
                 Note(
@@ -69,11 +77,16 @@ class NoteViewModel @Inject constructor(
         }
     }
 
-    fun getAllOverallNotes(petId: Int): Flow<List<Note>> {
-        return noteRepository.getAllNotesBySection(petId, NoteSection.OVERALL_HEALTH)
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allOverallNotes: StateFlow<List<Note>> =
+        curPetId.filterNotNull().flatMapLatest {
+            noteRepository.getAllNotesBySection(it, NoteSection.OVERALL_HEALTH)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun getAllCheckUpNotes(petId: Int): Flow<List<Note>> {
-        return noteRepository.getAllNotesBySection(petId, NoteSection.CHECK_UPS)
-    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allCheckUpNotes: StateFlow<List<Note>> =
+        curPetId.filterNotNull().flatMapLatest {
+            noteRepository.getAllNotesBySection(it, NoteSection.CHECK_UPS)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 }

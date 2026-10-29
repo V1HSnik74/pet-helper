@@ -26,22 +26,14 @@ fun PreventionTab(
     petName: String,
     animal: String
 ) {
-    val allUpcomingPreventions by remember(petId) {
-        healthViewModel.getAllUpcomingCategory(petId, HealthCategory.PREVENTION)
-    }.collectAsStateWithLifecycle(emptyList())
-    val preventionHistory by remember(petId) {
-        healthViewModel.getAllHistoryCategory(petId, HealthCategory.PREVENTION)
-    }.collectAsStateWithLifecycle(emptyList())
-    val preventionCompletionInfo by remember(petId) {
-        healthViewModel.getPreventionPercentage(petId)
-    }.collectAsStateWithLifecycle(
-        PreventionStatus(
-            0f,
-            isProtectedFleas = false,
-            isProtectedWorms = false,
-            isProtectedTicks = false
-        )
-    )
+    val allUpcomingPreventions by remember {
+        healthViewModel.getAllUpcomingCategory(HealthCategory.PREVENTION)
+    }.collectAsStateWithLifecycle()
+    val preventionHistory by remember {
+        healthViewModel.getAllHistoryCategory(HealthCategory.PREVENTION)
+    }.collectAsStateWithLifecycle()
+    val preventionCompletionInfo by
+    healthViewModel.preventionPercentage.collectAsStateWithLifecycle()
     var activeDialog by remember { mutableStateOf<DialogsPrevention?>(null) }
     var isDeleteOpened by remember { mutableStateOf(false) }
     var idToDelete by remember { mutableStateOf<Long?>(null) }
@@ -94,7 +86,7 @@ fun PreventionTab(
                     preventionUpcToEdit = item
                 },
                 true,
-                { healthViewModel.markAsDone(item, petName) }
+                { healthViewModel.markAsDone(item) }
             )
         }
         PagerCard(

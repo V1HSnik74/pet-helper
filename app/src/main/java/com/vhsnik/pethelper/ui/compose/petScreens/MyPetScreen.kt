@@ -32,11 +32,12 @@ fun MyPetScreen(
 ) {
     LaunchedEffect(id) {
         petsViewModel.setCurPet(id)
+        reminderViewModel.setCurPet(id)
     }
-    val curPet = petsViewModel.currPet
-    val allUpcomingSorted by remember(id) {
-        reminderViewModel.getAllRemindersSorted(id)
-    }.collectAsStateWithLifecycle(emptyList())
+    val curPet by petsViewModel.currPet.collectAsStateWithLifecycle()
+    val allUpcomingSorted by
+    reminderViewModel.allRemindersSorted
+        .collectAsStateWithLifecycle()
     Column(
         Modifier
             .fillMaxSize()
@@ -56,8 +57,8 @@ fun MyPetScreen(
         ) {
             curPet?.let {
                 PetInfoCard(
-                    curPet
-                ) { onCardClick(curPet.id) }
+                    it
+                ) { onCardClick(it.id) }
             }
             FlowRow(
                 Modifier.fillMaxWidth(),
@@ -130,10 +131,10 @@ fun MyPetScreen(
                     else -> ""
                 }
                 val time = when (it) {
-                    is Reminder -> it.time ?: "23:59"
+                    is Reminder -> it.time ?: ""
                     is HealthObject -> if (it.category == HealthCategory.MEDICINE)
                         LocalDateTime.parse(it.nextTaking).toLocalTime().format(timeParser)
-                    else it.time ?: "23:59"
+                    else it.time ?: ""
 
                     else -> ""
                 }
@@ -151,7 +152,7 @@ fun MyPetScreen(
             }
             curPet?.let {
                 AboutSection(
-                    curPet,
+                    it,
                     painterResource(R.drawable.paw_notes_icon)
                 )
             }

@@ -12,9 +12,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vhsnik.pethelper.R
 import com.vhsnik.pethelper.ui.compose.utils.*
 import com.vhsnik.pethelper.ui.theme.*
+import com.vhsnik.pethelper.ui.viewModel.HealthViewModel
+import com.vhsnik.pethelper.ui.viewModel.NoteViewModel
 import com.vhsnik.pethelper.ui.viewModel.PetsViewModel
 import kotlinx.coroutines.launch
 
@@ -31,12 +34,16 @@ fun HealthScreen(
     petId: Int,
     tab: Int = 0,
     onBackClick: () -> Unit,
-    petsViewModel: PetsViewModel = hiltViewModel()
+    petsViewModel: PetsViewModel = hiltViewModel(),
+    healthViewModel: HealthViewModel = hiltViewModel(),
+    noteViewModel: NoteViewModel = hiltViewModel()
 ) {
     LaunchedEffect(petId) {
+        healthViewModel.setPetId(petId)
         petsViewModel.setCurPet(petId)
+        noteViewModel.setCurPetId(petId)
     }
-    val pet = petsViewModel.currPet
+    val pet by petsViewModel.currPet.collectAsStateWithLifecycle()
     pet?.let {
         val tabs = TabButtonsHealth.entries
         val pagerState = rememberPagerState(tab) { tabs.size }

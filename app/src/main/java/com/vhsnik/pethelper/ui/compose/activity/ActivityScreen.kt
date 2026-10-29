@@ -42,38 +42,41 @@ fun ActivityScreen(
     activityViewModel: ActivityViewModel = hiltViewModel()
 ) {
     LaunchedEffect(petId) {
+        activityViewModel.setPetId(petId)
         petsViewModel.setCurPet(petId)
     }
-    val pet = petsViewModel.currPet
-    val info = listOf(
-        ActivityInfoItem(
-            R.drawable.activity_level_icon,
-            "Activity level",
-            pet?.activityLevel
-        ),
-        ActivityInfoItem(
-            R.drawable.favorite_activity,
-            "favorite Activity",
-            pet?.favActivities
-        ),
-        ActivityInfoItem(
-            R.drawable.limitations_icon,
-            "Physical limitations",
-            pet?.limitations
-        ),
-        ActivityInfoItem(
-            R.drawable.goals_icon,
-            "Goals",
-            pet?.goals
+    val pet by petsViewModel.currPet.collectAsStateWithLifecycle()
+    val info = remember(pet) {
+        listOf(
+            ActivityInfoItem(
+                R.drawable.activity_level_icon,
+                "Activity level",
+                pet?.activityLevel
+            ),
+            ActivityInfoItem(
+                R.drawable.favorite_activity,
+                "favorite Activity",
+                pet?.favActivities
+            ),
+            ActivityInfoItem(
+                R.drawable.limitations_icon,
+                "Physical limitations",
+                pet?.limitations
+            ),
+            ActivityInfoItem(
+                R.drawable.goals_icon,
+                "Goals",
+                pet?.goals
+            )
         )
-    )
-    val activityPlan by remember(petId) {
-        activityViewModel.getAllActivities(petId)
-    }.collectAsStateWithLifecycle(emptyList())
+    }
+    val activityPlan by activityViewModel.allActivities.collectAsStateWithLifecycle()
     var activeDialog by remember { mutableStateOf<OpenedDialogs?>(null) }
     var idForDelete by remember { mutableStateOf<Long?>(null) }
     var activityToEdit by remember { mutableStateOf<Activity?>(null) }
     var isPlanOpened by remember { mutableStateOf(false) }
+    val isGenerating by activityViewModel.isGenerating.collectAsStateWithLifecycle()
+    val generatedActivities by activityViewModel.generatedActivities.collectAsStateWithLifecycle()
     Column(
         Modifier
             .fillMaxSize()
@@ -132,10 +135,10 @@ fun ActivityScreen(
                 pet?.let {
                     GenerateButton(
                         {
-                            activityViewModel.getActivitiesRecommendation(pet)
+                            activityViewModel.getActivitiesRecommendation(it)
                         },
                         "Activity",
-                        activityViewModel.isGenerating
+                        isGenerating
                     )
                 }
             }
@@ -233,7 +236,7 @@ fun ActivityScreen(
                 activeDialog = null
                 activityToEdit = null
             },
-            { activity, note, duration, icon, petId ->
+            { activity, note, duration, icon, _ ->
                 if (activityToEdit != null) {
                     activityViewModel.updateActivity(
                         activityToEdit!!.copy(
@@ -244,7 +247,7 @@ fun ActivityScreen(
                         )
                     )
                 } else
-                    activityViewModel.addActivity(activity, note, duration, petId, icon)
+                    activityViewModel.addActivity(activity, note, duration, icon)
                 activeDialog = null
                 activityToEdit = null
             },
@@ -258,7 +261,7 @@ fun ActivityScreen(
         )
     }
 
-    activityViewModel.generatedActivities?.let { activities ->
+    generatedActivities?.let { activities ->
         GeneratedActivityNutritionPlan(
             { activityViewModel.clearGeneratedActivities() },
             activities,
@@ -266,7 +269,7 @@ fun ActivityScreen(
                 activityViewModel.saveActivityPlan(activities)
                 activityViewModel.clearGeneratedActivities()
             },
-            { activityViewModel.deleteActivities(petId) },
+            { activityViewModel.deleteActivities() },
             "Activity",
             { item ->
                 GeneratedItem(

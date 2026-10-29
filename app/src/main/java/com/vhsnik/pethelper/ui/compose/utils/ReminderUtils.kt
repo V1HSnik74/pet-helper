@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
@@ -112,13 +113,16 @@ private fun RemindMeRow(
     }
     val actualNotifDate = selectedDate.minusDays(allOptions)
     val maxHourForNotif = if (value == "same day") selectedTimeLT.hour else 23
+    val maxMinuteForNotif = if (value == "same day") selectedTimeLT.minute else 59
     Row(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextMaker("Remind me", 12.sp, fontWeight = FontWeight.Normal)
-        DropdownField(Modifier.weight(1f), value, content) { onClick(it) }
+        DropdownField(
+            if (isSecondBlock) Modifier.weight(1f) else Modifier.width(160.dp), value, content
+        ) { onClick(it) }
 
         if (isSecondBlock) {
             TextMaker("at", 12.sp, fontWeight = FontWeight.Normal)
@@ -133,7 +137,8 @@ private fun RemindMeRow(
                     onTimeChanged,
                     actualNotifDate,
                     true,
-                    maxHourForNotif
+                    maxHourForNotif,
+                    maxMinuteForNotif
                 )
             }
         }

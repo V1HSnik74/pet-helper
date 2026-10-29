@@ -7,6 +7,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
@@ -59,7 +60,12 @@ fun DialogPattern(
                     Spacer(Modifier.height(8.dp))
                     TextMaker(label, 16.sp)
                     Spacer(Modifier.height(16.dp))
-                    content()
+                    Column(Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())) {
+                        content()
+                        Spacer(Modifier.height(1.dp))
+                    }
                     Spacer(Modifier.height(16.dp))
                     ButtonMaker(
                         label,
@@ -138,7 +144,8 @@ fun PopupTimePicker(
     onTimeChanged: (String) -> Unit,
     selectedDate: LocalDate,
     isTimeUpc: Boolean,
-    maxHourLimit: Int = 23
+    maxHourLimit: Int = 23,
+    maxMinuteLimit: Int = 59
 ) {
     Popup(
         onDismissRequest = onDismiss,
@@ -151,7 +158,7 @@ fun PopupTimePicker(
             shape = RoundedCornerShape(15.dp)
         ) {
             Box(Modifier.padding(8.dp)) {
-                WheelPickerTime(onTimeChanged, selectedDate, isTimeUpc, maxHourLimit)
+                WheelPickerTime(onTimeChanged, selectedDate, isTimeUpc, maxHourLimit, maxMinuteLimit)
             }
         }
     }

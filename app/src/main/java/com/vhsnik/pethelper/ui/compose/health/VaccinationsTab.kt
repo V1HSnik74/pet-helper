@@ -37,17 +37,17 @@ fun VaccinationsTab(
     petName: String,
     animal: String
 ) {
-    val allUpcomingVaccines by remember(petId) {
-        healthViewModel.getAllUpcomingCategory(petId, HealthCategory.VACCINE)
-    }.collectAsStateWithLifecycle(emptyList())
-    val vaccineHistory by remember(petId) {
-        healthViewModel.getAllHistoryCategory(petId, HealthCategory.VACCINE)
-    }.collectAsStateWithLifecycle(emptyList())
+    val allUpcomingVaccines by remember {
+        healthViewModel.getAllUpcomingCategory(HealthCategory.VACCINE)
+    }.collectAsStateWithLifecycle()
+    val vaccineHistory by remember {
+        healthViewModel.getAllHistoryCategory(HealthCategory.VACCINE)
+    }.collectAsStateWithLifecycle()
     val theMostUpcomingVaccine = allUpcomingVaccines.firstOrNull()
     var activeDialog by remember { mutableStateOf<DialogsVaccines?>(null) }
-    val percentage by remember(petId, animal) {
-        healthViewModel.getVaccinationPercentage(petId, animal)
-    }.collectAsStateWithLifecycle(0f)
+    val percentage by remember {
+        healthViewModel.getVaccinationPercentage(animal)
+    }.collectAsStateWithLifecycle()
     var isDeleteOpened by remember { mutableStateOf(false) }
     var idForDelete by remember { mutableStateOf<Long?>(null) }
     var vaccineUpcToEdit by remember { mutableStateOf<HealthObject?>(null) }
@@ -104,7 +104,7 @@ fun VaccinationsTab(
                 item.name,
                 "",
                 item.date!!,
-                item.time!!,
+                item.time ?: "",
                 hasAddInfoLeft = false,
                 hasAddInfoRight = false,
                 hasLine = hasLine,
@@ -131,7 +131,11 @@ fun VaccinationsTab(
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(backgroundColor)
                 ) {
-                    Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
                         PagerCard(
                             "Upcoming",
                             {
@@ -159,7 +163,7 @@ fun VaccinationsTab(
                                     vaccineUpcToEdit = item
                                 },
                                 true,
-                                { healthViewModel.markAsDone(item, petName) }
+                                { healthViewModel.markAsDone(item) }
                             )
                         }
                     }

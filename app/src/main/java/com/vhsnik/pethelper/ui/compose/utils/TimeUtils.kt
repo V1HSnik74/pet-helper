@@ -36,7 +36,13 @@ fun getAvailableHours(
     return if (minHour <= maxHour) (minHour..maxHour).toList() else emptyList()
 }
 
-fun getAvailableMinutes(isTimeDue: Boolean, selectedDate: LocalDate, selectedHour: Int): List<Int> {
+fun getAvailableMinutes(
+    isTimeDue: Boolean,
+    selectedDate: LocalDate,
+    selectedHour: Int,
+    maxHourLimit: Int = 23,
+    maxMinuteLimit: Int = 59
+): List<Int> {
     val currTime = LocalTime.now()
     val isToday = selectedDate == LocalDate.now()
     val minMinute = if (isToday && isTimeDue && selectedHour == currTime.hour) {
@@ -45,7 +51,10 @@ fun getAvailableMinutes(isTimeDue: Boolean, selectedDate: LocalDate, selectedHou
     val maxMinute = if (isToday && !isTimeDue && selectedHour == currTime.hour) {
         maxOf(0, currTime.minute - 1)
     } else 59
-    return if (minMinute <= maxMinute) (minMinute..maxMinute).toList() else emptyList()
+    val maxMinuteTarget = if (selectedHour == maxHourLimit)
+        maxMinuteLimit else 59
+    val finalMaxMinute = minOf(maxMinute, maxMinuteTarget)
+    return if (minMinute <= finalMaxMinute) (minMinute..finalMaxMinute).toList() else emptyList()
 }
 
 fun getAvailableOptionsNotifications(

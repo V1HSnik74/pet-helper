@@ -12,6 +12,7 @@ import com.vhsnik.pethelper.workers.scheduleNotif
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.*
@@ -25,6 +26,11 @@ class ReminderViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
+    private val curPetId = MutableStateFlow<Int?>(null)
+    fun setCurPet(petId: Int) {
+        curPetId.value = petId
+    }
+
     fun addReminder(
         name: String,
         note: String?,
@@ -34,10 +40,10 @@ class ReminderViewModel @Inject constructor(
         isNotif: Boolean,
         notifDate: String,
         notifTime: String,
-        petId: Int,
         petName: String,
         animal: String
     ) {
+        val petId = curPetId.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             val id = reminderRepository.addReminder(
                 Reminder(
@@ -110,71 +116,77 @@ class ReminderViewModel @Inject constructor(
         )
     }
 
-    fun getAllRemindersByPetSelectedDay(date: String, petId: Int): Flow<List<Any>> {
-        val reminders = reminderRepository.getAllRemindersByDate(petId, date)
-        val healthObjects = healthObjectRepository.getAllHealthObject(petId).map {
-            it.filter { ho ->
-                if (ho.category == HealthCategory.MEDICINE) {
-                    LocalDateTime.parse(ho.nextTaking).toLocalDate()
-                        .format(DateTimeFormatter.ISO_LOCAL_DATE) == date
-                } else ho.date == date
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getAllRemindersByPetSelectedDay(date: String): StateFlow<List<Any>> {
+        return curPetId.filterNotNull().flatMapLatest {
+            val reminders = reminderRepository.getAllRemindersByDate(it, date)
+            val healthObjects = healthObjectRepository.getAllHealthObject(it).map { hos ->
+                hos.filter { ho ->
+                    if (ho.category == HealthCategory.MEDICINE) {
+                        LocalDateTime.parse(ho.nextTaking).toLocalDate()
+                            .format(DateTimeFormatter.ISO_LOCAL_DATE) == date
+                    } else ho.date == date
+                }
             }
-        }
-        return combine(reminders, healthObjects) { r, ho ->
-            val combined = mutableListOf<Any>()
-            combined.addAll(r)
-            combined.addAll(ho)
-            combined
-        }
+            combine(reminders, healthObjects) { r, ho ->
+                val combined = mutableListOf<Any>()
+                combined.addAll(r)
+                combined.addAll(ho)
+                combined
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
 
-    fun getAllRemindersSorted(petId: Int): Flow<List<Any>> {
-        val reminders = reminderRepository.getAllReminders(petId).map {
-            val now = LocalDateTime.now()
-            it.filter { r ->
-                val date = LocalDate.parse(r.date, DateTimeFormatter.ISO_LOCAL_DATE)
-                val time = if (!r.time.isNullOrEmpty())
-                    LocalTime.parse(r.time, timeParser)
-                else LocalTime.parse("23:59", timeParser)
-                LocalDateTime.of(date, time) >= now
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allRemindersSorted: StateFlow<List<Any>> =
+        curPetId.filterNotNull().flatMapLatest {
+            val reminders = reminderRepository.getAllReminders(it).map { rems ->
+                val now = LocalDateTime.now()
+                rems.filter { r ->
+                    val date = LocalDate.parse(r.date, DateTimeFormatter.ISO_LOCAL_DATE)
+                    val time = if (!r.time.isNullOrEmpty())
+                        LocalTime.parse(r.time, timeParser)
+                    else LocalTime.parse("23:59", timeParser)
+                    LocalDateTime.of(date, time) >= now
+                }
             }
-        }
-        val healthObjects = healthObjectRepository.getAllHealthObjectIsDone(petId, false)
-        return combine(reminders, healthObjects) { r, ho ->
-            val allReminders = mutableListOf<Any>()
-            allReminders.addAll(r)
-            allReminders.addAll(ho)
-            allReminders.sortedBy {
-                when (it) {
-                    is Reminder -> {
-                        val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
-                        val time = if (!it.time.isNullOrEmpty())
-                            LocalTime.parse(it.time, timeParser)
-                        else LocalTime.parse("23:59", timeParser)
-                        LocalDateTime.of(date, time)
-                    }
-
-                    is HealthObject -> {
-                        if (it.category == HealthCategory.MEDICINE) {
-                            LocalDateTime.parse(
-                                it.nextTaking,
-                                DateTimeFormatter.ISO_LOCAL_DATE_TIME
-                            )
-                        } else {
-                            val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
-                            val time = if (!it.time.isNullOrEmpty()) LocalTime.parse(
-                                it.time,
-                                timeParser
-                            )
+            val healthObjects = healthObjectRepository.getAllHealthObjectIsDone(it, false)
+            combine(reminders, healthObjects) { r, ho ->
+                val allReminders = mutableListOf<Any>()
+                allReminders.addAll(r)
+                allReminders.addAll(ho)
+                allReminders.sortedBy {rem ->
+                    when (rem) {
+                        is Reminder -> {
+                            val date = LocalDate.parse(rem.date, DateTimeFormatter.ISO_LOCAL_DATE)
+                            val time = if (!rem.time.isNullOrEmpty())
+                                LocalTime.parse(rem.time, timeParser)
                             else LocalTime.parse("23:59", timeParser)
                             LocalDateTime.of(date, time)
                         }
+
+                        is HealthObject -> {
+                            if (rem.category == HealthCategory.MEDICINE) {
+                                LocalDateTime.parse(
+                                    rem.nextTaking,
+                                    DateTimeFormatter.ISO_LOCAL_DATE_TIME
+                                )
+                            } else {
+                                val date =
+                                    LocalDate.parse(rem.date, DateTimeFormatter.ISO_LOCAL_DATE)
+                                val time = if (!rem.time.isNullOrEmpty()) LocalTime.parse(
+                                    rem.time,
+                                    timeParser
+                                )
+                                else LocalTime.parse("23:59", timeParser)
+                                LocalDateTime.of(date, time)
+                            }
+                        }
+
+                        else -> null
                     }
-
-                    else -> null
                 }
-            }
 
-        }
-    }
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 }

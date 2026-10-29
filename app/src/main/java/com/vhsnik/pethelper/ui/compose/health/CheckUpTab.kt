@@ -37,20 +37,18 @@ fun CheckUpTab(
     petName: String,
     animal: String
 ) {
-    val allUpcomingCheckUps by remember(petId) {
+    val allUpcomingCheckUps by remember {
         healthViewModel.getAllUpcomingCategory(
-            petId,
             HealthCategory.CHECKUP
         )
-    }.collectAsStateWithLifecycle(emptyList())
-    val checkUpsHistory by remember(petId) {
+    }.collectAsStateWithLifecycle()
+    val checkUpsHistory by remember {
         healthViewModel.getAllHistoryCategory(
-            petId,
             HealthCategory.CHECKUP
         )
-    }.collectAsStateWithLifecycle(emptyList())
-    val allNotes by remember(petId) { noteViewModel.getAllCheckUpNotes(petId) }
-        .collectAsStateWithLifecycle(emptyList())
+    }.collectAsStateWithLifecycle()
+    val allNotes by noteViewModel.allCheckUpNotes
+        .collectAsStateWithLifecycle()
     val mostUpcomingCheckUp = remember(allUpcomingCheckUps) { allUpcomingCheckUps.firstOrNull() }
     var activeDialog by remember { mutableStateOf<DialogsCheckUp?>(null) }
     var isDeleteDialog by remember { mutableStateOf(false) }
@@ -97,7 +95,7 @@ fun CheckUpTab(
                     checkUpUpcToEdit = item
                 },
                 true,
-                { healthViewModel.markAsDone(item, petName) }
+                { healthViewModel.markAsDone(item) }
             )
         }
         PagerCard(
@@ -206,9 +204,9 @@ fun CheckUpTab(
                 activeDialog = null
                 noteToEdit = null
             },
-            { note, date, petId ->
+            { note, date, _ ->
                 if (noteToEdit == null)
-                    noteViewModel.addNote(note, null, petId, NoteSection.CHECK_UPS, date)
+                    noteViewModel.addNote(note, null, NoteSection.CHECK_UPS, date)
                 else
                     noteViewModel.updateNote(noteToEdit!!.copy(description = note, date = date))
                 activeDialog = null
@@ -337,9 +335,9 @@ fun CardItem(
         item.name,
         item.note.orEmpty(),
         item.date!!,
-        item.time!!,
+        item.time ?: "",
         hasAddInfoLeft = true,
-        hasAddInfoRight = true,
+        hasAddInfoRight = !item.time.isNullOrEmpty(),
         hasLine,
         !item.note.isNullOrEmpty(),
         {

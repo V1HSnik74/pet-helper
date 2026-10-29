@@ -5,9 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Environment
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vhsnik.pethelper.data.entity.Pet
@@ -15,11 +12,12 @@ import com.vhsnik.pethelper.data.repository.interfaces.PetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
 import java.time.LocalDate
@@ -32,7 +30,10 @@ import javax.inject.Inject
 class PetsViewModel @Inject constructor(
     private val petRepository: PetRepository
 ) : ViewModel() {
-    val allPets: Flow<List<Pet>> = petRepository.allPets
+    val allPets: StateFlow<List<Pet>> = petRepository.allPets.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000),
+        emptyList()
+    )
     private val _isPhotoLoading = MutableStateFlow(false)
     val isPhotoLoading: StateFlow<Boolean> = _isPhotoLoading.asStateFlow()
 
@@ -65,29 +66,28 @@ class PetsViewModel @Inject constructor(
         return file.absolutePath
     }
 
-    fun deletePet(petId: Int){
+    fun deletePet(petId: Int) {
         viewModelScope.launch {
             petRepository.deletePet(petId)
         }
     }
 
-    var currPet by mutableStateOf<PetFields?>(null)
-        private set
-
+    private val _currPet = MutableStateFlow<PetFields?>(null)
+    val currPet = _currPet.asStateFlow()
     private var petJob: Job? = null
 
     fun setCurPet(id: Int) {
         petJob?.cancel()
         petJob = viewModelScope.launch {
             petRepository.getPetById(id).collect {
-                currPet = it?.getInfoForCompose()
+                _currPet.value = it?.getInfoForCompose()
             }
         }
     }
 
     fun clearCurPet() {
         petJob?.cancel()
-        currPet = null
+        _currPet.value = null
     }
 
     fun updatePetField(petId: Int, transform: (Pet) -> Pet) {

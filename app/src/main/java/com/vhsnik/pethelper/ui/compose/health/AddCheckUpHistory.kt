@@ -24,8 +24,7 @@ fun AddCheckUpHistory(
     var noteUpc by remember { mutableStateOf("") }
     var date by remember { mutableStateOf(curDay) }
     var dateUpc by remember { mutableStateOf(curDay.plusMonths(12)) }
-    var time by remember { mutableStateOf(curTime) }
-    var timeUpc by remember { mutableStateOf(curTime) }
+    var timeUpc by remember { mutableStateOf("") }
     var isNotif by remember { mutableStateOf(false) }
     var notifDate by remember { mutableStateOf("1 day before") }
     var notifTime by remember { mutableStateOf(curTime) }
@@ -42,7 +41,7 @@ fun AddCheckUpHistory(
                     petId,
                     note.ifBlank { null },
                     date.format(DateTimeFormatter.ISO_LOCAL_DATE),
-                    time,
+                    null,
                     isDone = true,
                     isNotif = false
                 )
@@ -62,7 +61,7 @@ fun AddCheckUpHistory(
                 )
             )
         },
-        type.isNotEmpty()
+        type.isNotBlank() && timeUpc.isNotEmpty()
     ) {
         LabelAndTextField(
             "Check-up Type",
@@ -134,41 +133,21 @@ fun AddCheckUpHistory(
             }
         }
         Spacer(Modifier.height(16.dp))
-        Row(Modifier.fillMaxWidth()) {
-            Box(Modifier.weight(1f)) {
-                LabelAndDateTime(
-                    "Time",
-                    time
-                ) {
-                    activeDialog =
-                        Dialogs.TIME
-                }
-                if (activeDialog == Dialogs.TIME) {
-                    PopupTimePicker(
-                        { activeDialog = null },
-                        { time = it },
-                        date,
-                        false
-                    )
-                }
+        Box(Modifier.fillMaxWidth()) {
+            LabelAndDateTime(
+                "Time Due",
+                timeUpc
+            ) {
+                activeDialog =
+                    Dialogs.TIME_UPC
             }
-            Spacer(Modifier.width(16.dp))
-            Box(Modifier.weight(1f)) {
-               LabelAndDateTime(
-                    "Time Due",
-                    timeUpc
-                ) {
-                    activeDialog =
-                        Dialogs.TIME_UPC
-                }
-                if (activeDialog == Dialogs.TIME_UPC) {
-                    PopupTimePicker(
-                        { activeDialog = null },
-                        { timeUpc = it },
-                        dateUpc,
-                        true
-                    )
-                }
+            if (activeDialog == Dialogs.TIME_UPC) {
+                PopupTimePicker(
+                    { activeDialog = null },
+                    { timeUpc = it },
+                    dateUpc,
+                    true
+                )
             }
         }
         Spacer(Modifier.height(16.dp))

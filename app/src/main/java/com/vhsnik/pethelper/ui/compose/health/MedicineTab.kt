@@ -23,17 +23,14 @@ fun MedicineTab(
     petName: String,
     animal: String
 ) {
-    val allMedicines by remember(petId) {
+    val allMedicines by remember {
         healthViewModel.getCategoryHealthObjects(
-            petId,
             HealthCategory.MEDICINE
         )
-    }.collectAsStateWithLifecycle(
-        emptyList()
-    )
-    val allUpcomingMedicines by remember(petId) {
-        healthViewModel.getAllUpcomingCategory(petId, HealthCategory.MEDICINE)
-    }.collectAsStateWithLifecycle(emptyList())
+    }.collectAsStateWithLifecycle()
+    val allUpcomingMedicines by remember {
+        healthViewModel.getAllUpcomingCategory(HealthCategory.MEDICINE)
+    }.collectAsStateWithLifecycle()
     var isAddMedicationOpened by remember { mutableStateOf(false) }
     var medicineToEdit by remember { mutableStateOf<HealthObject?>(null) }
     var idToDelete by remember { mutableStateOf<Long?>(null) }
@@ -110,7 +107,11 @@ fun MedicineTab(
                 if (medicineToEdit == null)
                     healthViewModel.addHealthObject(it, animal, petName)
                 else
-                    healthViewModel.updateHealthObject(it.copy(id = medicineToEdit!!.id), animal, petName)
+                    healthViewModel.updateHealthObject(
+                        it.copy(id = medicineToEdit!!.id),
+                        animal,
+                        petName
+                    )
                 isAddMedicationOpened = false
                 medicineToEdit = null
             },

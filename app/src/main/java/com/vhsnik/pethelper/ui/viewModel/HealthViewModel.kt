@@ -10,6 +10,7 @@ import com.vhsnik.pethelper.ui.compose.utils.*
 import com.vhsnik.pethelper.workers.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.*
@@ -28,50 +29,73 @@ class HealthViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val healthObjectRepository: HealthObjectRepository
 ) : ViewModel() {
-    fun getAllUpcomingHealthObjects(petId: Int): Flow<List<HealthObject>> {
-        return healthObjectRepository.getAllHealthObjectIsDone(petId, false)
-            .map {
-                it.sortedBy { ho ->
-                    if (ho.category == HealthCategory.MEDICINE) {
-                        LocalDateTime.parse(ho.nextTaking, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                    } else {
-                        val datePart = LocalDate.parse(ho.date, DateTimeFormatter.ISO_LOCAL_DATE)
-                        val timePart = if (!ho.time.isNullOrEmpty()) {
-                            LocalTime.parse(ho.time, timeParser)
-                        } else LocalTime.of(23, 59)
-                        LocalDateTime.of(datePart, timePart)
+    private val curPetId = MutableStateFlow<Int?>(null)
+    fun setPetId(id: Int) {
+        curPetId.value = id
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allUpcomingHealthObjects: StateFlow<List<HealthObject>> = curPetId.filterNotNull()
+        .flatMapLatest {
+            healthObjectRepository.getAllHealthObjectIsDone(it, false)
+                .map {
+                    it.sortedBy { ho ->
+                        if (ho.category == HealthCategory.MEDICINE) {
+                            LocalDateTime.parse(
+                                ho.nextTaking,
+                                DateTimeFormatter.ISO_LOCAL_DATE_TIME
+                            )
+                        } else {
+                            val datePart =
+                                LocalDate.parse(ho.date, DateTimeFormatter.ISO_LOCAL_DATE)
+                            val timePart = if (!ho.time.isNullOrEmpty()) {
+                                LocalTime.parse(ho.time, timeParser)
+                            } else LocalTime.of(23, 59)
+                            LocalDateTime.of(datePart, timePart)
+                        }
                     }
                 }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getAllUpcomingCategory(category: HealthCategory): StateFlow<List<HealthObject>> {
+        return curPetId.filterNotNull().flatMapLatest {
+            val flow = if (category == HealthCategory.MEDICINE) {
+                healthObjectRepository.getCategoryHealthObject(it, category)
+            } else {
+                healthObjectRepository.getCategoryHealthObjectIsDone(
+                    it,
+                    category,
+                    false
+                )
             }
+            flow.map { list ->
+                if (category == HealthCategory.MEDICINE)
+                    list.sortedBy { it.nextTaking }
+                else list.sortedBy { it.date }
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+
     }
 
-    fun getAllUpcomingCategory(petId: Int, category: HealthCategory): Flow<List<HealthObject>> {
-        val flow = if (category == HealthCategory.MEDICINE) {
-            healthObjectRepository.getCategoryHealthObject(petId, category)
-        } else {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getAllHistoryCategory(category: HealthCategory): StateFlow<List<HealthObject>> {
+        return curPetId.filterNotNull().flatMapLatest {
             healthObjectRepository.getCategoryHealthObjectIsDone(
-                petId,
+                it,
                 category,
-                false
+                true
             )
-        }
-        return flow.map { list ->
-            if (category == HealthCategory.MEDICINE)
-                list.sortedBy { it.nextTaking }
-            else list.sortedBy { it.date }
-        }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
 
-    fun getAllHistoryCategory(petId: Int, category: HealthCategory): Flow<List<HealthObject>> {
-        return healthObjectRepository.getCategoryHealthObjectIsDone(
-            petId,
-            category,
-            true
-        )
-    }
-
-    fun getCategoryHealthObjects(petId: Int, category: HealthCategory): Flow<List<HealthObject>> {
-        return healthObjectRepository.getCategoryHealthObject(petId, category)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getCategoryHealthObjects(category: HealthCategory): StateFlow<List<HealthObject>> {
+        return curPetId.filterNotNull().flatMapLatest {
+            healthObjectRepository.getCategoryHealthObject(it, category)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
 
     fun addHealthObject(
@@ -103,19 +127,20 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    fun getPreventionPercentage(petId: Int): Flow<PreventionStatus> {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val preventionPercentage: StateFlow<PreventionStatus> = curPetId.filterNotNull().flatMapLatest {
         val upcoming =
             healthObjectRepository.getCategoryHealthObjectIsDone(
-                petId,
+                it,
                 HealthCategory.PREVENTION,
                 false
             )
         val history = healthObjectRepository.getCategoryHealthObjectIsDone(
-            petId,
+            it,
             HealthCategory.PREVENTION,
             true
         )
-        return combine(history, upcoming) { h, u ->
+        combine(history, upcoming) { h, u ->
             if (h.isEmpty()) return@combine PreventionStatus(
                 0f,
                 isProtectedFleas = false,
@@ -167,80 +192,99 @@ class HealthViewModel @Inject constructor(
                 isProtectedTicks
             )
         }
-    }
-
-    fun getVaccinationPercentage(petId: Int, animal: String): Flow<Float> {
-        val upcoming = healthObjectRepository.getCategoryHealthObjectIsDone(
-            petId,
-            HealthCategory.VACCINE,
-            false
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        PreventionStatus(
+            0f,
+            isProtectedFleas = false,
+            isProtectedWorms = false,
+            isProtectedTicks = false
         )
-        val history = healthObjectRepository.getCategoryHealthObjectIsDone(
-            petId,
-            HealthCategory.VACCINE,
-            true
-        )
-        return combine(upcoming, history) { u, h ->
-            if (h.isEmpty()) return@combine 0f
-            val targetVaccines = if (animal == "Dog") dogVaccines else catVaccines
-            val curDate = LocalDate.now()
-            val doneVaccines = h.filter {
-                val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
-                val expirationDateDef = date.plusYears(1)
-                val dateDue = (u.find { vac ->
-                    it.name.contains(
-                        vac.name,
-                        ignoreCase = true
-                    ) || vac.name.contains(it.name, ignoreCase = true)
-                })?.date.orEmpty()
-                val expirationDate = if (dateDue.isEmpty()) expirationDateDef
-                else {
-                    val dateDueLD = LocalDate.parse(dateDue, DateTimeFormatter.ISO_LOCAL_DATE)
-                    if (dateDueLD.isBefore(expirationDateDef)) dateDueLD else expirationDateDef
+    )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getVaccinationPercentage(animal: String): StateFlow<Float> {
+        return curPetId.filterNotNull().flatMapLatest {
+            val upcoming = healthObjectRepository.getCategoryHealthObjectIsDone(
+                it,
+                HealthCategory.VACCINE,
+                false
+            )
+            val history = healthObjectRepository.getCategoryHealthObjectIsDone(
+                it,
+                HealthCategory.VACCINE,
+                true
+            )
+            combine(upcoming, history) { u, h ->
+                if (h.isEmpty()) return@combine 0f
+                val targetVaccines = if (animal == "Dog") dogVaccines else catVaccines
+                val curDate = LocalDate.now()
+                val doneVaccines = h.filter {
+                    val date = LocalDate.parse(it.date, DateTimeFormatter.ISO_LOCAL_DATE)
+                    val expirationDateDef = date.plusYears(1)
+                    val dateDue = (u.find { vac ->
+                        it.name.contains(
+                            vac.name,
+                            ignoreCase = true
+                        ) || vac.name.contains(it.name, ignoreCase = true)
+                    })?.date.orEmpty()
+                    val expirationDate = if (dateDue.isEmpty()) expirationDateDef
+                    else {
+                        val dateDueLD = LocalDate.parse(dateDue, DateTimeFormatter.ISO_LOCAL_DATE)
+                        if (dateDueLD.isBefore(expirationDateDef)) dateDueLD else expirationDateDef
+                    }
+                    !expirationDate.isBefore(curDate)
+                }.map { it.name }
+                    .toList()
+                var userCount = 0
+                for (vac in targetVaccines) {
+                    val isDone = doneVaccines.any {
+                        it.contains(vac, ignoreCase = true)
+                    }
+                    if (isDone)
+                        userCount += 1
                 }
-                !expirationDate.isBefore(curDate)
-            }.map { it.name }
-                .toList()
-            var userCount = 0
-            for (vac in targetVaccines) {
-                val isDone = doneVaccines.any {
-                    it.contains(vac, ignoreCase = true)
-                }
-                if (isDone)
-                    userCount += 1
+                userCount.toFloat() / targetVaccines.size
             }
-            userCount.toFloat() / targetVaccines.size
-        }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0f)
     }
 
-    fun getCheckUpStatus(petId: Int): Flow<Boolean> {
-        return healthObjectRepository.getCategoryHealthObjectIsDone(
-            petId,
-            HealthCategory.CHECKUP,
-            true
-        ).map {
-            if (it.isEmpty()) return@map false
-            val curDate = LocalDate.now()
-            val relevantCheckUps = it.filter { c ->
-                val checkUpDate = LocalDate.parse(c.date)
-                checkUpDate.plusYears(1) >= curDate
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val checkUpStatus: StateFlow<Boolean> =
+        curPetId.filterNotNull().flatMapLatest {
+            healthObjectRepository.getCategoryHealthObjectIsDone(
+                it,
+                HealthCategory.CHECKUP,
+                true
+            ).map {
+                if (it.isEmpty()) return@map false
+                val curDate = LocalDate.now()
+                val relevantCheckUps = it.filter { c ->
+                    val checkUpDate = LocalDate.parse(c.date)
+                    checkUpDate.plusYears(1) >= curDate
+                }
+                relevantCheckUps.any { c ->
+                    c.name.contains("annual", true) || c.name.contains(
+                        "year",
+                        true
+                    )
+                }
             }
-            relevantCheckUps.any { c ->
-                c.name.contains("annual", true) || c.name.contains(
-                    "year",
-                    true
-                )
-            }
-        }
-    }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    fun markAsDone(ho: HealthObject, petName: String){
-        if (ho.category != HealthCategory.MEDICINE)
-            deleteNotifHealthObject(context, ho.id, "health")
-        else
-            cancelMedicineNotif(context, ho.id, petName)
+    fun markAsDone(ho: HealthObject) {
+        deleteNotifHealthObject(context, ho.id, "health")
         viewModelScope.launch {
-            healthObjectRepository.updateHealthObject(ho.copy(isDone = true))
+            val curDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val curTime = LocalTime.now().format(timeParser)
+            healthObjectRepository.updateHealthObject(
+                ho.copy(
+                    isDone = true,
+                    date = curDate,
+                    time = if (ho.category == HealthCategory.PREVENTION) null else curTime
+                )
+            )
         }
     }
 
